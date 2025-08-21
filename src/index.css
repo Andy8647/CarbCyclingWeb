@@ -46,71 +46,47 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Light theme colors */
+  --background: #dcd6c8;
+  --foreground: #2d2d2d;
+  --card: rgba(220, 214, 200, 0.9);
+  --card-foreground: #2d2d2d;
+  --popover: #dcd6c8;
+  --popover-foreground: #2d2d2d;
+  --primary: #5c7c8a;
+  --primary-foreground: #ffffff;
+  --secondary: rgba(92, 124, 138, 0.1);
+  --secondary-foreground: #2d2d2d;
+  --muted: rgba(92, 124, 138, 0.1);
+  --muted-foreground: #666666;
+  --accent: #e7b669;
+  --accent-foreground: #2d2d2d;
+  --destructive: #ef4444;
+  --border: rgba(92, 124, 138, 0.2);
+  --input: rgba(92, 124, 138, 0.1);
+  --ring: #5c7c8a;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Dark theme colors */
+  --background: #0d2538;
+  --foreground: #ffffff;
+  --card: rgba(13, 37, 56, 0.9);
+  --card-foreground: #ffffff;
+  --popover: #0d2538;
+  --popover-foreground: #ffffff;
+  --primary: #c678dd;
+  --primary-foreground: #0d2538;
+  --secondary: rgba(198, 120, 221, 0.1);
+  --secondary-foreground: #ffffff;
+  --muted: rgba(198, 120, 221, 0.1);
+  --muted-foreground: #a0a0a0;
+  --accent: #98c379;
+  --accent-foreground: #0d2538;
+  --destructive: #ef4444;
+  --border: rgba(198, 120, 221, 0.2);
+  --input: rgba(198, 120, 221, 0.1);
+  --ring: #c678dd;
 }
 
 @layer base {
@@ -119,5 +95,33 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .main-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .main-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .grid-col-1 {
+    grid-column: span 1;
+  }
+
+  .grid-col-2 {
+    grid-column: span 1;
+  }
+
+  @media (min-width: 1024px) {
+    .grid-col-2 {
+      grid-column: span 2;
+    }
   }
 }
