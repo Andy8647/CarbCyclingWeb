@@ -1,13 +1,24 @@
 export type BodyType = 'ectomorph' | 'mesomorph' | 'endomorph';
 export type DayType = 'high' | 'medium' | 'low';
 export type ProteinLevel = 'beginner' | 'experienced' | 'custom';
+export type Gender = 'male' | 'female';
+export type ActivityFactor = 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
 
 export interface UserInput {
+  age: number;
+  gender: Gender;
   weight: number; // in kg
+  height: number; // in cm
+  activityFactor: ActivityFactor;
   bodyType: BodyType;
   proteinLevel: ProteinLevel;
   customProtein?: number; // g/kg, only if proteinLevel is 'custom'
   cycleDays: number; // 3-7 days
+}
+
+export interface MetabolicData {
+  bmr: number; // Basal Metabolic Rate
+  tdee: number; // Total Daily Energy Expenditure
 }
 
 export interface DayPlan {

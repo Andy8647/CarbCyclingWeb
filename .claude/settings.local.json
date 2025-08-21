@@ -11,7 +11,10 @@
       "Bash(npm run dev:*)",
       "WebFetch(domain:github.com)",
       "Bash(curl:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git commit:*)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "WebFetch(domain:medium.com)"
     ]
   },
   "hooks": {
