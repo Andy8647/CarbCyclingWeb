@@ -24,6 +24,15 @@
             "command": "npm run format"
           }
         ]
+      },
+      {
+        "matcher": "Update",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm run format"
+          }
+        ]
       }
     ]
   }
