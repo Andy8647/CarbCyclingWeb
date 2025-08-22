@@ -1,4 +1,3 @@
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CompactInput } from '@/components/ui/compact-input';
 import { RadioGroup } from '@/components/ui/radio-group';
@@ -21,7 +20,6 @@ export function InputForm() {
   if (!form) return null;
 
   const {
-    register,
     handleSubmit,
     watch,
     setValue,
@@ -29,7 +27,27 @@ export function InputForm() {
   } = form;
 
   const watchedValues = watch();
-  const showCustomProtein = watchedValues.proteinLevel === 'custom';
+
+  const handleBodyTypeChange = (value: string) => {
+    const bodyType = value as 'endomorph' | 'mesomorph' | 'ectomorph';
+
+    // Auto-fill nutrition coefficients based on body type
+    const coefficients = {
+      endomorph: { carbCoeff: 2.0, proteinCoeff: 1.5, fatCoeff: 1.0 },
+      mesomorph: { carbCoeff: 2.5, proteinCoeff: 1.2, fatCoeff: 0.9 },
+      ectomorph: { carbCoeff: 3.0, proteinCoeff: 1.0, fatCoeff: 1.1 },
+    };
+
+    const { carbCoeff, proteinCoeff, fatCoeff } = coefficients[bodyType];
+
+    // Batch update all values at once to avoid race conditions
+    setTimeout(() => {
+      setValue('bodyType', bodyType, { shouldValidate: true });
+      setValue('carbCoeff', carbCoeff, { shouldValidate: true });
+      setValue('proteinCoeff', proteinCoeff, { shouldValidate: true });
+      setValue('fatCoeff', fatCoeff, { shouldValidate: true });
+    }, 0);
+  };
 
   const onSubmit = (data: unknown) => {
     console.log('Form data:', data);
@@ -83,11 +101,11 @@ export function InputForm() {
 
   return (
     <GlassCard>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
         {/* Single row layout - all in one line */}
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
-          {/* Column 1: Basic Info */}
-          <div className="xl:col-span-2">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+          {/* Column 1: Basic Info - 1 unit */}
+          <div>
             <SectionCard title="基础信息" emoji="👤">
               <div className="grid grid-cols-2 gap-2">
                 {/* Age */}
@@ -162,63 +180,40 @@ export function InputForm() {
                   unit={unitSystem === 'metric' ? 'kg' : 'lb'}
                 />
               </div>
-              
-              {/* Activity Factor - full width */}
-              <div className="space-y-2 mt-3">
-                <Label className="text-xs font-light text-foreground flex items-center gap-1">
-                  <span className="text-xs">🏃</span>
-                  <span>活动水平</span>
-                </Label>
-                <Select
-                  value={watchedValues.activityFactor}
-                  onValueChange={(value) =>
-                    setValue(
-                      'activityFactor',
-                      value as
-                        | 'sedentary'
-                        | 'light'
-                        | 'moderate'
-                        | 'active'
-                        | 'very_active',
-                      { shouldValidate: true }
-                    )
-                  }
-                >
-                  <SelectTrigger className="h-9 text-sm text-center w-full">
-                    <SelectValue placeholder="活动水平" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sedentary">久坐</SelectItem>
-                    <SelectItem value="light">轻度</SelectItem>
-                    <SelectItem value="moderate">中度</SelectItem>
-                    <SelectItem value="active">活跃</SelectItem>
-                    <SelectItem value="very_active">极活跃</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </SectionCard>
           </div>
 
-          {/* Column 2: Body type */}
-          <div>
-            <SectionCard title="体型" emoji="🏃">
+          {/* Column 2: Nutrition coefficients - 2 units */}
+          <div className="xl:col-span-2">
+            <SectionCard
+              title="营养素系数"
+              emoji="🏋️"
+              description={(() => {
+                const descriptions = {
+                  endomorph:
+                    '内胚型：易增重，代谢较慢，适合低碳水高蛋白饮食。蛋白质建议0.8-2.5g/kg体重。',
+                  mesomorph:
+                    '中胚型：肌肉发达，代谢均衡，营养分配相对灵活。蛋白质建议0.8-2.5g/kg体重。',
+                  ectomorph:
+                    '外胚型：偏瘦难增重，代谢快，需要更多碳水维持体重。蛋白质建议0.8-2.5g/kg体重。',
+                };
+                return watchedValues.bodyType
+                  ? descriptions[watchedValues.bodyType]
+                  : '选择体型后显示对应的营养建议。蛋白质建议0.8-2.5g/kg体重，根据训练强度调整。';
+              })()}
+            >
+              {/* Body type selection - top row */}
               <RadioGroup
                 value={watchedValues.bodyType}
-                onValueChange={(value) =>
-                  setValue(
-                    'bodyType',
-                    value as 'endomorph' | 'mesomorph' | 'ectomorph',
-                    { shouldValidate: true }
-                  )
-                }
-                className="space-y-1"
+                onValueChange={handleBodyTypeChange}
+                className="grid grid-cols-3 gap-1 mb-3"
               >
                 <RadioCard
                   value="endomorph"
                   id="endomorph"
                   emoji="🔺"
                   title="内胚型"
-                  description="易增重"
+                  description=""
                   isSelected={watchedValues.bodyType === 'endomorph'}
                 />
                 <RadioCard
@@ -226,7 +221,7 @@ export function InputForm() {
                   id="mesomorph"
                   emoji="⬜"
                   title="中胚型"
-                  description="均衡型"
+                  description=""
                   isSelected={watchedValues.bodyType === 'mesomorph'}
                 />
                 <RadioCard
@@ -234,10 +229,67 @@ export function InputForm() {
                   id="ectomorph"
                   emoji="🔻"
                   title="外胚型"
-                  description="偏瘦型"
+                  description=""
                   isSelected={watchedValues.bodyType === 'ectomorph'}
                 />
               </RadioGroup>
+
+              {/* Nutrition coefficients - bottom section */}
+              <div className="grid grid-cols-3 gap-2">
+                <CompactInput
+                  label="碳水"
+                  emoji="🍞"
+                  type="number"
+                  step="0.1"
+                  min="2.0"
+                  max="8.0"
+                  value={watchedValues.carbCoeff || 5.0}
+                  onChange={(e) =>
+                    setValue('carbCoeff', parseFloat(e.target.value) || 5.0, {
+                      shouldValidate: true,
+                    })
+                  }
+                  placeholder="5.0"
+                  unit="g/kg"
+                />
+                <CompactInput
+                  label="蛋白质"
+                  emoji="🥩"
+                  type="number"
+                  step="0.1"
+                  min="0.8"
+                  max="2.5"
+                  value={watchedValues.proteinCoeff || 1.2}
+                  onChange={(e) =>
+                    setValue(
+                      'proteinCoeff',
+                      parseFloat(e.target.value) || 1.2,
+                      {
+                        shouldValidate: true,
+                      }
+                    )
+                  }
+                  placeholder="1.2"
+                  unit="g/kg"
+                />
+                <CompactInput
+                  label="脂肪"
+                  emoji="🥑"
+                  type="number"
+                  step="0.1"
+                  min="0.5"
+                  max="1.5"
+                  value={watchedValues.fatCoeff || 1.0}
+                  onChange={(e) =>
+                    setValue('fatCoeff', parseFloat(e.target.value) || 1.0, {
+                      shouldValidate: true,
+                    })
+                  }
+                  placeholder="1.0"
+                  unit="g/kg"
+                />
+              </div>
+
               {errors.bodyType && (
                 <p className="text-xs text-red-400/80 flex items-center gap-1 justify-center mt-2">
                   <span>⚠️</span>
@@ -247,82 +299,10 @@ export function InputForm() {
             </SectionCard>
           </div>
 
-          {/* Column 3: Protein level */}
-          <div>
-            <SectionCard title="训练水平" emoji="🏋️">
-              <RadioGroup
-                value={watchedValues.proteinLevel}
-                onValueChange={(value) =>
-                  setValue(
-                    'proteinLevel',
-                    value as 'beginner' | 'experienced' | 'custom',
-                    { shouldValidate: true }
-                  )
-                }
-                className="space-y-1"
-              >
-                <RadioCard
-                  value="beginner"
-                  id="beginner"
-                  emoji="🌱"
-                  title="初学者"
-                  description="0.8g/kg"
-                  isSelected={watchedValues.proteinLevel === 'beginner'}
-                />
-                <RadioCard
-                  value="experienced"
-                  id="experienced"
-                  emoji="💪"
-                  title="有经验"
-                  description="1.5g/kg"
-                  isSelected={watchedValues.proteinLevel === 'experienced'}
-                />
-                <RadioCard
-                  value="custom"
-                  id="custom"
-                  emoji="⚙️"
-                  title="自定义"
-                  description="0.8-2.0g/kg"
-                  isSelected={watchedValues.proteinLevel === 'custom'}
-                />
-              </RadioGroup>
-
-              {showCustomProtein && (
-                <div className="mt-2">
-                  <Input
-                    type="number"
-                    step="0.1"
-                    min="0.8"
-                    max="2.0"
-                    {...register('customProtein', { valueAsNumber: true })}
-                    className="h-8 bg-transparent border text-center text-xs [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
-                    placeholder="1.2"
-                  />
-                </div>
-              )}
-
-              {errors.proteinLevel && (
-                <p className="text-xs text-red-400/80 flex items-center gap-1 justify-center mt-2">
-                  <span>⚠️</span>
-                  {errors.proteinLevel.message}
-                </p>
-              )}
-            </SectionCard>
-          </div>
-
-          {/* Column 4: Cycle days */}
+          {/* Column 3: Cycle days + Activity - 1 unit */}
           <div>
             <SectionCard title="循环天数" emoji="📅">
-              <div className="space-y-3">
-                <div className="flex items-center justify-center">
-                  <div className="px-3 py-2 rounded-lg bg-white/5 dark:bg-black/5">
-                    <span className="text-lg font-light">
-                      {watchedValues.cycleDays}
-                    </span>
-                    <span className="text-xs text-muted-foreground ml-1">天</span>
-                  </div>
-                </div>
-
+              <div className="space-y-2">
                 <SliderSection
                   title=""
                   emoji=""
@@ -333,19 +313,44 @@ export function InputForm() {
                   min={3}
                   max={7}
                   step={1}
-                  unit=""
+                  unit="天"
                   options={[3, 4, 5, 6, 7]}
-                  getDescription={(value) => {
-                    const descriptions: Record<number, string> = {
-                      3: '短周期',
-                      4: '平衡周期',
-                      5: '标准周期',
-                      6: '增强周期',
-                      7: '完整周期',
-                    };
-                    return descriptions[value] || '';
-                  }}
+                  getDescription={() => ''}
                 />
+
+                {/* Activity Factor */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-light text-foreground flex items-center gap-1">
+                    <span className="text-xs">🏃</span>
+                    <span>每日活动量</span>
+                  </Label>
+                  <Select
+                    value={watchedValues.activityFactor}
+                    onValueChange={(value) =>
+                      setValue(
+                        'activityFactor',
+                        value as
+                          | 'sedentary'
+                          | 'light'
+                          | 'moderate'
+                          | 'active'
+                          | 'very_active',
+                        { shouldValidate: true }
+                      )
+                    }
+                  >
+                    <SelectTrigger className="h-9 text-sm text-center w-full">
+                      <SelectValue placeholder="活动水平" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sedentary">久坐</SelectItem>
+                      <SelectItem value="light">轻度</SelectItem>
+                      <SelectItem value="moderate">中度</SelectItem>
+                      <SelectItem value="active">活跃</SelectItem>
+                      <SelectItem value="very_active">极活跃</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               {errors.cycleDays && (
                 <p className="text-xs text-red-400/80 flex items-center gap-1 justify-center mt-2">
@@ -357,29 +362,20 @@ export function InputForm() {
           </div>
         </div>
 
-        {/* Status */}
-        <div
-          className={`p-3 transition-all duration-300 rounded-lg ${
-            isValid
-              ? 'bg-green-400/10 dark:bg-green-400/10'
-              : 'bg-white/10 dark:bg-black/10'
-          }`}
-        >
-          <div className="flex items-center justify-center gap-2">
-            <div
-              className={`w-2 h-2 rounded-full ${
-                isValid ? 'bg-green-400' : 'bg-muted-foreground animate-pulse'
-              }`}
-            />
-            <span
-              className={`text-xs font-medium ${
-                isValid ? 'text-green-400' : 'text-muted-foreground'
-              }`}
-            >
-              {isValid ? '✓ 表单已完整' : '请完善必填项'}
-            </span>
-            {isValid && <span className="text-sm">🎉</span>}
-          </div>
+        {/* Calculate Button */}
+        <div className="flex justify-end -mt-10">
+          <button
+            type="submit"
+            disabled={!isValid}
+            className={`px-6 py-3 rounded-lg font-medium text-sm transition-all duration-300 flex items-center gap-2 ${
+              isValid
+                ? 'bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg hover:shadow-xl transform hover:scale-105 hover:cursor-pointer'
+                : 'bg-white/20 dark:bg-black/20 text-muted-foreground cursor-not-allowed'
+            }`}
+          >
+            <span className='text-xl'>🚀</span>
+            <span>{isValid ? '开始计算' : '请完善表单'}</span>
+          </button>
         </div>
       </form>
     </GlassCard>

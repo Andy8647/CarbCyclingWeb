@@ -15,8 +15,9 @@ export const formSchema = z.object({
     'very_active',
   ]),
   bodyType: z.enum(['endomorph', 'mesomorph', 'ectomorph']),
-  proteinLevel: z.enum(['beginner', 'experienced', 'custom']),
-  customProtein: z.number().min(0.8).max(2.0).optional(),
+  carbCoeff: z.number().min(2.0).max(8.0),
+  proteinCoeff: z.number().min(0.8).max(2.5),
+  fatCoeff: z.number().min(0.5).max(1.5),
   cycleDays: z.number().min(3).max(7),
 });
 

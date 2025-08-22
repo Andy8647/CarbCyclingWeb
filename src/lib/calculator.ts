@@ -16,8 +16,9 @@ export interface UserInput {
   height: number; // in cm
   activityFactor: ActivityFactor;
   bodyType: BodyType;
-  proteinLevel: ProteinLevel;
-  customProtein?: number; // g/kg, only if proteinLevel is 'custom'
+  carbCoeff: number; // g/kg
+  proteinCoeff: number; // g/kg
+  fatCoeff: number; // g/kg
   cycleDays: number; // 3-7 days
 }
 
@@ -33,6 +34,7 @@ export interface DayPlan {
   fat: number; // grams
   protein: number; // grams
   calories: number; // kcal
+  caloriesDiff: number; // calories - tdee
 }
 
 export interface WeeklySummary {
@@ -47,19 +49,13 @@ export interface NutritionPlan {
   dailyPlans: DayPlan[];
 }
 
-// Nutrition coefficients from PRD
-const NUTRITION_COEFFICIENTS: Record<BodyType, { carbs: number; fat: number }> =
-  {
-    endomorph: { carbs: 2.0, fat: 1.0 },
-    mesomorph: { carbs: 2.5, fat: 0.9 },
-    ectomorph: { carbs: 3.0, fat: 1.1 },
-  };
-
-// Protein coefficients
-const PROTEIN_COEFFICIENTS: Record<ProteinLevel, number> = {
-  beginner: 0.8,
-  experienced: 1.5,
-  custom: 0, // Will be overridden by customProtein
+// Activity factor multipliers for TDEE calculation
+const ACTIVITY_MULTIPLIERS: Record<ActivityFactor, number> = {
+  sedentary: 1.2,
+  light: 1.375,
+  moderate: 1.55,
+  active: 1.725,
+  very_active: 1.9,
 };
 
 // Cycle distribution percentages
@@ -88,20 +84,45 @@ const CALORIES_PER_GRAM = {
   protein: 4,
 };
 
+// Calculate BMR using Mifflin-St Jeor equation
+export function calculateBMR(
+  weight: number, // kg
+  height: number, // cm
+  age: number,
+  gender: Gender
+): number {
+  if (gender === 'male') {
+    return 88.362 + 13.397 * weight + 4.799 * height - 5.677 * age;
+  } else {
+    return 447.593 + 9.247 * weight + 3.098 * height - 4.33 * age;
+  }
+}
+
+// Calculate TDEE from BMR and activity factor
+export function calculateTDEE(bmr: number, activityFactor: ActivityFactor): number {
+  return bmr * ACTIVITY_MULTIPLIERS[activityFactor];
+}
+
+// Calculate metabolic data
+export function calculateMetabolicData(input: UserInput): MetabolicData {
+  const bmr = calculateBMR(input.weight, input.height, input.age, input.gender);
+  const tdee = calculateTDEE(bmr, input.activityFactor);
+  
+  return {
+    bmr: Math.round(bmr),
+    tdee: Math.round(tdee),
+  };
+}
+
 export function calculateNutritionPlan(input: UserInput): NutritionPlan {
-  // Get coefficients for body type
-  const coefficients = NUTRITION_COEFFICIENTS[input.bodyType];
+  // Calculate TDEE for calorie difference
+  const metabolicData = calculateMetabolicData(input);
+  const tdee = metabolicData.tdee;
 
-  // Calculate protein coefficient
-  const proteinCoeff =
-    input.proteinLevel === 'custom'
-      ? input.customProtein || 0.8
-      : PROTEIN_COEFFICIENTS[input.proteinLevel];
-
-  // Calculate daily base amounts
-  const dailyBaseCarbs = input.weight * coefficients.carbs;
-  const dailyBaseFat = input.weight * coefficients.fat;
-  const dailyProtein = input.weight * proteinCoeff;
+  // Calculate daily base amounts using user's coefficients
+  const dailyBaseCarbs = input.weight * input.carbCoeff;
+  const dailyBaseFat = input.weight * input.fatCoeff;
+  const dailyProtein = input.weight * input.proteinCoeff;
 
   // Calculate weekly totals (for carbs and fat only)
   const weeklyCarbs = dailyBaseCarbs * input.cycleDays;
@@ -139,6 +160,7 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
         fat * CALORIES_PER_GRAM.fat +
         protein * CALORIES_PER_GRAM.protein
     );
+    const caloriesDiff = calories - tdee;
 
     dailyPlans.push({
       day: dayCounter++,
@@ -147,6 +169,7 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
       fat,
       protein,
       calories,
+      caloriesDiff,
     });
   }
 
@@ -160,6 +183,7 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
         fat * CALORIES_PER_GRAM.fat +
         protein * CALORIES_PER_GRAM.protein
     );
+    const caloriesDiff = calories - tdee;
 
     dailyPlans.push({
       day: dayCounter++,
@@ -168,6 +192,7 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
       fat,
       protein,
       calories,
+      caloriesDiff,
     });
   }
 
@@ -181,6 +206,7 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
         fat * CALORIES_PER_GRAM.fat +
         protein * CALORIES_PER_GRAM.protein
     );
+    const caloriesDiff = calories - tdee;
 
     dailyPlans.push({
       day: dayCounter++,
@@ -189,6 +215,7 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
       fat,
       protein,
       calories,
+      caloriesDiff,
     });
   }
 

@@ -27,19 +27,21 @@ export function SliderSection({
   getDescription,
 }: SliderSectionProps) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium text-foreground flex items-center gap-2">
-          <span className="text-sm">{emoji}</span>
-          <span>{title}</span>
-        </Label>
-        <div className="px-3 py-1 rounded-lg bg-white/5 dark:bg-black/5">
-          <span className="text-xl font-light">{value}</span>
-          <span className="text-xs text-muted-foreground ml-1">{unit}</span>
+    <div className="space-y-2">
+      {title && (
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium text-foreground flex items-center gap-2">
+            <span className="text-sm">{emoji}</span>
+            <span>{title}</span>
+          </Label>
+          <div className="px-3 py-1 rounded-lg bg-white/5 dark:bg-black/5">
+            <span className="text-xl font-light">{value}</span>
+            <span className="text-xs text-muted-foreground ml-1">{unit}</span>
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         <Slider
           value={[value]}
           onValueChange={([newValue]) => onValueChange(newValue)}
@@ -63,11 +65,13 @@ export function SliderSection({
           ))}
         </div>
 
-        <div className="p-2 rounded-lg bg-white/5 dark:bg-black/5">
-          <div className="text-xs text-center text-muted-foreground">
-            {getDescription(value)}
+        {getDescription(value) && (
+          <div className="p-2 rounded-lg bg-white/5 dark:bg-black/5">
+            <div className="text-xs text-center text-muted-foreground">
+              {getDescription(value)}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
