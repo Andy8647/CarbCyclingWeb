@@ -10,7 +10,7 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
   ({ className, variant = 'default', children, ...props }, ref) => {
     const variants = {
       default:
-        'bg-white/20 dark:bg-black/20 shadow-[0_0_10px_0_rgba(0,0,0,0.1)] dark:shadow-[0_0_10px_0_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_0_rgba(0,0,0,0.15)] dark:hover:shadow-[0_0_15px_0_rgba(0,0,0,0.4)]',
+        'bg-white/20 dark:bg-black/20 shadow-[0_0_10px_0_rgba(0,0,0,0.1)] dark:shadow-[0_0_10px_0_rgba(0,0,0,0.3)]',
       subtle:
         'bg-white/10 dark:bg-black/10 shadow-[0_0_8px_0_rgba(0,0,0,0.08)] dark:shadow-[0_0_8px_0_rgba(0,0,0,0.2)]',
       strong:
@@ -21,7 +21,7 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
       <div
         ref={ref}
         className={cn(
-          'sm:p-8 rounded-2xl backdrop-blur-[8px] transition-all duration-300 ease-in-out',
+          'w-full sm:p-8 rounded-2xl backdrop-blur-[8px] transition-all duration-300 ease-in-out',
           variants[variant],
           className
         )}

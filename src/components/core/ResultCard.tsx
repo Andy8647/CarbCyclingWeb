@@ -17,7 +17,7 @@ const getDayTypeDisplay = (type: string) => {
   }
 };
 
-export function ResultCard({ className }: { className: string }) {
+export function ResultCard() {
   const { form } = useFormContext();
 
   const formData = form?.watch();
@@ -78,7 +78,7 @@ export function ResultCard({ className }: { className: string }) {
   };
 
   return (
-    <GlassCard className={className}>
+    <GlassCard>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <span className="text-lg">📊</span>

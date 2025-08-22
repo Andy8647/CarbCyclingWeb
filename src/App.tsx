@@ -25,9 +25,9 @@ const StableBackground = memo(() => (
 StableBackground.displayName = 'StableBackground';
 
 const MainContent = () => (
-  <main className="w-full max-w-none px-8 py-6 main-grid">
-    <InputForm className="grid-col-1" />
-    <ResultCard className="grid-col-2" />
+  <main className="w-full px-8 py-6 space-y-6">
+    <InputForm />
+    <ResultCard />
   </main>
 );
 

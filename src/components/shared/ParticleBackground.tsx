@@ -65,7 +65,7 @@ export function ParticleBackground({
           value: 0.8,
         },
         size: {
-          value: 16,
+          value: 8,
         },
         links: {
           enable: false,

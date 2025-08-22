@@ -2,12 +2,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CompactInput } from '@/components/ui/compact-input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { GlassCard } from '@/components/ui/glass-card';
 import { useFormContext } from '@/lib/form-context';
 
-export function InputForm({ className }: { className: string }) {
+export function InputForm() {
   const { form, unitSystem } = useFormContext();
 
   if (!form) return null;
@@ -74,7 +80,7 @@ export function InputForm({ className }: { className: string }) {
   };
 
   return (
-    <GlassCard className={className}>
+    <GlassCard>
       <div className="flex items-center">
         <span className="text-lg">📋</span>
         <h2 className="text-lg font-bold text-foreground">基础信息</h2>
@@ -92,7 +98,11 @@ export function InputForm({ className }: { className: string }) {
               min="18"
               max="80"
               value={watchedValues.age || 25}
-              onChange={(e) => setValue('age', parseInt(e.target.value) || 25, { shouldValidate: true })}
+              onChange={(e) =>
+                setValue('age', parseInt(e.target.value) || 25, {
+                  shouldValidate: true,
+                })
+              }
               placeholder="25"
               unit="岁"
             />
@@ -105,7 +115,11 @@ export function InputForm({ className }: { className: string }) {
               </Label>
               <Select
                 value={watchedValues.gender}
-                onValueChange={(value) => setValue('gender', value as 'male' | 'female', { shouldValidate: true })}
+                onValueChange={(value) =>
+                  setValue('gender', value as 'male' | 'female', {
+                    shouldValidate: true,
+                  })
+                }
               >
                 <SelectTrigger className="h-10 text-sm">
                   <SelectValue placeholder="选择性别" />
@@ -138,9 +152,13 @@ export function InputForm({ className }: { className: string }) {
               type={unitSystem === 'imperial' ? 'text' : 'number'}
               min={unitSystem === 'imperial' ? undefined : '120'}
               max={unitSystem === 'imperial' ? undefined : '250'}
-              value={unitSystem === 'imperial' ? convertHeight(watchedValues.height || 175, 'imperial') : (watchedValues.height || 175)}
+              value={
+                unitSystem === 'imperial'
+                  ? convertHeight(watchedValues.height || 175, 'imperial')
+                  : watchedValues.height || 175
+              }
               onChange={(e) => handleHeightChange(e.target.value)}
-              placeholder={unitSystem === 'imperial' ? "5'9\"" : "175"}
+              placeholder={unitSystem === 'imperial' ? '5\'9"' : '175'}
               unit={unitSystem === 'metric' ? 'cm' : ''}
             />
 
@@ -152,7 +170,18 @@ export function InputForm({ className }: { className: string }) {
               </Label>
               <Select
                 value={watchedValues.activityFactor}
-                onValueChange={(value) => setValue('activityFactor', value as 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active', { shouldValidate: true })}
+                onValueChange={(value) =>
+                  setValue(
+                    'activityFactor',
+                    value as
+                      | 'sedentary'
+                      | 'light'
+                      | 'moderate'
+                      | 'active'
+                      | 'very_active',
+                    { shouldValidate: true }
+                  )
+                }
               >
                 <SelectTrigger className="h-10 text-sm">
                   <SelectValue placeholder="选择活动水平" />
