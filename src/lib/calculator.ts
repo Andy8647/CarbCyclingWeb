@@ -2,7 +2,12 @@ export type BodyType = 'ectomorph' | 'mesomorph' | 'endomorph';
 export type DayType = 'high' | 'medium' | 'low';
 export type ProteinLevel = 'beginner' | 'experienced' | 'custom';
 export type Gender = 'male' | 'female';
-export type ActivityFactor = 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
+export type ActivityFactor =
+  | 'sedentary'
+  | 'light'
+  | 'moderate'
+  | 'active'
+  | 'very_active';
 
 export interface UserInput {
   age: number;

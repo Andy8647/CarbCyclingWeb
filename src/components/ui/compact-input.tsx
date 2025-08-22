@@ -28,18 +28,18 @@ const CompactInput = React.forwardRef<HTMLInputElement, CompactInputProps>(
       <div className={cn('space-y-2', containerClassName)}>
         <Label
           className={cn(
-            'text-sm font-light text-foreground flex items-center gap-1',
+            'text-xs font-light text-foreground flex items-center gap-1',
             labelClassName
           )}
         >
-          {emoji && <span className="text-sm">{emoji}</span>}
+          {emoji && <span className="text-xs">{emoji}</span>}
           <span>{label}</span>
         </Label>
         <div className="relative">
           <Input
             ref={ref}
             className={cn(
-              'h-10 text-sm text-center pr-12 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]',
+              'h-9 text-sm text-center pr-12 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]',
               className
             )}
             {...props}
