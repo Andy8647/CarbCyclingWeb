@@ -6,7 +6,7 @@
 
 ### ✅ 已完成的功能
 - **项目初始化与技术栈搭建** - Vite + React + TypeScript + shadcn/ui
-- **基础布局与响应式设计** - 桌面端/移动端布局适配
+- **基础布局与响应式设计** - 桌面端/移动端布局适配，多断点优化
 - **主题切换功能** - light/dark/system 模式，localStorage持久化
 - **动态粒子背景** - react-tsparticles 集成，主题响应
 - **玻璃拟态卡片样式** - InputForm 和 ResultCard 的 Glassmorphism 效果
@@ -16,41 +16,64 @@
   - 动态描述显示
   - 活动水平和循环天数设置
   - 表单验证与用户体验优化
-- **核心计算逻辑** - 基本的营养素计算框架
+  - 实时计算功能（移除"开始计算"按钮）
+  - 响应式断点优化（768px/1280px断点）
+- **核心计算逻辑** - 完整的营养素计算框架，包括：
+  - BMR和TDEE计算（Mifflin-St Jeor公式）
+  - 碳循环营养素分配
+  - 热量差计算和显示
+- **ResultCard 组件** - 高级结果展示，包括：
+  - 周度摘要卡片展示
+  - Kanban风格的每日计划布局
+  - 训练项目管理（dropdown选择器）
+  - 拖拽排序功能（@dnd-kit实现）
+  - 复制结果到剪贴板功能
 - **Footer 免责声明** - 页脚布局和免责信息
 
-### 🚧 当前开发阶段 - v0.2 增强功能
+### 🚧 当前开发阶段 - v0.3 用户体验优化
 
-**目标**: 完善计算功能、优化结果展示、增加导出功能
+**目标**: 完善响应式体验、增加导出功能、数据持久化
 
 ## 🎯 待完成功能（按优先级排序）
 
 ### 高优先级 (P0)
-1. **TDEE计算与热量差显示** - 基于用户信息计算每日总消耗，在结果中显示热量差
-2. **计算结果组件增强** - 更新emoji，优化展示逻辑
-3. **CSV/PNG导出功能** - 替换实时计算按钮，添加导出选项
+1. **响应式布局优化** - 1024px以下使用表格布局，更大屏幕使用Kanban布局
+2. **CSV导出功能** - 导出营养计划为CSV格式
+3. **PNG导出功能** - 导出营养计划为PNG图片
 
 ### 中优先级 (P1)  
-4. **训练项目管理** - 可自定义的训练部位dropdown（胸、背、腿等）
-5. **结果表格拖拽排序** - 实现每日计划的drag&drop重新排序
-6. **数据持久化** - localStorage保存用户输入和训练项目设置
+4. **数据持久化** - localStorage保存用户输入和训练项目设置
+5. **拖拽体验优化** - 进一步完善拖拽交互和视觉反馈
 
 ### 低优先级 (P2)
-7. **Footer样式优化** - 调整宽度和视觉效果
-8. **SEO优化** - 使用vite-plugin-pwa或react-helmet-async管理metadata
-9. **国际化支持** - 中英文切换
-10. **单位系统完善** - kg/lb转换优化
+6. **Footer样式优化** - 调整宽度和视觉效果
+7. **SEO优化** - 使用vite-plugin-pwa或react-helmet-async管理metadata
+8. **国际化支持** - 中英文切换
+9. **单位系统完善** - kg/lb转换优化
+10. **性能优化** - 代码分割和懒加载
 
 ## 🛠 技术实现规划
 
-### TDEE计算公式
+### 响应式布局断点设计
+- **< 768px**: 手机端垂直布局
+- **768px - 1023px**: 平板端，InputForm单行，ResultCard使用表格布局
+- **1024px+**: 桌面端，InputForm单行，ResultCard使用Kanban布局
+
+### 已实现的技术特性
+
+#### TDEE计算公式
 - **BMR计算**: Mifflin-St Jeor公式
   - 男性: BMR = 88.362 + (13.397 × 体重kg) + (4.799 × 身高cm) - (5.677 × 年龄)
   - 女性: BMR = 447.593 + (9.247 × 体重kg) + (3.098 × 身高cm) - (4.330 × 年龄)
 - **活动系数**: 
   - 久坐: 1.2, 轻度: 1.375, 中度: 1.55, 活跃: 1.725, 极活跃: 1.9
 
-### 训练项目预设选项
+#### 拖拽功能技术栈
+- **@dnd-kit/core**: 核心拖拽功能
+- **@dnd-kit/sortable**: 排序功能
+- **@dnd-kit/modifiers**: snapCenterToCursor修饰符
+
+#### 训练项目预设选项
 - 胸部、背部、腿部、肩部、手臂、腹部、全身、有氧、休息
 
 ### 数据结构设计
@@ -59,6 +82,7 @@ interface UserSettings {
   formData: FormData;
   customWorkouts: string[];
   dailyWorkouts: Record<number, string>; // day index -> workout
+  dayOrder: number[]; // drag&drop排序状态
 }
 ```
 
@@ -66,39 +90,71 @@ interface UserSettings {
 
 ## 3. 技术选型确认
 
+### 核心技术栈
 - **脚手架**: Vite
 - **框架**: React 19+
 - **语言**: TypeScript
 - **UI 组件库**: shadcn/ui
-- **表单管理**: react-hook-form
+
+### 功能库
+- **表单管理**: react-hook-form + @hookform/resolvers
 - **校验**: zod
+- **拖拽功能**: @dnd-kit (core, sortable, modifiers)
 - **动态背景**: react-tsparticles
-- **国际化**: i18next
-- **图片导出**: html-to-image
+
+### 待集成库
+- **国际化**: i18next (计划中)
+- **图片导出**: html-to-image (计划中)
 
 ---
 
-## 4. 组件设计 (初步)
+## 4. 组件架构
 
+### 当前实现状态
 ```
 src/
 ├── components/
-│   ├── ui/ (来自 shadcn/ui)
+│   ├── ui/ (shadcn/ui + 自定义组件)
+│   │   ├── glass-card.tsx       ✅ 玻璃拟态卡片
+│   │   ├── compact-input.tsx    ✅ 紧凑输入框
+│   │   ├── radio-card.tsx       ✅ 单选卡片
+│   │   ├── section-card.tsx     ✅ 分组卡片
+│   │   └── slider-section.tsx   ✅ 滑动选择器
 │   ├── layout/
-│   │   ├── Header.tsx
-│   │   ├── Footer.tsx
-│   │   └── ThemeProvider.tsx
+│   │   ├── Header.tsx           ✅ 头部导航
+│   │   └── Footer.tsx           ✅ 页脚免责
 │   ├── core/
-│   │   ├── InputForm.tsx         # 输入表单
-│   │   ├── ResultCard.tsx        # 结果展示
-│   │   ├── Summary.tsx           # 周度摘要
-│   │   └── DailyTable.tsx        # 每日明细表
+│   │   ├── InputForm.tsx        ✅ 输入表单 (实时计算)
+│   │   └── ResultCard.tsx       ✅ 结果展示 (Kanban布局)
 │   └── shared/
-│       ├── ParticleBackground.tsx # 粒子背景
-│       └── LanguageSwitcher.tsx   # 语言切换器
+│       └── ParticleBackground.tsx ✅ 粒子背景
 ├── lib/
-│   ├── calculator.ts             # 核心计算逻辑
-│   ├── i18n.ts                   # 国际化配置
-│   └── utils.ts                  # 工具函数
-└── App.tsx                       # 应用主入口
+│   ├── calculator.ts            ✅ 完整计算逻辑
+│   ├── form-context.tsx         ✅ 表单状态管理
+│   ├── theme-context.tsx        ✅ 主题管理
+│   └── utils.ts                 ✅ 工具函数
+└── App.tsx                      ✅ 应用主入口
 ```
+
+---
+
+## 5. 当前开发状态
+
+### ✅ v0.2 已完成 (2024-08-23)
+- 实时计算功能：移除"开始计算"按钮，表单变化时自动更新结果
+- Kanban风格结果展示：按天数分列，支持拖拽排序
+- 训练项目管理：每日可选择训练部位
+- 高级拖拽功能：@dnd-kit实现，支持卡片交换和位置移动
+- 响应式优化：多断点适配 (768px/1280px)
+- 复制功能：Markdown格式复制到剪贴板
+
+### 🎯 v0.3 下一步计划
+1. **响应式布局改进**: 1024px以下切换到表格布局
+2. **导出功能**: CSV和PNG格式导出
+3. **数据持久化**: localStorage存储用户设置
+
+### 📋 技术债务与优化点
+- 表格布局组件需要重新实现 (用于中等屏幕)
+- 导出功能的UI集成
+- 性能优化：大数据集的拖拽性能
+- 单元测试覆盖率提升

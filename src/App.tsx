@@ -25,9 +25,11 @@ const StableBackground = memo(() => (
 StableBackground.displayName = 'StableBackground';
 
 const MainContent = () => (
-  <main className="w-full px-8 py-6 space-y-6">
-    <InputForm />
-    <ResultCard />
+  <main className="w-full px-8 py-6 space-y-6 flex flex-col items-center">
+    <div className="w-full max-w-[1600px] space-y-6">
+      <InputForm />
+      <ResultCard />
+    </div>
   </main>
 );
 
@@ -35,6 +37,14 @@ MainContent.displayName = 'MainContent';
 
 function AppContent() {
   const [unitSystem, setUnitSystem] = useState<'metric' | 'imperial'>('metric');
+  const [dailyWorkouts, setDailyWorkouts] = useState<Record<number, string>>(
+    {}
+  );
+  const [dayOrder, setDayOrder] = useState<number[]>([]);
+
+  const setDailyWorkout = (day: number, workout: string) => {
+    setDailyWorkouts((prev) => ({ ...prev, [day]: workout }));
+  };
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -58,9 +68,13 @@ function AppContent() {
       form={form}
       unitSystem={unitSystem}
       setUnitSystem={setUnitSystem}
+      dailyWorkouts={dailyWorkouts}
+      setDailyWorkout={setDailyWorkout}
+      dayOrder={dayOrder}
+      setDayOrder={setDayOrder}
     >
       <div
-        className="min-h-screen text-foreground relative"
+        className="min-h-screen text-foreground relative flex flex-col select-none"
         style={{
           background: 'transparent',
           color: 'var(--foreground)',
@@ -68,7 +82,9 @@ function AppContent() {
       >
         <StableBackground />
         <Header />
-        <MainContent />
+        <div className="flex-1">
+          <MainContent />
+        </div>
         <Footer />
       </div>
     </FormProvider>

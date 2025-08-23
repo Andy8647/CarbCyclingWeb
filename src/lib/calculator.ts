@@ -35,6 +35,7 @@ export interface DayPlan {
   protein: number; // grams
   calories: number; // kcal
   caloriesDiff: number; // calories - tdee
+  workout?: string; // workout type
 }
 
 export interface WeeklySummary {
@@ -250,6 +251,25 @@ export function convertWeight(
   }
 
   return weight;
+}
+
+// Workout types with emojis
+export const WORKOUT_TYPES = [
+  { value: 'chest', label: '胸部', emoji: '💪' },
+  { value: 'back', label: '背部', emoji: '🏋️' },
+  { value: 'legs', label: '腿部', emoji: '🦵' },
+  { value: 'shoulders', label: '肩部', emoji: '🙌' },
+  { value: 'arms', label: '手臂', emoji: '💪' },
+  { value: 'abs', label: '腹部', emoji: '🔥' },
+  { value: 'full_body', label: '全身', emoji: '🏃' },
+  { value: 'cardio', label: '有氧', emoji: '❤️' },
+  { value: 'rest', label: '休息', emoji: '😴' },
+];
+
+export function getWorkoutDisplay(workoutType?: string): string {
+  if (!workoutType) return '🎯 选择训练';
+  const workout = WORKOUT_TYPES.find(w => w.value === workoutType);
+  return workout ? `${workout.emoji} ${workout.label}` : workoutType;
 }
 
 // Validation helpers

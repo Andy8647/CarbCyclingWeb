@@ -20,10 +20,9 @@ export function InputForm() {
   if (!form) return null;
 
   const {
-    handleSubmit,
     watch,
     setValue,
-    formState: { errors, isValid },
+    formState: { errors },
   } = form;
 
   const watchedValues = watch();
@@ -49,9 +48,6 @@ export function InputForm() {
     }, 0);
   };
 
-  const onSubmit = (data: unknown) => {
-    console.log('Form data:', data);
-  };
 
   const convertWeight = (kg: number, to: 'metric' | 'imperial') => {
     return to === 'imperial' ? Math.round(kg * 2.20462 * 10) / 10 : kg;
@@ -68,6 +64,9 @@ export function InputForm() {
   };
 
   const handleWeightChange = (value: string) => {
+    if (value === '') {
+      return; // Don't update form state when empty
+    }
     const numValue = parseFloat(value);
     if (!isNaN(numValue)) {
       const kgValue = unitSystem === 'imperial' ? numValue / 2.20462 : numValue;
@@ -79,6 +78,9 @@ export function InputForm() {
 
   const handleHeightChange = (value: string) => {
     if (unitSystem === 'imperial') {
+      if (value === '') {
+        return; // Don't update form state when empty
+      }
       const match = value.match(/^(\d+)'(\d+(?:\.\d+)?)"?$/);
       if (match) {
         const feet = parseInt(match[1]);
@@ -90,6 +92,9 @@ export function InputForm() {
         });
       }
     } else {
+      if (value === '') {
+        return; // Don't update form state when empty
+      }
       const numValue = parseFloat(value);
       if (!isNaN(numValue)) {
         setValue('height', Math.round(numValue), {
@@ -101,13 +106,13 @@ export function InputForm() {
 
   return (
     <GlassCard>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+      <div className="space-y-3">
         {/* Single row layout - all in one line */}
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Column 1: Basic Info - 1 unit */}
           <div>
             <SectionCard title="基础信息" emoji="👤">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-2">
                 {/* Age */}
                 <CompactInput
                   label="年龄"
@@ -115,12 +120,16 @@ export function InputForm() {
                   type="number"
                   min="18"
                   max="80"
-                  value={watchedValues.age || 25}
-                  onChange={(e) =>
-                    setValue('age', parseInt(e.target.value) || 25, {
+                  defaultValue={watchedValues.age || 25}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      return;
+                    }
+                    setValue('age', parseInt(value) || 0, {
                       shouldValidate: true,
-                    })
-                  }
+                    });
+                  }}
                   placeholder="25"
                   unit="岁"
                 />
@@ -156,7 +165,7 @@ export function InputForm() {
                   type={unitSystem === 'imperial' ? 'text' : 'number'}
                   min={unitSystem === 'imperial' ? undefined : '120'}
                   max={unitSystem === 'imperial' ? undefined : '250'}
-                  value={
+                  defaultValue={
                     unitSystem === 'imperial'
                       ? convertHeight(watchedValues.height || 175, 'imperial')
                       : watchedValues.height || 175
@@ -174,7 +183,7 @@ export function InputForm() {
                   step={unitSystem === 'imperial' ? '0.1' : '1'}
                   min={unitSystem === 'imperial' ? '66' : '30'}
                   max={unitSystem === 'imperial' ? '440' : '200'}
-                  value={convertWeight(watchedValues.weight || 70, unitSystem)}
+                  defaultValue={convertWeight(watchedValues.weight || 70, unitSystem)}
                   onChange={(e) => handleWeightChange(e.target.value)}
                   placeholder="70"
                   unit={unitSystem === 'metric' ? 'kg' : 'lb'}
@@ -184,7 +193,7 @@ export function InputForm() {
           </div>
 
           {/* Column 2: Nutrition coefficients - 2 units */}
-          <div className="xl:col-span-2">
+          <div className="md:col-span-2">
             <SectionCard
               title="营养素系数"
               emoji="🏋️"
@@ -243,12 +252,16 @@ export function InputForm() {
                   step="0.1"
                   min="2.0"
                   max="8.0"
-                  value={watchedValues.carbCoeff || 5.0}
-                  onChange={(e) =>
-                    setValue('carbCoeff', parseFloat(e.target.value) || 5.0, {
+                  defaultValue={watchedValues.carbCoeff || 5.0}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      return;
+                    }
+                    setValue('carbCoeff', parseFloat(value) || 0, {
                       shouldValidate: true,
-                    })
-                  }
+                    });
+                  }}
                   placeholder="5.0"
                   unit="g/kg"
                 />
@@ -259,16 +272,16 @@ export function InputForm() {
                   step="0.1"
                   min="0.8"
                   max="2.5"
-                  value={watchedValues.proteinCoeff || 1.2}
-                  onChange={(e) =>
-                    setValue(
-                      'proteinCoeff',
-                      parseFloat(e.target.value) || 1.2,
-                      {
-                        shouldValidate: true,
-                      }
-                    )
-                  }
+                  defaultValue={watchedValues.proteinCoeff || 1.2}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      return;
+                    }
+                    setValue('proteinCoeff', parseFloat(value) || 0, {
+                      shouldValidate: true,
+                    });
+                  }}
                   placeholder="1.2"
                   unit="g/kg"
                 />
@@ -279,12 +292,16 @@ export function InputForm() {
                   step="0.1"
                   min="0.5"
                   max="1.5"
-                  value={watchedValues.fatCoeff || 1.0}
-                  onChange={(e) =>
-                    setValue('fatCoeff', parseFloat(e.target.value) || 1.0, {
+                  defaultValue={watchedValues.fatCoeff || 1.0}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      return;
+                    }
+                    setValue('fatCoeff', parseFloat(value) || 0, {
                       shouldValidate: true,
-                    })
-                  }
+                    });
+                  }}
                   placeholder="1.0"
                   unit="g/kg"
                 />
@@ -362,22 +379,7 @@ export function InputForm() {
           </div>
         </div>
 
-        {/* Calculate Button */}
-        <div className="flex justify-end -mt-10">
-          <button
-            type="submit"
-            disabled={!isValid}
-            className={`px-6 py-3 rounded-lg font-medium text-sm transition-all duration-300 flex items-center gap-2 ${
-              isValid
-                ? 'bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg hover:shadow-xl transform hover:scale-105 hover:cursor-pointer'
-                : 'bg-white/20 dark:bg-black/20 text-muted-foreground cursor-not-allowed'
-            }`}
-          >
-            <span className='text-xl'>🚀</span>
-            <span>{isValid ? '开始计算' : '请完善表单'}</span>
-          </button>
-        </div>
-      </form>
+      </div>
     </GlassCard>
   );
 }

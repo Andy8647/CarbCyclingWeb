@@ -27,6 +27,10 @@ interface FormContextType {
   form: UseFormReturn<FormData> | null;
   unitSystem: 'metric' | 'imperial';
   setUnitSystem: (unit: 'metric' | 'imperial') => void;
+  dailyWorkouts: Record<number, string>;
+  setDailyWorkout: (day: number, workout: string) => void;
+  dayOrder: number[];
+  setDayOrder: (order: number[]) => void;
 }
 
 const FormContext = createContext<FormContextType | undefined>(undefined);
@@ -36,14 +40,22 @@ export function FormProvider({
   form,
   unitSystem,
   setUnitSystem,
+  dailyWorkouts,
+  setDailyWorkout,
+  dayOrder,
+  setDayOrder,
 }: {
   children: ReactNode;
   form: UseFormReturn<FormData>;
   unitSystem: 'metric' | 'imperial';
   setUnitSystem: (unit: 'metric' | 'imperial') => void;
+  dailyWorkouts: Record<number, string>;
+  setDailyWorkout: (day: number, workout: string) => void;
+  dayOrder: number[];
+  setDayOrder: (order: number[]) => void;
 }) {
   return (
-    <FormContext.Provider value={{ form, unitSystem, setUnitSystem }}>
+    <FormContext.Provider value={{ form, unitSystem, setUnitSystem, dailyWorkouts, setDailyWorkout, dayOrder, setDayOrder }}>
       {children}
     </FormContext.Provider>
   );
