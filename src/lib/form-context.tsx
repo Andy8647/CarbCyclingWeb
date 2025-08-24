@@ -55,7 +55,17 @@ export function FormProvider({
   setDayOrder: (order: number[]) => void;
 }) {
   return (
-    <FormContext.Provider value={{ form, unitSystem, setUnitSystem, dailyWorkouts, setDailyWorkout, dayOrder, setDayOrder }}>
+    <FormContext.Provider
+      value={{
+        form,
+        unitSystem,
+        setUnitSystem,
+        dailyWorkouts,
+        setDailyWorkout,
+        dayOrder,
+        setDayOrder,
+      }}
+    >
       {children}
     </FormContext.Provider>
   );

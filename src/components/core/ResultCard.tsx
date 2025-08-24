@@ -15,9 +15,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import {
+  draggable,
+  dropTargetForElements,
+} from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-import { attachClosestEdge, extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
+import {
+  attachClosestEdge,
+  extractClosestEdge,
+} from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 
 const getDayTypeDisplay = (type: string) => {
   switch (type) {
@@ -57,14 +63,13 @@ function DraggableCard({
         getInitialData: () => ({
           type: 'card',
           day: day.day,
-          dayData: day
+          dayData: day,
         }),
         onDragStart: () => setIsDragging(true),
         onDrop: () => setIsDragging(false),
       })
     );
   }, [day]);
-
 
   return (
     <div
@@ -210,7 +215,7 @@ function DayColumn({
   }, [columnIndex, onDrop]);
 
   return (
-    <div 
+    <div
       ref={ref}
       className={`flex-1 min-w-[120px] max-w-[280px] ${
         isDraggedOver ? 'bg-blue-50/30 dark:bg-blue-900/20 rounded-lg' : ''
@@ -344,7 +349,7 @@ export function ResultCard() {
 
   const handleDrop = (dragData: any, targetColumnIndex: number) => {
     if (dragData.type !== 'card') return;
-    
+
     const activeDayNum = dragData.day;
     const currentIndex = dayOrder.indexOf(activeDayNum);
 
@@ -357,7 +362,6 @@ export function ResultCard() {
       setDayOrder(newDayOrder);
     }
   };
-
 
   if (!form) return null;
 

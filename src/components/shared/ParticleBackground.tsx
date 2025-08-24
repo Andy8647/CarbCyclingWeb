@@ -27,17 +27,17 @@ export function ParticleBackground({
           value: 'transparent',
         },
       },
-      fpsLimit: 60,
+      fpsLimit: 30,
       fullScreen: {
         enable: true,
         zIndex: -1,
       },
       particles: {
         number: {
-          value: 50,
+          value: 25,
           density: {
             enable: true,
-            area: 800,
+            area: 1200,
           },
         },
         shape: {
@@ -62,17 +62,17 @@ export function ParticleBackground({
           },
         },
         opacity: {
-          value: 0.8,
+          value: 0.6,
         },
         size: {
-          value: 8,
+          value: 6,
         },
         links: {
           enable: false,
         },
         move: {
           enable: true,
-          speed: isAnimating ? 4 : 1.5,
+          speed: isAnimating ? 3 : 1,
           direction: isAnimating ? ('top' as const) : ('none' as const),
           random: !isAnimating,
           straight: isAnimating,

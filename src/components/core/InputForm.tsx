@@ -48,7 +48,6 @@ export function InputForm() {
     }, 0);
   };
 
-
   const convertWeight = (kg: number, to: 'metric' | 'imperial') => {
     return to === 'imperial' ? Math.round(kg * 2.20462 * 10) / 10 : kg;
   };
@@ -183,7 +182,10 @@ export function InputForm() {
                   step={unitSystem === 'imperial' ? '0.1' : '1'}
                   min={unitSystem === 'imperial' ? '66' : '30'}
                   max={unitSystem === 'imperial' ? '440' : '200'}
-                  defaultValue={convertWeight(watchedValues.weight || 70, unitSystem)}
+                  defaultValue={convertWeight(
+                    watchedValues.weight || 70,
+                    unitSystem
+                  )}
                   onChange={(e) => handleWeightChange(e.target.value)}
                   placeholder="70"
                   unit={unitSystem === 'metric' ? 'kg' : 'lb'}
@@ -378,7 +380,6 @@ export function InputForm() {
             </SectionCard>
           </div>
         </div>
-
       </div>
     </GlassCard>
   );

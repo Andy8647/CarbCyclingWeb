@@ -18,7 +18,8 @@
       "WebSearch",
       "WebFetch(domain:colorhunt.co)",
       "WebFetch(domain:colorffy.com)",
-      "WebFetch(domain:blog.logrocket.com)"
+      "WebFetch(domain:blog.logrocket.com)",
+      "WebFetch(domain:atlassian.design)"
     ]
   },
   "hooks": {

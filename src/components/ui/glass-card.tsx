@@ -21,12 +21,12 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
       <div
         ref={ref}
         className={cn(
-          'w-full sm:p-8 rounded-2xl backdrop-blur-[8px] transition-all duration-300 ease-in-out',
+          'w-full sm:p-8 rounded-2xl backdrop-blur-[4px] transition-all duration-300 ease-in-out',
           variants[variant],
           className
         )}
         style={{
-          WebkitBackdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(4px)',
           borderRadius: '1rem',
         }}
         {...props}

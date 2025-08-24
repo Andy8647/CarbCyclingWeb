@@ -100,7 +100,10 @@ export function calculateBMR(
 }
 
 // Calculate TDEE from BMR and activity factor
-export function calculateTDEE(bmr: number, activityFactor: ActivityFactor): number {
+export function calculateTDEE(
+  bmr: number,
+  activityFactor: ActivityFactor
+): number {
   return bmr * ACTIVITY_MULTIPLIERS[activityFactor];
 }
 
@@ -108,7 +111,7 @@ export function calculateTDEE(bmr: number, activityFactor: ActivityFactor): numb
 export function calculateMetabolicData(input: UserInput): MetabolicData {
   const bmr = calculateBMR(input.weight, input.height, input.age, input.gender);
   const tdee = calculateTDEE(bmr, input.activityFactor);
-  
+
   return {
     bmr: Math.round(bmr),
     tdee: Math.round(tdee),
@@ -268,7 +271,7 @@ export const WORKOUT_TYPES = [
 
 export function getWorkoutDisplay(workoutType?: string): string {
   if (!workoutType) return '🎯 选择训练';
-  const workout = WORKOUT_TYPES.find(w => w.value === workoutType);
+  const workout = WORKOUT_TYPES.find((w) => w.value === workoutType);
   return workout ? `${workout.emoji} ${workout.label}` : workoutType;
 }
 
