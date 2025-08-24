@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState, useRef } from 'react';
 import { useFormContext } from '@/lib/form-context';
 import {
   calculateNutritionPlan,
@@ -15,20 +15,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-  type DragStartEvent,
-  useDroppable,
-  DragOverlay,
-} from '@dnd-kit/core';
-import { useDraggable } from '@dnd-kit/core';
-import { CSS } from '@dnd-kit/utilities';
+import { draggable, dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
+import { attachClosestEdge, extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 
 const getDayTypeDisplay = (type: string) => {
   switch (type) {
@@ -55,35 +44,36 @@ function DraggableCard({
   dailyWorkouts,
   setDailyWorkout,
 }: DraggableCardProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    isDragging,
-  } = useDraggable({ 
-    id: `card-${day.day}`,
-    data: {
-      type: 'card',
-      day: day
-    }
-  });
+  const ref = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
-  const style = {
-    transform: CSS.Translate.toString(transform),
-  };
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    return combine(
+      draggable({
+        element,
+        getInitialData: () => ({
+          type: 'card',
+          day: day.day,
+          dayData: day
+        }),
+        onDragStart: () => setIsDragging(true),
+        onDrop: () => setIsDragging(false),
+      })
+    );
+  }, [day]);
+
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className={`rounded-xl border p-3 shadow-sm transition-all duration-200 bg-white dark:bg-black border-slate-200 dark:border-slate-700 ${
-        isDragging
-          ? 'opacity-30 cursor-grabbing'
-          : 'cursor-grab hover:shadow-md'
-      }`}
+      ref={ref}
+      className="rounded-xl border p-3 shadow-sm bg-white dark:bg-black border-slate-200 dark:border-slate-700 cursor-grab hover:shadow-md"
+      data-dragging={isDragging ? 'true' : 'false'}
+      style={{
+        opacity: isDragging ? 0.5 : 1,
+      }}
     >
       {/* 日型标签 */}
       <div className="flex justify-center mb-3">
@@ -189,6 +179,7 @@ interface DayColumnProps {
   day: any;
   dailyWorkouts: Record<number, string>;
   setDailyWorkout: (day: number, workout: string) => void;
+  onDrop: (dragData: any, columnIndex: number) => void;
 }
 
 function DayColumn({
@@ -196,20 +187,33 @@ function DayColumn({
   day,
   dailyWorkouts,
   setDailyWorkout,
+  onDrop,
 }: DayColumnProps) {
-  const { isOver, setNodeRef } = useDroppable({
-    id: `column-${columnIndex}`,
-    data: {
-      type: 'column',
-      index: columnIndex
-    }
-  });
+  const ref = useRef<HTMLDivElement>(null);
+  const [isDraggedOver, setIsDraggedOver] = useState(false);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    return dropTargetForElements({
+      element,
+      getData: () => ({ columnIndex }),
+      canDrop: ({ source }) => source.data.type === 'card',
+      onDragEnter: () => setIsDraggedOver(true),
+      onDragLeave: () => setIsDraggedOver(false),
+      onDrop: ({ source }) => {
+        setIsDraggedOver(false);
+        onDrop(source.data, columnIndex);
+      },
+    });
+  }, [columnIndex, onDrop]);
 
   return (
     <div 
-      ref={setNodeRef}
-      className={`flex-1 min-w-[120px] max-w-[280px] transition-all duration-200 ${
-        isOver ? 'bg-blue-50/30 dark:bg-blue-900/20 rounded-lg' : ''
+      ref={ref}
+      className={`flex-1 min-w-[120px] max-w-[280px] ${
+        isDraggedOver ? 'bg-blue-50/30 dark:bg-blue-900/20 rounded-lg' : ''
       }`}
     >
       {/* 固定列头 - 不可拖拽 */}
@@ -221,8 +225,8 @@ function DayColumn({
 
       {/* 卡片容器区域 */}
       <div
-        className={`min-h-[300px] rounded-xl border-2 border-dashed transition-all duration-200 ${
-          isOver
+        className={`min-h-[300px] rounded-xl border-2 border-dashed ${
+          isDraggedOver
             ? 'border-blue-400 bg-blue-50/50 dark:bg-blue-900/30 border-solid'
             : 'border-slate-300/50 dark:border-slate-600/50'
         }`}
@@ -250,16 +254,6 @@ function DayColumn({
 export function ResultCard() {
   const { form, dailyWorkouts, setDailyWorkout, dayOrder, setDayOrder } =
     useFormContext();
-  const [activeId, setActiveId] = useState<string | null>(null);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 10,
-      },
-    }),
-    useSensor(KeyboardSensor)
-  );
 
   const formData = form?.watch();
   const isValid = form?.formState.isValid;
@@ -348,58 +342,19 @@ export function ResultCard() {
       .filter(Boolean) as typeof nutritionPlan.dailyPlans;
   }, [nutritionPlan, dayOrder]);
 
-  const handleDragStart = (event: DragStartEvent) => {
-    console.log('Drag start:', { activeId: event.active.id, activeData: event.active.data.current });
-    setActiveId(event.active.id);
-  };
-
-  const handleDragOver = (event: any) => {
-    console.log('Drag over:', { activeId: event.active.id, overId: event.over?.id });
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveId(null);
-
-    console.log('Drag end:', { activeId: active.id, overId: over?.id, overData: over?.data.current });
+  const handleDrop = (dragData: any, targetColumnIndex: number) => {
+    if (dragData.type !== 'card') return;
     
-    if (!over) return;
+    const activeDayNum = dragData.day;
+    const currentIndex = dayOrder.indexOf(activeDayNum);
 
-    const activeCardId = active.id as string;
-    const overId = over.id as string;
-    
-    // Extract day number from card id
-    const activeDayNum = parseInt(activeCardId.replace('card-', ''));
-    
-    // Handle dropping on column
-    if (overId.startsWith('column-')) {
-      const targetColumnIndex = parseInt(overId.replace('column-', ''));
-      const currentIndex = dayOrder.indexOf(activeDayNum);
-
-      if (currentIndex !== -1 && currentIndex !== targetColumnIndex) {
-        const newDayOrder = [...dayOrder];
-        // Remove from current position
-        newDayOrder.splice(currentIndex, 1);
-        // Insert at target position
-        newDayOrder.splice(targetColumnIndex, 0, activeDayNum);
-        setDayOrder(newDayOrder);
-      }
-    }
-    // Handle dropping on another card - swap positions  
-    else if (overId.startsWith('card-')) {
-      const overDayNum = parseInt(overId.replace('card-', ''));
-      const activeIndex = dayOrder.indexOf(activeDayNum);
-      const overIndex = dayOrder.indexOf(overDayNum);
-
-      if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
-        const newDayOrder = [...dayOrder];
-        // Swap positions
-        [newDayOrder[activeIndex], newDayOrder[overIndex]] = [
-          newDayOrder[overIndex], 
-          newDayOrder[activeIndex]
-        ];
-        setDayOrder(newDayOrder);
-      }
+    if (currentIndex !== -1 && currentIndex !== targetColumnIndex) {
+      const newDayOrder = [...dayOrder];
+      // Remove from current position
+      newDayOrder.splice(currentIndex, 1);
+      // Insert at target position
+      newDayOrder.splice(targetColumnIndex, 0, activeDayNum);
+      setDayOrder(newDayOrder);
     }
   };
 
@@ -518,37 +473,27 @@ export function ResultCard() {
             </div>
 
             {/* Kanban Board 按天数分列 */}
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragStart={handleDragStart}
-              onDragOver={handleDragOver}
-              onDragEnd={handleDragEnd}
-            >
-                <div className="w-full">
-                  <div
-                    className="flex gap-3 pb-4 mx-auto justify-around"
-                    style={{
-                      width: orderedDays.length <= 7 ? '100%' : 'max-content',
-                      maxWidth: '100%',
-                      overflowX: orderedDays.length > 7 ? 'auto' : 'visible',
-                    }}
-                  >
-                    {Array.from({ length: orderedDays.length }, (_, index) => (
-                      <DayColumn
-                        key={`column-${index}`}
-                        columnIndex={index}
-                        day={orderedDays[index]}
-                        dailyWorkouts={dailyWorkouts}
-                        setDailyWorkout={setDailyWorkout}
-                      />
-                    ))}
-                  </div>
-                </div>
-              <DragOverlay>
-                {null}
-              </DragOverlay>
-            </DndContext>
+            <div className="w-full">
+              <div
+                className="flex gap-3 pb-4 mx-auto justify-around"
+                style={{
+                  width: orderedDays.length <= 7 ? '100%' : 'max-content',
+                  maxWidth: '100%',
+                  overflowX: orderedDays.length > 7 ? 'auto' : 'visible',
+                }}
+              >
+                {Array.from({ length: orderedDays.length }, (_, index) => (
+                  <DayColumn
+                    key={`column-${index}`}
+                    columnIndex={index}
+                    day={orderedDays[index]}
+                    dailyWorkouts={dailyWorkouts}
+                    setDailyWorkout={setDailyWorkout}
+                    onDrop={handleDrop}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         ) : (
           // 空态
