@@ -23,17 +23,12 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
-  type DragOverEvent,
+  type DragStartEvent,
   useDroppable,
   DragOverlay,
 } from '@dnd-kit/core';
 import { snapCenterToCursor } from '@dnd-kit/modifiers';
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
+import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
 const getDayTypeDisplay = (type: string) => {
@@ -66,15 +61,17 @@ function DraggableCard({
     listeners,
     setNodeRef,
     transform,
-    transition,
     isDragging,
-  } = useSortable({ id: `card-${day.day}` });
+  } = useDraggable({ 
+    id: `card-${day.day}`,
+    data: {
+      type: 'card',
+      day: day
+    }
+  });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.8 : 1,
-    zIndex: isDragging ? 50 : 1,
+    transform: CSS.Translate.toString(transform),
   };
 
   return (
@@ -83,10 +80,10 @@ function DraggableCard({
       style={style}
       {...attributes}
       {...listeners}
-      className={`rounded-xl backdrop-blur-sm border p-3 shadow-sm transition-all duration-200 cursor-grab hover:cursor-grabbing ${
+      className={`rounded-xl border p-3 shadow-sm transition-all duration-200 bg-white dark:bg-black border-slate-200 dark:border-slate-700 ${
         isDragging
-          ? 'bg-white/90 dark:bg-black/70 border-white/40 dark:border-white/20 shadow-xl rotate-6 scale-105'
-          : 'bg-white/60 dark:bg-black/40 border-white/20 dark:border-white/10 hover:shadow-md'
+          ? 'opacity-30 cursor-grabbing'
+          : 'cursor-grab hover:shadow-md'
       }`}
     >
       {/* 日型标签 */}
@@ -135,7 +132,7 @@ function DraggableCard({
         </div>
 
         <div className="space-y-1.5">
-          <div className="flex justify-between items-center p-1.5 rounded bg-slate-50 dark:bg-slate-800/50">
+          <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
             <div className="flex items-center gap-0.5">
               <span className="text-xs">🍚</span>
               <span className="text-xs">碳水</span>
@@ -143,7 +140,7 @@ function DraggableCard({
             <div className="font-semibold text-xs">{day.carbs}g</div>
           </div>
 
-          <div className="flex justify-between items-center p-1.5 rounded bg-slate-50 dark:bg-slate-800/50">
+          <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
             <div className="flex items-center gap-0.5">
               <span className="text-xs">🥜</span>
               <span className="text-xs">脂肪</span>
@@ -151,7 +148,7 @@ function DraggableCard({
             <div className="font-semibold text-xs">{day.fat}g</div>
           </div>
 
-          <div className="flex justify-between items-center p-1.5 rounded bg-slate-50 dark:bg-slate-800/50">
+          <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
             <div className="flex items-center gap-0.5">
               <span className="text-xs">🥩</span>
               <span className="text-xs">蛋白</span>
@@ -202,25 +199,33 @@ function DayColumn({
   setDailyWorkout,
 }: DayColumnProps) {
   const { isOver, setNodeRef } = useDroppable({
-    id: `column-${columnIndex + 1}`,
+    id: `column-${columnIndex}`,
+    data: {
+      type: 'column',
+      index: columnIndex
+    }
   });
 
   return (
-    <div className="flex-1 min-w-[120px] max-w-[280px]">
+    <div 
+      ref={setNodeRef}
+      className={`flex-1 min-w-[120px] max-w-[280px] transition-all duration-200 ${
+        isOver ? 'bg-blue-50/30 dark:bg-blue-900/20 rounded-lg' : ''
+      }`}
+    >
       {/* 固定列头 - 不可拖拽 */}
-      <div className="mb-3 p-2.5 rounded-lg bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-sm">
+      <div className="mb-3 p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800">
         <div className="flex items-center justify-center">
           <h3 className="font-semibold text-sm">第{columnIndex + 1}天</h3>
         </div>
       </div>
 
-      {/* 可放置区域 */}
+      {/* 卡片容器区域 */}
       <div
-        ref={setNodeRef}
         className={`min-h-[300px] rounded-xl border-2 border-dashed transition-all duration-200 ${
           isOver
-            ? 'border-blue-400 bg-blue-50/50 dark:bg-blue-900/20'
-            : 'border-slate-200/50 dark:border-slate-700/50'
+            ? 'border-blue-400 bg-blue-50/50 dark:bg-blue-900/30 border-solid'
+            : 'border-slate-300/50 dark:border-slate-600/50'
         }`}
       >
         {day && (
@@ -251,12 +256,10 @@ export function ResultCard() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // 需要移动8px才触发拖拽
+        distance: 10,
       },
     }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
+    useSensor(KeyboardSensor)
   );
 
   const formData = form?.watch();
@@ -346,32 +349,32 @@ export function ResultCard() {
       .filter(Boolean) as typeof nutritionPlan.dailyPlans;
   }, [nutritionPlan, dayOrder]);
 
-  const handleDragStart = (event: any) => {
+  const handleDragStart = (event: DragStartEvent) => {
+    console.log('Drag start:', { activeId: event.active.id, activeData: event.active.data.current });
     setActiveId(event.active.id);
+  };
+
+  const handleDragOver = (event: any) => {
+    console.log('Drag over:', { activeId: event.active.id, overId: event.over?.id });
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-
     setActiveId(null);
 
-    if (!over || active.id === over.id) return;
+    console.log('Drag end:', { activeId: active.id, overId: over?.id, overData: over?.data.current });
+    
+    if (!over) return;
 
-    // Prevent default scroll behavior
-    event.preventDefault?.();
-
-    const activeId = active.id as string;
+    const activeCardId = active.id as string;
     const overId = over.id as string;
-
+    
     // Extract day number from card id
-    const activeDayNum = parseInt(activeId.replace('card-', ''));
-
-    // Handle different drop targets
+    const activeDayNum = parseInt(activeCardId.replace('card-', ''));
+    
+    // Handle dropping on column
     if (overId.startsWith('column-')) {
-      // Dropping on a column
-      const targetColumnIndex = parseInt(overId.replace('column-', '')) - 1;
-
-      // Find current position of the active day
+      const targetColumnIndex = parseInt(overId.replace('column-', ''));
       const currentIndex = dayOrder.indexOf(activeDayNum);
 
       if (currentIndex !== -1 && currentIndex !== targetColumnIndex) {
@@ -382,30 +385,23 @@ export function ResultCard() {
         newDayOrder.splice(targetColumnIndex, 0, activeDayNum);
         setDayOrder(newDayOrder);
       }
-    } else if (overId.startsWith('card-')) {
-      // Dropping on another card - swap positions
+    }
+    // Handle dropping on another card - swap positions  
+    else if (overId.startsWith('card-')) {
       const overDayNum = parseInt(overId.replace('card-', ''));
-
       const activeIndex = dayOrder.indexOf(activeDayNum);
       const overIndex = dayOrder.indexOf(overDayNum);
 
       if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
         const newDayOrder = [...dayOrder];
-        // Swap the positions
+        // Swap positions
         [newDayOrder[activeIndex], newDayOrder[overIndex]] = [
-          newDayOrder[overIndex],
-          newDayOrder[activeIndex],
+          newDayOrder[overIndex], 
+          newDayOrder[activeIndex]
         ];
         setDayOrder(newDayOrder);
       }
     }
-
-    // Prevent any focus changes that might cause scrolling
-    setTimeout(() => {
-      if (document.activeElement && 'blur' in document.activeElement) {
-        (document.activeElement as HTMLElement).blur();
-      }
-    }, 0);
   };
 
   // Get the active day for drag overlay
@@ -479,7 +475,7 @@ export function ResultCard() {
           <div className="space-y-4">
             {/* 周度摘要卡片 */}
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              <div className="rounded-xl bg-slate-50/70 dark:bg-slate-800/50 p-3">
+              <div className="rounded-xl bg-slate-100 dark:bg-slate-800 p-3">
                 <div className="text-xs text-slate-500 flex items-center gap-1">
                   <span className="text-sm">🥩</span>
                   <span>每日蛋白</span>
@@ -488,7 +484,7 @@ export function ResultCard() {
                   {nutritionPlan.summary.dailyProtein} g
                 </div>
               </div>
-              <div className="rounded-xl bg-slate-50/70 dark:bg-slate-800/50 p-3">
+              <div className="rounded-xl bg-slate-100 dark:bg-slate-800 p-3">
                 <div className="text-xs text-slate-500 flex items-center gap-1">
                   <span className="text-sm">🍚</span>
                   <span>周碳水</span>
@@ -497,7 +493,7 @@ export function ResultCard() {
                   {nutritionPlan.summary.totalCarbs} g
                 </div>
               </div>
-              <div className="rounded-xl bg-slate-50/70 dark:bg-slate-800/50 p-3">
+              <div className="rounded-xl bg-slate-100 dark:bg-slate-800 p-3">
                 <div className="text-xs text-slate-500 flex items-center gap-1">
                   <span className="text-sm">🥜</span>
                   <span>周脂肪</span>
@@ -506,7 +502,7 @@ export function ResultCard() {
                   {nutritionPlan.summary.totalFat} g
                 </div>
               </div>
-              <div className="rounded-xl bg-slate-50/70 dark:bg-slate-800/50 p-3">
+              <div className="rounded-xl bg-slate-100 dark:bg-slate-800 p-3">
                 <div className="text-xs text-slate-500 flex items-center gap-1">
                   <span className="text-sm">🔥</span>
                   <span>周热量</span>
@@ -516,7 +512,7 @@ export function ResultCard() {
                 </div>
               </div>
               {metabolicData && (
-                <div className="rounded-xl bg-slate-50/70 dark:bg-slate-800/50 p-3">
+                <div className="rounded-xl bg-slate-100 dark:bg-slate-800 p-3">
                   <div className="text-xs text-slate-500 flex items-center gap-1">
                     <span className="text-sm">⚡</span>
                     <span>每日TDEE</span>
@@ -533,13 +529,9 @@ export function ResultCard() {
               sensors={sensors}
               collisionDetection={closestCenter}
               onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
               onDragEnd={handleDragEnd}
-              autoScroll={false}
             >
-              <SortableContext
-                items={orderedDays.map((day) => `card-${day.day}`)}
-                strategy={verticalListSortingStrategy}
-              >
                 <div className="w-full">
                   <div
                     className="flex gap-3 pb-4 mx-auto justify-around"
@@ -560,23 +552,19 @@ export function ResultCard() {
                     ))}
                   </div>
                 </div>
-              </SortableContext>
-              <DragOverlay 
-                dropAnimation={null}
+              <DragOverlay
                 modifiers={[snapCenterToCursor]}
+                className="z-50"
               >
                 {activeId && activeDayData ? (
-                  <div 
-                    className="w-[120px] p-2 rounded-lg bg-white/90 dark:bg-black/70 border border-white/40 dark:border-white/20 shadow-xl"
-                    style={{ transform: 'rotate(5deg)' }}
-                  >
-                    <div className="text-center">
-                      <div className="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 mb-2">
+                  <div className="rounded-xl border p-3 shadow-2xl bg-white dark:bg-black border-slate-400 dark:border-slate-500 rotate-3 scale-105">
+                    <div className="flex justify-center mb-2">
+                      <div className="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
                         {getDayTypeDisplay(activeDayData.type)}
                       </div>
-                      <div className="text-xs text-slate-600 dark:text-slate-400">
-                        拖拽中...
-                      </div>
+                    </div>
+                    <div className="text-center text-xs text-slate-600 dark:text-slate-400 font-medium">
+                      第{activeDayData.day}天
                     </div>
                   </div>
                 ) : null}

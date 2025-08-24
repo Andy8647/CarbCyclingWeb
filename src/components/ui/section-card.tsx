@@ -17,7 +17,7 @@ export function SectionCard({
   description,
 }: SectionCardProps) {
   return (
-    <div className={`p-3 rounded-xl bg-white/10 dark:bg-black/10 ${className}`}>
+    <div className={`p-3 rounded-xl bg-white dark:bg-black ${className}`}>
       <div className="space-y-2">
         <div>
           <Label className="text-sm font-medium text-foreground flex items-center gap-2">

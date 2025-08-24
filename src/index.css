@@ -59,52 +59,52 @@
 
 :root {
   --radius: 0.625rem;
-  /* Light theme colors */
-  --background: #dcd6c8;
-  --foreground: #2d2d2d;
-  --card: rgba(220, 214, 200, 0.9);
-  --card-foreground: #2d2d2d;
-  --popover: #dcd6c8;
-  --popover-foreground: #2d2d2d;
-  --primary: #5c7c8a;
-  --primary-foreground: #ffffff;
-  --secondary: rgba(92, 124, 138, 0.1);
-  --secondary-foreground: #2d2d2d;
-  --muted: rgba(92, 124, 138, 0.1);
-  --muted-foreground: #666666;
-  --accent: #e7b669;
-  --accent-foreground: #2d2d2d;
-  --destructive: #ef4444;
-  --border: rgba(92, 124, 138, 0.2);
-  --input: rgba(92, 124, 138, 0.1);
-  --ring: #5c7c8a;
+  /* Light theme colors - Gruvbox Light */
+  --background: #fbf1c7;
+  --foreground: #3c3836;
+  --card: #f2e5bc;
+  --card-foreground: #3c3836;
+  --popover: #ebdbb2;
+  --popover-foreground: #3c3836;
+  --primary: #076678;
+  --primary-foreground: #fbf1c7;
+  --secondary: #d5c4a1;
+  --secondary-foreground: #504945;
+  --muted: #ebdbb2;
+  --muted-foreground: #665c54;
+  --accent: #427b58;
+  --accent-foreground: #fbf1c7;
+  --destructive: #9d0006;
+  --border: #bdae93;
+  --input: #f2e5bc;
+  --ring: #076678;
 }
 
 .dark {
-  /* Dark theme colors */
-  --background: #0d2538;
-  --foreground: #ffffff;
-  --card: rgba(13, 37, 56, 0.9);
-  --card-foreground: #ffffff;
-  --popover: #0d2538;
-  --popover-foreground: #ffffff;
-  --primary: #c678dd;
-  --primary-foreground: #0d2538;
-  --secondary: rgba(198, 120, 221, 0.1);
-  --secondary-foreground: #ffffff;
-  --muted: rgba(198, 120, 221, 0.1);
-  --muted-foreground: #a0a0a0;
-  --accent: #98c379;
-  --accent-foreground: #0d2538;
-  --destructive: #ef4444;
-  --border: rgba(198, 120, 221, 0.2);
-  --input: rgba(198, 120, 221, 0.1);
-  --ring: #c678dd;
+  /* Dark theme colors - Tokyo Night Storm */
+  --background: #24283b;
+  --foreground: #c0caf5;
+  --card: #1a1b26;
+  --card-foreground: #c0caf5;
+  --popover: #16161e;
+  --popover-foreground: #a9b1d6;
+  --primary: #7aa2f7;
+  --primary-foreground: #24283b;
+  --secondary: #414868;
+  --secondary-foreground: #a9b1d6;
+  --muted: #3b4261;
+  --muted-foreground: #9aa5ce;
+  --accent: #73daca;
+  --accent-foreground: #24283b;
+  --destructive: #f7768e;
+  --border: #565f89;
+  --input: #3b4261;
+  --ring: #7aa2f7;
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
   }
   body {
     @apply bg-background text-foreground font-mono;

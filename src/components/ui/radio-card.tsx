@@ -23,10 +23,10 @@ export function RadioCard({
 }: RadioCardProps) {
   return (
     <div
-      className={`p-3 cursor-pointer transition-all duration-200 rounded-lg bg-white/5 dark:bg-black/5 ${
+      className={`p-3 cursor-pointer transition-all duration-200 rounded-lg bg-white dark:bg-black ${
         isSelected
-          ? 'bg-white/30 dark:bg-white/25'
-          : 'hover:bg-white/20 dark:hover:bg-white/15'
+          ? 'bg-slate-200 dark:bg-slate-700'
+          : 'hover:bg-slate-100 dark:hover:bg-slate-800'
       }`}
     >
       <div className="flex items-center space-x-3">

@@ -15,7 +15,10 @@
       "Bash(git commit:*)",
       "WebFetch(domain:ui.shadcn.com)",
       "WebFetch(domain:medium.com)",
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:colorhunt.co)",
+      "WebFetch(domain:colorffy.com)",
+      "WebFetch(domain:blog.logrocket.com)"
     ]
   },
   "hooks": {

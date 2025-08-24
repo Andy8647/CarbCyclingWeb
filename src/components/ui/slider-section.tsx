@@ -34,7 +34,7 @@ export function SliderSection({
             <span className="text-sm">{emoji}</span>
             <span>{title}</span>
           </Label>
-          <div className="px-3 py-1 rounded-lg bg-white/5 dark:bg-black/5">
+          <div className="px-3 py-1 rounded-lg bg-slate-100 dark:bg-slate-800">
             <span className="text-xl font-light">{value}</span>
             <span className="text-xs text-muted-foreground ml-1">{unit}</span>
           </div>
@@ -66,7 +66,7 @@ export function SliderSection({
         </div>
 
         {getDescription(value) && (
-          <div className="p-2 rounded-lg bg-white/5 dark:bg-black/5">
+          <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800">
             <div className="text-xs text-center text-muted-foreground">
               {getDescription(value)}
             </div>
