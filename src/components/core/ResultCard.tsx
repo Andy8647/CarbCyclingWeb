@@ -27,7 +27,6 @@ import {
   useDroppable,
   DragOverlay,
 } from '@dnd-kit/core';
-import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -404,12 +403,6 @@ export function ResultCard() {
     }
   };
 
-  // Get the active day for drag overlay
-  const activeDayData = useMemo(() => {
-    if (!activeId) return null;
-    const dayNum = parseInt(activeId.replace('card-', ''));
-    return orderedDays.find((day) => day.day === dayNum);
-  }, [activeId, orderedDays]);
 
   if (!form) return null;
 
@@ -552,22 +545,8 @@ export function ResultCard() {
                     ))}
                   </div>
                 </div>
-              <DragOverlay
-                modifiers={[snapCenterToCursor]}
-                className="z-50"
-              >
-                {activeId && activeDayData ? (
-                  <div className="rounded-xl border p-3 shadow-2xl bg-white dark:bg-black border-slate-400 dark:border-slate-500 rotate-3 scale-105">
-                    <div className="flex justify-center mb-2">
-                      <div className="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
-                        {getDayTypeDisplay(activeDayData.type)}
-                      </div>
-                    </div>
-                    <div className="text-center text-xs text-slate-600 dark:text-slate-400 font-medium">
-                      第{activeDayData.day}天
-                    </div>
-                  </div>
-                ) : null}
+              <DragOverlay>
+                {null}
               </DragOverlay>
             </DndContext>
           </div>
