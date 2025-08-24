@@ -1,3 +1,5 @@
+// import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Label } from '@/components/ui/label';
 import { CompactInput } from '@/components/ui/compact-input';
 import { RadioGroup } from '@/components/ui/radio-group';
@@ -15,6 +17,7 @@ import { SliderSection } from '@/components/ui/slider-section';
 import { useFormContext } from '@/lib/form-context';
 
 export function InputForm() {
+  const { t } = useTranslation();
   const { form, unitSystem } = useFormContext();
 
   if (!form) return null;
@@ -106,15 +109,15 @@ export function InputForm() {
   return (
     <GlassCard>
       <div className="space-y-3">
-        {/* Single row layout - all in one line */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Responsive layout - stacked on mobile, single row on desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Column 1: Basic Info - 1 unit */}
           <div>
-            <SectionCard title="基础信息" emoji="👤">
-              <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-2">
+            <SectionCard title={t('basicInfo.title')} emoji="👤">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2">
                 {/* Age */}
                 <CompactInput
-                  label="年龄"
+                  label={t('common.age')}
                   emoji="🎂"
                   type="number"
                   min="18"
@@ -130,14 +133,14 @@ export function InputForm() {
                     });
                   }}
                   placeholder="25"
-                  unit="岁"
+                  unit={t('basicInfo.ageUnit')}
                 />
 
                 {/* Gender */}
                 <div className="space-y-2">
                   <Label className="text-xs font-light text-foreground flex items-center gap-1">
                     <span className="text-xs">👨‍👩</span>
-                    <span>性别</span>
+                    <span>{t('common.gender')}</span>
                   </Label>
                   <Select
                     value={watchedValues.gender}
@@ -147,19 +150,22 @@ export function InputForm() {
                       })
                     }
                   >
-                    <SelectTrigger className="h-9 text-sm text-center w-full">
-                      <SelectValue placeholder="性别" />
+                    <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm text-center w-full">
+                      <SelectValue placeholder={t('common.gender')} />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="male">男</SelectItem>
-                      <SelectItem value="female">女</SelectItem>
+                    <SelectContent sideOffset={4}>
+                      <SelectItem value="male">{t('common.male')}</SelectItem>
+                      <SelectItem value="female">
+                        {t('common.female')}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 {/* Height */}
                 <CompactInput
-                  label="身高"
+                  key={`height-${unitSystem}`}
+                  label={t('common.height')}
                   emoji="📏"
                   type={unitSystem === 'imperial' ? 'text' : 'number'}
                   min={unitSystem === 'imperial' ? undefined : '120'}
@@ -171,12 +177,15 @@ export function InputForm() {
                   }
                   onChange={(e) => handleHeightChange(e.target.value)}
                   placeholder={unitSystem === 'imperial' ? '5\'9"' : '175'}
-                  unit={unitSystem === 'metric' ? 'cm' : ''}
+                  unit={
+                    unitSystem === 'metric' ? t('basicInfo.heightUnit') : ''
+                  }
                 />
 
                 {/* Weight */}
                 <CompactInput
-                  label="体重"
+                  key={`weight-${unitSystem}`}
+                  label={t('common.weight')}
                   emoji="⚖️"
                   type="number"
                   step={unitSystem === 'imperial' ? '0.1' : '1'}
@@ -188,42 +197,36 @@ export function InputForm() {
                   )}
                   onChange={(e) => handleWeightChange(e.target.value)}
                   placeholder="70"
-                  unit={unitSystem === 'metric' ? 'kg' : 'lb'}
+                  unit={
+                    unitSystem === 'metric' ? t('basicInfo.weightUnit') : 'lb'
+                  }
                 />
               </div>
             </SectionCard>
           </div>
 
           {/* Column 2: Nutrition coefficients - 2 units */}
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             <SectionCard
-              title="营养素系数"
+              title={t('nutrition.title')}
               emoji="🏋️"
               description={(() => {
-                const descriptions = {
-                  endomorph:
-                    '内胚型：易增重，代谢较慢，适合低碳水高蛋白饮食。蛋白质建议0.8-2.5g/kg体重。',
-                  mesomorph:
-                    '中胚型：肌肉发达，代谢均衡，营养分配相对灵活。蛋白质建议0.8-2.5g/kg体重。',
-                  ectomorph:
-                    '外胚型：偏瘦难增重，代谢快，需要更多碳水维持体重。蛋白质建议0.8-2.5g/kg体重。',
-                };
                 return watchedValues.bodyType
-                  ? descriptions[watchedValues.bodyType]
-                  : '选择体型后显示对应的营养建议。蛋白质建议0.8-2.5g/kg体重，根据训练强度调整。';
+                  ? t(`nutrition.descriptions.${watchedValues.bodyType}`)
+                  : t('nutrition.descriptions.default');
               })()}
             >
               {/* Body type selection - top row */}
               <RadioGroup
                 value={watchedValues.bodyType}
                 onValueChange={handleBodyTypeChange}
-                className="grid grid-cols-3 gap-1 mb-3"
+                className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-1 mb-3"
               >
                 <RadioCard
                   value="endomorph"
                   id="endomorph"
                   emoji="🔺"
-                  title="内胚型"
+                  title={t('nutrition.endomorph')}
                   description=""
                   isSelected={watchedValues.bodyType === 'endomorph'}
                 />
@@ -231,7 +234,7 @@ export function InputForm() {
                   value="mesomorph"
                   id="mesomorph"
                   emoji="⬜"
-                  title="中胚型"
+                  title={t('nutrition.mesomorph')}
                   description=""
                   isSelected={watchedValues.bodyType === 'mesomorph'}
                 />
@@ -239,16 +242,16 @@ export function InputForm() {
                   value="ectomorph"
                   id="ectomorph"
                   emoji="🔻"
-                  title="外胚型"
+                  title={t('nutrition.ectomorph')}
                   description=""
                   isSelected={watchedValues.bodyType === 'ectomorph'}
                 />
               </RadioGroup>
 
               {/* Nutrition coefficients - bottom section */}
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <CompactInput
-                  label="碳水"
+                  label={t('nutrition.carbCoeff')}
                   emoji="🍞"
                   type="number"
                   step="0.1"
@@ -268,7 +271,7 @@ export function InputForm() {
                   unit="g/kg"
                 />
                 <CompactInput
-                  label="蛋白质"
+                  label={t('nutrition.proteinCoeff')}
                   emoji="🥩"
                   type="number"
                   step="0.1"
@@ -288,7 +291,7 @@ export function InputForm() {
                   unit="g/kg"
                 />
                 <CompactInput
-                  label="脂肪"
+                  label={t('nutrition.fatCoeff')}
                   emoji="🥑"
                   type="number"
                   step="0.1"
@@ -320,7 +323,7 @@ export function InputForm() {
 
           {/* Column 3: Cycle days + Activity - 1 unit */}
           <div>
-            <SectionCard title="循环天数" emoji="📅">
+            <SectionCard title={t('activity.title')} emoji="📅">
               <div className="space-y-2">
                 <SliderSection
                   title=""
@@ -332,7 +335,7 @@ export function InputForm() {
                   min={3}
                   max={7}
                   step={1}
-                  unit="天"
+                  unit={t('activity.days')}
                   options={[3, 4, 5, 6, 7]}
                   getDescription={() => ''}
                 />
@@ -341,7 +344,7 @@ export function InputForm() {
                 <div className="space-y-2">
                   <Label className="text-xs font-light text-foreground flex items-center gap-1">
                     <span className="text-xs">🏃</span>
-                    <span>每日活动量</span>
+                    <span>{t('activity.activityLevel')}</span>
                   </Label>
                   <Select
                     value={watchedValues.activityFactor}
@@ -358,15 +361,25 @@ export function InputForm() {
                       )
                     }
                   >
-                    <SelectTrigger className="h-9 text-sm text-center w-full">
-                      <SelectValue placeholder="活动水平" />
+                    <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm text-center w-full">
+                      <SelectValue placeholder={t('activity.activityLevel')} />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sedentary">久坐</SelectItem>
-                      <SelectItem value="light">轻度</SelectItem>
-                      <SelectItem value="moderate">中度</SelectItem>
-                      <SelectItem value="active">活跃</SelectItem>
-                      <SelectItem value="very_active">极活跃</SelectItem>
+                    <SelectContent sideOffset={4}>
+                      <SelectItem value="sedentary">
+                        {t('activity.sedentary')}
+                      </SelectItem>
+                      <SelectItem value="light">
+                        {t('activity.light')}
+                      </SelectItem>
+                      <SelectItem value="moderate">
+                        {t('activity.moderate')}
+                      </SelectItem>
+                      <SelectItem value="active">
+                        {t('activity.active')}
+                      </SelectItem>
+                      <SelectItem value="very_active">
+                        {t('activity.very_active')}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

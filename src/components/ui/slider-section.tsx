@@ -55,9 +55,10 @@ export function SliderSection({
           {options.map((option) => (
             <div
               key={option}
-              className={`text-center transition-all duration-200 ${
+              className={`text-center transition-all duration-200 cursor-pointer hover:text-foreground hover:scale-105 ${
                 option === value ? 'text-foreground font-medium scale-110' : ''
               }`}
+              onClick={() => onValueChange(option)}
             >
               {option}
               {unit}

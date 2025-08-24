@@ -1,10 +1,11 @@
 import { useMemo, useEffect, useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFormContext } from '@/lib/form-context';
 import {
   calculateNutritionPlan,
   calculateMetabolicData,
   type UserInput,
-  WORKOUT_TYPES,
+  getWorkoutTypes,
 } from '@/lib/calculator';
 import { Button } from '@/components/ui/button';
 import { GlassCard } from '@/components/ui/glass-card';
@@ -20,35 +21,51 @@ import {
   dropTargetForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-import {
-  attachClosestEdge,
-  extractClosestEdge,
-} from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
+// Removed unused imports for cleaner code
+import { IOSGridLayout } from './IOSGridLayout';
 
-const getDayTypeDisplay = (type: string) => {
+const getDayTypeDisplay = (type: string, t: (key: string) => string) => {
   switch (type) {
     case 'high':
-      return '🔥 高碳日';
+      return t('results.dayTypes.high');
     case 'medium':
-      return '⚖️ 中碳日';
+      return t('results.dayTypes.medium');
     case 'low':
-      return '🌿 低碳日';
+      return t('results.dayTypes.low');
     default:
       return type;
   }
 };
 
 // 可拖拽的营养卡片
+interface DayData {
+  day: number;
+  type: string;
+  carbs: number;
+  fat: number;
+  protein: number;
+  calories: number;
+  caloriesDiff: number;
+}
+
+interface DragData {
+  type: string;
+  day: number;
+  dayData: DayData;
+}
+
 interface DraggableCardProps {
-  day: any;
+  day: DayData;
   dailyWorkouts: Record<number, string>;
   setDailyWorkout: (day: number, workout: string) => void;
+  t: (key: string) => string;
 }
 
 function DraggableCard({
   day,
   dailyWorkouts,
   setDailyWorkout,
+  t,
 }: DraggableCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -74,7 +91,7 @@ function DraggableCard({
   return (
     <div
       ref={ref}
-      className="rounded-xl border p-3 shadow-sm bg-white dark:bg-black border-slate-200 dark:border-slate-700 cursor-grab hover:shadow-md"
+      className="rounded-xl border p-3 shadow-sm bg-white dark:bg-card border-slate-200 dark:border-slate-700 cursor-grab hover:shadow-md"
       data-dragging={isDragging ? 'true' : 'false'}
       style={{
         opacity: isDragging ? 0.5 : 1,
@@ -83,7 +100,7 @@ function DraggableCard({
       {/* 日型标签 */}
       <div className="flex justify-center mb-3">
         <div className="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
-          {getDayTypeDisplay(day.type)}
+          {getDayTypeDisplay(day.type, t)}
         </div>
       </div>
 
@@ -95,7 +112,7 @@ function DraggableCard({
         onClick={(e) => e.stopPropagation()}
       >
         <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 block">
-          🏋️ 训练项目
+          🏋️ {t('results.workout')}
         </label>
         <div onPointerDown={(e) => e.stopPropagation()}>
           <Select
@@ -103,10 +120,10 @@ function DraggableCard({
             onValueChange={(value) => setDailyWorkout(day.day, value)}
           >
             <SelectTrigger className="h-8 text-xs w-full">
-              <SelectValue placeholder="选择训练" />
+              <SelectValue placeholder={t('results.selectWorkout')} />
             </SelectTrigger>
-            <SelectContent>
-              {WORKOUT_TYPES.map((workout) => (
+            <SelectContent sideOffset={4}>
+              {getWorkoutTypes(t).map((workout) => (
                 <SelectItem key={workout.value} value={workout.value}>
                   <span className="flex items-center gap-1">
                     <span>{workout.emoji}</span>
@@ -122,14 +139,14 @@ function DraggableCard({
       {/* 营养数据 */}
       <div className="space-y-2.5">
         <div className="text-xs font-medium text-slate-600 dark:text-slate-400">
-          📊 营养配比
+          📊 {t('results.nutritionBreakdown')}
         </div>
 
         <div className="space-y-1.5">
           <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
             <div className="flex items-center gap-0.5">
               <span className="text-xs">🍚</span>
-              <span className="text-xs">碳水</span>
+              <span className="text-xs">{t('results.carbs')}</span>
             </div>
             <div className="font-semibold text-xs">{day.carbs}g</div>
           </div>
@@ -137,7 +154,7 @@ function DraggableCard({
           <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
             <div className="flex items-center gap-0.5">
               <span className="text-xs">🥜</span>
-              <span className="text-xs">脂肪</span>
+              <span className="text-xs">{t('results.fat')}</span>
             </div>
             <div className="font-semibold text-xs">{day.fat}g</div>
           </div>
@@ -145,7 +162,7 @@ function DraggableCard({
           <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
             <div className="flex items-center gap-0.5">
               <span className="text-xs">🥩</span>
-              <span className="text-xs">蛋白</span>
+              <span className="text-xs">{t('results.protein')}</span>
             </div>
             <div className="font-semibold text-xs">{day.protein}g</div>
           </div>
@@ -154,11 +171,15 @@ function DraggableCard({
         {/* 热量信息 */}
         <div className="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
           <div className="flex justify-between items-center">
-            <div className="text-xs text-slate-500">🔥 总热量</div>
+            <div className="text-xs text-slate-500">
+              🔥 {t('results.totalCalories')}
+            </div>
             <div className="font-semibold text-xs">{day.calories}</div>
           </div>
           <div className="flex justify-between items-center">
-            <div className="text-xs text-slate-500">📈 热量差</div>
+            <div className="text-xs text-slate-500">
+              📈 {t('results.calorieDeficit')}
+            </div>
             <div
               className={`font-semibold text-xs ${
                 day.caloriesDiff > 0
@@ -181,10 +202,11 @@ function DraggableCard({
 // 可放置的列容器
 interface DayColumnProps {
   columnIndex: number;
-  day: any;
+  day: DayData;
   dailyWorkouts: Record<number, string>;
   setDailyWorkout: (day: number, workout: string) => void;
-  onDrop: (dragData: any, columnIndex: number) => void;
+  onDrop: (dragData: DragData, columnIndex: number) => void;
+  t: (key: string) => string;
 }
 
 function DayColumn({
@@ -193,6 +215,7 @@ function DayColumn({
   dailyWorkouts,
   setDailyWorkout,
   onDrop,
+  t,
 }: DayColumnProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isDraggedOver, setIsDraggedOver] = useState(false);
@@ -209,7 +232,7 @@ function DayColumn({
       onDragLeave: () => setIsDraggedOver(false),
       onDrop: ({ source }) => {
         setIsDraggedOver(false);
-        onDrop(source.data, columnIndex);
+        onDrop(source.data as unknown as DragData, columnIndex);
       },
     });
   }, [columnIndex, onDrop]);
@@ -224,7 +247,9 @@ function DayColumn({
       {/* 固定列头 - 不可拖拽 */}
       <div className="mb-3 p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800">
         <div className="flex items-center justify-center">
-          <h3 className="font-semibold text-sm">第{columnIndex + 1}天</h3>
+          <h3 className="font-semibold text-sm">
+            {t('results.dayNumber').replace('{{day}}', (columnIndex + 1).toString())}
+          </h3>
         </div>
       </div>
 
@@ -241,13 +266,14 @@ function DayColumn({
             day={day}
             dailyWorkouts={dailyWorkouts}
             setDailyWorkout={setDailyWorkout}
+            t={t}
           />
         )}
         {!day && (
           <div className="flex items-center justify-center h-full text-slate-400 dark:text-slate-600">
             <div className="text-center">
               <div className="text-2xl mb-2">📋</div>
-              <div className="text-sm">拖拽卡片到此处</div>
+              <div className="text-sm">{t('results.dropCardHere')}</div>
             </div>
           </div>
         )}
@@ -256,9 +282,36 @@ function DayColumn({
   );
 }
 
+// Custom hook for screen size detection
+function useScreenSize() {
+  const [isLargeScreen, setIsLargeScreen] = useState(true);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsLargeScreen(window.innerWidth >= 1024);
+    };
+
+    // Check initial size
+    checkScreenSize();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkScreenSize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  return isLargeScreen;
+}
+
 export function ResultCard() {
-  const { form, dailyWorkouts, setDailyWorkout, dayOrder, setDayOrder } =
+  const { t } = useTranslation();
+  const { form, dailyWorkouts, setDailyWorkout, dayOrder, setDayOrder, unitSystem } =
     useFormContext();
+
+  const isLargeScreen = useScreenSize();
+
+  // 营养数据（克数和卡路里）在公制和英制中是相同的，不需转换
 
   const formData = form?.watch();
   const isValid = form?.formState.isValid;
@@ -347,7 +400,7 @@ export function ResultCard() {
       .filter(Boolean) as typeof nutritionPlan.dailyPlans;
   }, [nutritionPlan, dayOrder]);
 
-  const handleDrop = (dragData: any, targetColumnIndex: number) => {
+  const handleDrop = (dragData: DragData, targetColumnIndex: number) => {
     if (dragData.type !== 'card') return;
 
     const activeDayNum = dragData.day;
@@ -363,6 +416,23 @@ export function ResultCard() {
     }
   };
 
+  // Handle drop for iOS grid layout (direct index-based reordering)
+  const handleGridDrop = (dragData: DragData, targetIndex: number) => {
+    if (dragData.type !== 'card') return;
+
+    const activeDayNum = dragData.day;
+    const currentIndex = dayOrder.indexOf(activeDayNum);
+
+    if (currentIndex !== -1 && currentIndex !== targetIndex) {
+      const newDayOrder = [...dayOrder];
+      // Remove from current position
+      newDayOrder.splice(currentIndex, 1);
+      // Insert at target position
+      newDayOrder.splice(targetIndex, 0, activeDayNum);
+      setDayOrder(newDayOrder);
+    }
+  };
+
   if (!form) return null;
 
   const handleCopyResults = () => {
@@ -370,32 +440,32 @@ export function ResultCard() {
 
     const { summary, dailyPlans } = nutritionPlan;
 
-    let markdownText = `# 碳循环饮食计划\n\n`;
-    markdownText += `## 周度摘要\n`;
-    markdownText += `- 🥩 每日蛋白: ${summary.dailyProtein}g\n`;
-    markdownText += `- 🍚 周碳水: ${summary.totalCarbs}g\n`;
-    markdownText += `- 🥜 周脂肪: ${summary.totalFat}g\n`;
-    markdownText += `- 🔥 周热量: ${summary.totalCalories}kcal\n`;
+    let markdownText = `# ${t('results.carbCyclingPlan')}\n\n`;
+    markdownText += `## ${t('results.weeklySummary')}\n`;
+    markdownText += `- 🥩 ${t('results.dailyProtein')}: ${summary.dailyProtein}g\n`;
+    markdownText += `- 🍚 ${t('results.weeklyCarbs')}: ${summary.totalCarbs}g\n`;
+    markdownText += `- 🥜 ${t('results.weeklyFat')}: ${summary.totalFat}g\n`;
+    markdownText += `- 🔥 ${t('results.weeklyCalories')}: ${summary.totalCalories}kcal\n`;
     if (metabolicData) {
-      markdownText += `- ⚡ 每日TDEE: ${metabolicData.tdee}kcal\n`;
+      markdownText += `- ⚡ ${t('results.dailyTDEE')}: ${metabolicData.tdee}kcal\n`;
     }
-    markdownText += `\n## 每日明细\n\n`;
-    markdownText += `| 天数 | 日型 | 碳水(g) | 脂肪(g) | 蛋白(g) | 总热量(kcal) | 热量差(kcal) |\n`;
+    markdownText += `\n## ${t('results.dailyDetails')}\n\n`;
+    markdownText += `| ${t('results.day')} | ${t('results.dayType')} | ${t('results.carbs')}(g) | ${t('results.fat')}(g) | ${t('results.protein')}(g) | ${t('results.totalCalories')}(kcal) | ${t('results.calorieDeficit')}(kcal) |\n`;
     markdownText += `|------|------|---------|---------|---------|-------------|-------------|\n`;
 
     dailyPlans.forEach((day) => {
       const caloriesDiffStr =
         day.caloriesDiff > 0 ? `+${day.caloriesDiff}` : `${day.caloriesDiff}`;
-      markdownText += `| 第${day.day}天 | ${getDayTypeDisplay(day.type)} | ${day.carbs} | ${day.fat} | ${day.protein} | ${day.calories} | ${caloriesDiffStr} |\n`;
+      markdownText += `| ${t('results.dayNumber').replace('{{day}}', day.day.toString())} | ${getDayTypeDisplay(day.type, t)} | ${day.carbs} | ${day.fat} | ${day.protein} | ${day.calories} | ${caloriesDiffStr} |\n`;
     });
 
     navigator.clipboard
       .writeText(markdownText)
       .then(() => {
-        alert('结果已复制到剪贴板！');
+        alert(t('results.copySuccess'));
       })
       .catch((err) => {
-        console.error('复制失败:', err);
+        console.error(t('results.copyError'), err);
       });
   };
 
@@ -403,8 +473,10 @@ export function ResultCard() {
     <GlassCard>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <span className="text-lg">📊</span>
-          <h2 className="text-lg font-bold text-foreground">计算结果</h2>
+          <span className="text-lg">🍽️</span>
+          <h2 className="text-lg font-bold text-foreground">
+            {t('results.title')}
+          </h2>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full">
           <div className="flex flex-wrap gap-3">
@@ -413,10 +485,16 @@ export function ResultCard() {
               onClick={handleCopyResults}
               className="rounded-xl"
             >
-              📋 复制结果
+              <span>📋</span>
+              <span className="hidden sm:inline ml-1">
+                {t('results.copyResults')}
+              </span>
             </Button>
             <Button variant="outline" className="rounded-xl" disabled>
-              🖼️ 导出 PNG (待实现)
+              <span>🖼️</span>
+              <span className="hidden sm:inline ml-1">
+                {t('results.exportPNG')}
+              </span>
             </Button>
           </div>
         </div>
@@ -425,88 +503,98 @@ export function ResultCard() {
       <div>
         {nutritionPlan ? (
           <div className="space-y-4">
-            {/* 周度摘要卡片 */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              <div className="rounded-xl bg-slate-100 dark:bg-slate-800 p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1">
+            {/* 周度摘要卡片 - 单行布局 */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+              <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
+                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1">
                   <span className="text-sm">🥩</span>
-                  <span>每日蛋白</span>
+                  <span>{t('results.dailyProtein')}</span>
                 </div>
-                <div className="text-lg font-semibold">
+                <div className="text-sm sm:text-lg font-semibold">
                   {nutritionPlan.summary.dailyProtein} g
                 </div>
               </div>
-              <div className="rounded-xl bg-slate-100 dark:bg-slate-800 p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1">
+              <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
+                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1">
                   <span className="text-sm">🍚</span>
-                  <span>周碳水</span>
+                  <span>{t('results.weeklyCarbs')}</span>
                 </div>
-                <div className="text-lg font-semibold">
+                <div className="text-sm sm:text-lg font-semibold">
                   {nutritionPlan.summary.totalCarbs} g
                 </div>
               </div>
-              <div className="rounded-xl bg-slate-100 dark:bg-slate-800 p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1">
+              <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
+                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1">
                   <span className="text-sm">🥜</span>
-                  <span>周脂肪</span>
+                  <span>{t('results.weeklyFat')}</span>
                 </div>
-                <div className="text-lg font-semibold">
+                <div className="text-sm sm:text-lg font-semibold">
                   {nutritionPlan.summary.totalFat} g
                 </div>
               </div>
-              <div className="rounded-xl bg-slate-100 dark:bg-slate-800 p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1">
+              <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
+                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1">
                   <span className="text-sm">🔥</span>
-                  <span>周热量</span>
+                  <span>{t('results.calorieInfo')}</span>
                 </div>
-                <div className="text-lg font-semibold">
-                  {nutritionPlan.summary.totalCalories} kcal
+                <div className="space-y-1">
+                  <div className="text-xs sm:text-sm font-semibold">
+                    {t('results.weeklyCalories')}:{' '}
+                    {nutritionPlan.summary.totalCalories}
+                  </div>
+                  {metabolicData && (
+                    <div className="text-xs sm:text-sm font-semibold">
+                      {t('results.dailyTDEE')}: {metabolicData.tdee}
+                    </div>
+                  )}
                 </div>
               </div>
-              {metabolicData && (
-                <div className="rounded-xl bg-slate-100 dark:bg-slate-800 p-3">
-                  <div className="text-xs text-slate-500 flex items-center gap-1">
-                    <span className="text-sm">⚡</span>
-                    <span>每日TDEE</span>
-                  </div>
-                  <div className="text-lg font-semibold">
-                    {metabolicData.tdee} kcal
-                  </div>
-                </div>
-              )}
             </div>
 
-            {/* Kanban Board 按天数分列 */}
-            <div className="w-full">
-              <div
-                className="flex gap-3 pb-4 mx-auto justify-around"
-                style={{
-                  width: orderedDays.length <= 7 ? '100%' : 'max-content',
-                  maxWidth: '100%',
-                  overflowX: orderedDays.length > 7 ? 'auto' : 'visible',
-                }}
-              >
-                {Array.from({ length: orderedDays.length }, (_, index) => (
-                  <DayColumn
-                    key={`column-${index}`}
-                    columnIndex={index}
-                    day={orderedDays[index]}
-                    dailyWorkouts={dailyWorkouts}
-                    setDailyWorkout={setDailyWorkout}
-                    onDrop={handleDrop}
-                  />
-                ))}
+            {/* Layout conditional rendering based on screen size */}
+            {isLargeScreen ? (
+              /* Kanban Board layout for large screens (>= 1024px) */
+              <div className="w-full">
+                <div
+                  className="flex gap-3 pb-4 mx-auto justify-around"
+                  style={{
+                    width: orderedDays.length <= 7 ? '100%' : 'max-content',
+                    maxWidth: '100%',
+                    overflowX: orderedDays.length > 7 ? 'auto' : 'visible',
+                  }}
+                >
+                  {Array.from({ length: orderedDays.length }, (_, index) => (
+                    <DayColumn
+                      key={`column-${index}`}
+                      columnIndex={index}
+                      day={orderedDays[index]}
+                      dailyWorkouts={dailyWorkouts}
+                      setDailyWorkout={setDailyWorkout}
+                      onDrop={handleDrop}
+                      t={t}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              /* iOS Grid Layout for small/medium screens (< 1024px) */
+              <IOSGridLayout
+                orderedDays={orderedDays}
+                dailyWorkouts={dailyWorkouts}
+                setDailyWorkout={setDailyWorkout}
+                onDrop={handleGridDrop}
+              />
+            )}
           </div>
         ) : (
           // 空态
           <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
             <div className="text-4xl">📝</div>
-            <div className="text-base font-medium">请先填写完整信息</div>
+            <div className="text-base font-medium">
+              {t('results.fillFormFirst')}
+            </div>
             <div className="text-sm text-slate-500">
-              体重、体型、蛋白系数与循环天数就绪后，这里会即时展示你的 3–7
-              天计划。
+              {t('results.fillFormDescription')}
             </div>
           </div>
         )}

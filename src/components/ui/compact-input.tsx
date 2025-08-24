@@ -39,13 +39,13 @@ const CompactInput = React.forwardRef<HTMLInputElement, CompactInputProps>(
           <Input
             ref={ref}
             className={cn(
-              'h-9 text-sm text-center pr-12 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]',
+              'h-8 sm:h-9 text-xs sm:text-sm text-center pr-8 sm:pr-12 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]',
               className
             )}
             {...props}
           />
           {unit && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium pointer-events-none">
+            <div className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium pointer-events-none">
               {unit}
             </div>
           )}

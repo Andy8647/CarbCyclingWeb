@@ -258,21 +258,35 @@ export function convertWeight(
 
 // Workout types with emojis
 export const WORKOUT_TYPES = [
-  { value: 'chest', label: '胸部', emoji: '💪' },
-  { value: 'back', label: '背部', emoji: '🏋️' },
-  { value: 'legs', label: '腿部', emoji: '🦵' },
-  { value: 'shoulders', label: '肩部', emoji: '🙌' },
-  { value: 'arms', label: '手臂', emoji: '💪' },
-  { value: 'abs', label: '腹部', emoji: '🔥' },
-  { value: 'full_body', label: '全身', emoji: '🏃' },
-  { value: 'cardio', label: '有氧', emoji: '❤️' },
-  { value: 'rest', label: '休息', emoji: '😴' },
+  { value: 'chest', emoji: '💪' },
+  { value: 'back', emoji: '🏋️' },
+  { value: 'legs', emoji: '🦵' },
+  { value: 'shoulders', emoji: '🙌' },
+  { value: 'arms', emoji: '💪' },
+  { value: 'abs', emoji: '🔥' },
+  { value: 'full_body', emoji: '🏃' },
+  { value: 'cardio', emoji: '❤️' },
+  { value: 'rest', emoji: '😴' },
 ];
 
-export function getWorkoutDisplay(workoutType?: string): string {
-  if (!workoutType) return '🎯 选择训练';
+export function getWorkoutTypes(t: (key: string) => string) {
+  return WORKOUT_TYPES.map((workout) => ({
+    ...workout,
+    label: t(`workouts.${workout.value}`),
+  }));
+}
+
+export function getWorkoutDisplay(
+  workoutType?: string,
+  t?: (key: string) => string
+): string {
+  if (!workoutType)
+    return t ? `🎯 ${t('results.selectWorkout')}` : '🎯 选择训练';
   const workout = WORKOUT_TYPES.find((w) => w.value === workoutType);
-  return workout ? `${workout.emoji} ${workout.label}` : workoutType;
+  if (workout && t) {
+    return `${workout.emoji} ${t(`workouts.${workout.value}`)}`;
+  }
+  return workout ? `${workout.emoji} ${workout.value}` : workoutType;
 }
 
 // Validation helpers

@@ -23,23 +23,25 @@ export function RadioCard({
 }: RadioCardProps) {
   return (
     <div
-      className={`p-3 cursor-pointer transition-all duration-200 rounded-lg bg-white dark:bg-black ${
+      className={`p-2 sm:p-3 cursor-pointer transition-all duration-200 rounded-lg bg-white dark:bg-muted ${
         isSelected
-          ? 'bg-slate-200 dark:bg-slate-700'
-          : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+          ? 'bg-slate-200 dark:bg-secondary'
+          : 'hover:bg-slate-100 dark:hover:bg-secondary/50'
       }`}
     >
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2 sm:space-x-3">
         <RadioGroupItem value={value} id={id} />
         <Label htmlFor={id} className="flex-1 cursor-pointer">
           <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{emoji}</span>
-              <span className="font-medium text-sm">{title}</span>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <span className="text-base sm:text-lg">{emoji}</span>
+              <span className="font-medium text-xs sm:text-sm">{title}</span>
             </div>
             {rightElement}
           </div>
-          <div className="text-xs text-muted-foreground">{description}</div>
+          {description && (
+            <div className="text-xs text-muted-foreground">{description}</div>
+          )}
         </Label>
       </div>
     </div>

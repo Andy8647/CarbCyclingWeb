@@ -62,7 +62,7 @@
   /* Light theme colors - Gruvbox Light */
   --background: #fbf1c7;
   --foreground: #3c3836;
-  --card: #f2e5bc;
+  --card: #ebdbb2;
   --card-foreground: #3c3836;
   --popover: #ebdbb2;
   --popover-foreground: #3c3836;
@@ -70,36 +70,36 @@
   --primary-foreground: #fbf1c7;
   --secondary: #d5c4a1;
   --secondary-foreground: #504945;
-  --muted: #ebdbb2;
+  --muted: #d5c4a1;
   --muted-foreground: #665c54;
-  --accent: #427b58;
+  --accent: #af3a03;
   --accent-foreground: #fbf1c7;
   --destructive: #9d0006;
   --border: #bdae93;
-  --input: #f2e5bc;
+  --input: #ebdbb2;
   --ring: #076678;
 }
 
 .dark {
-  /* Dark theme colors - Tokyo Night Storm */
-  --background: #24283b;
-  --foreground: #c0caf5;
-  --card: #1a1b26;
-  --card-foreground: #c0caf5;
-  --popover: #16161e;
-  --popover-foreground: #a9b1d6;
-  --primary: #7aa2f7;
-  --primary-foreground: #24283b;
-  --secondary: #414868;
-  --secondary-foreground: #a9b1d6;
-  --muted: #3b4261;
-  --muted-foreground: #9aa5ce;
-  --accent: #73daca;
-  --accent-foreground: #24283b;
-  --destructive: #f7768e;
-  --border: #565f89;
-  --input: #3b4261;
-  --ring: #7aa2f7;
+  /* Dark theme colors - Atom One Dark */
+  --background: #282c34;
+  --foreground: #abb2bf;
+  --card: #21252b;
+  --card-foreground: #abb2bf;
+  --popover: #2c323c;
+  --popover-foreground: #abb2bf;
+  --primary: #61afef;
+  --primary-foreground: #282c34;
+  --secondary: #3e4451;
+  --secondary-foreground: #abb2bf;
+  --muted: #32363e;
+  --muted-foreground: #5c6370;
+  --accent: #c678dd;
+  --accent-foreground: #282c34;
+  --destructive: #e06c75;
+  --border: #3e4451;
+  --input: #2c323c;
+  --ring: #528bff;
 }
 
 @layer base {
