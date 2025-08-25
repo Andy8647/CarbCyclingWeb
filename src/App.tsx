@@ -9,6 +9,7 @@ import { ParticleBackground } from '@/components/shared/ParticleBackground';
 import { ThemeProvider } from '@/lib/theme-context';
 import { FormProvider, formSchema, type FormData } from '@/lib/form-context';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { Toaster } from '@/components/ui/toaster';
 import { useAppPersistence } from '@/lib/use-app-persistence';
 
 const StableBackground = memo(() => (
@@ -38,20 +39,24 @@ const MainContent = () => (
 MainContent.displayName = 'MainContent';
 
 function AppContent() {
-  const { 
-    saveFormData, 
-    getFormData, 
-    saveUserSettings, 
+  const {
+    saveFormData,
+    getFormData,
+    saveUserSettings,
     getUserSettings,
     saveTrainingWorkouts,
     saveTrainingOrder,
-    getTrainingConfig
+    getTrainingConfig,
   } = useAppPersistence();
 
   // Get saved user settings or use defaults
   const userSettings = getUserSettings();
-  const [unitSystem, setUnitSystemState] = useState<'metric' | 'imperial'>(userSettings.unitSystem);
-  const [dailyWorkouts, setDailyWorkoutsState] = useState<Record<number, string>>({});
+  const [unitSystem, setUnitSystemState] = useState<'metric' | 'imperial'>(
+    userSettings.unitSystem
+  );
+  const [dailyWorkouts, setDailyWorkoutsState] = useState<
+    Record<number, string>
+  >({});
   const [dayOrder, setDayOrderState] = useState<number[]>([]);
 
   // Enhanced setters that also save to persistence
@@ -157,6 +162,7 @@ function AppContent() {
           <MainContent />
         </div>
         <Footer />
+        <Toaster />
       </div>
     </FormProvider>
   );

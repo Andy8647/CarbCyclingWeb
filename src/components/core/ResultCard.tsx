@@ -30,6 +30,7 @@ import {
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 // Removed unused imports for cleaner code
 import { IOSGridLayout } from './IOSGridLayout';
+import { useToast } from '@/lib/use-toast';
 
 const getDayTypeDisplay = (type: string, t: (key: string) => string) => {
   switch (type) {
@@ -316,6 +317,7 @@ function useScreenSize() {
 
 export function ResultCard() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const { form, dailyWorkouts, setDailyWorkout, dayOrder, setDayOrder } =
     useFormContext();
 
@@ -393,12 +395,16 @@ export function ResultCard() {
   useEffect(() => {
     if (nutritionPlan && nutritionPlan.dailyPlans.length > 0) {
       // Only reset dayOrder if it's completely empty or the cycle length changed
-      if (dayOrder.length === 0 || dayOrder.length !== nutritionPlan.dailyPlans.length) {
+      if (
+        dayOrder.length === 0 ||
+        dayOrder.length !== nutritionPlan.dailyPlans.length
+      ) {
         // Check if the current dayOrder contains the right day numbers for this cycle
         const expectedDays = nutritionPlan.dailyPlans.map((day) => day.day);
-        const hasValidOrder = dayOrder.length === expectedDays.length && 
-          dayOrder.every(day => expectedDays.includes(day));
-        
+        const hasValidOrder =
+          dayOrder.length === expectedDays.length &&
+          dayOrder.every((day) => expectedDays.includes(day));
+
         // Only set default order if we don't have a valid saved order
         if (!hasValidOrder) {
           setDayOrder(expectedDays);
@@ -481,10 +487,19 @@ export function ResultCard() {
     navigator.clipboard
       .writeText(markdownText)
       .then(() => {
-        alert(t('results.copySuccess'));
+        toast({
+          variant: "success",
+          title: "📝 " + t('results.copyAsMarkdown'),
+          description: t('results.copySuccess'),
+        });
       })
       .catch((err) => {
         console.error(t('results.copyError'), err);
+        toast({
+          variant: "destructive",
+          title: t('results.copyError'),
+          description: "Failed to copy to clipboard",
+        });
       });
   };
 
@@ -524,10 +539,19 @@ export function ResultCard() {
     navigator.clipboard
       .writeText(csvText)
       .then(() => {
-        alert(t('results.copySuccess'));
+        toast({
+          variant: "success",
+          title: "📊 " + t('results.copyAsCSV'),
+          description: t('results.copySuccess'),
+        });
       })
       .catch((err) => {
         console.error(t('results.copyError'), err);
+        toast({
+          variant: "destructive",
+          title: t('results.copyError'),
+          description: "Failed to copy to clipboard",
+        });
       });
   };
 
