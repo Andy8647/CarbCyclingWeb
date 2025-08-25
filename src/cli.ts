@@ -2,9 +2,12 @@
 
 import {
   calculateNutritionPlan,
+  calculateMetabolicData,
   type UserInput,
   type BodyType,
   type ProteinLevel,
+  type ActivityFactor,
+  type Gender,
 } from './lib/calculator.js';
 
 function printUsage() {
@@ -100,11 +103,33 @@ function parseArgs(): UserInput | null {
     return null;
   }
 
+  // Body type coefficients
+  const bodyTypeCoefficients = {
+    endomorph: { carbCoeff: 2.0, fatCoeff: 1.0 },
+    mesomorph: { carbCoeff: 2.5, fatCoeff: 0.9 },
+    ectomorph: { carbCoeff: 3.0, fatCoeff: 1.1 },
+  };
+
+  // Protein coefficients
+  const proteinCoefficients = {
+    beginner: 0.8,
+    experienced: 1.5,
+    custom: customProtein || 1.2,
+  };
+
+  const coeffs = bodyTypeCoefficients[bodyType];
+  const proteinCoeff = proteinCoefficients[proteinLevel];
+
   return {
+    age: 30, // Default age for CLI
+    gender: 'male' as Gender, // Default gender for CLI
     weight,
+    height: 175, // Default height for CLI
+    activityFactor: 'moderate' as ActivityFactor, // Default activity
     bodyType,
-    proteinLevel,
-    customProtein,
+    carbCoeff: coeffs.carbCoeff,
+    proteinCoeff: proteinCoeff,
+    fatCoeff: coeffs.fatCoeff,
     cycleDays,
   };
 }
