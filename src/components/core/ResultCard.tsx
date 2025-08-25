@@ -17,6 +17,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   draggable,
   dropTargetForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
@@ -438,7 +444,7 @@ export function ResultCard() {
 
   if (!form) return null;
 
-  const handleCopyResults = () => {
+  const handleCopyAsMarkdown = () => {
     if (!nutritionPlan) return;
 
     const { summary, dailyPlans } = nutritionPlan;
@@ -472,6 +478,49 @@ export function ResultCard() {
       });
   };
 
+  const handleCopyAsCSV = () => {
+    if (!nutritionPlan) return;
+
+    const { summary, dailyPlans } = nutritionPlan;
+
+    // CSV header
+    let csvText = `${t('results.day')},${t('results.dayType')},${t('results.carbs')}(g),${t('results.fat')}(g),${t('results.protein')}(g),${t('results.totalCalories')}(kcal),${t('results.calorieDeficit')}(kcal)\n`;
+
+    // Daily data
+    dailyPlans.forEach((day) => {
+      const caloriesDiffStr =
+        day.caloriesDiff > 0 ? `+${day.caloriesDiff}` : `${day.caloriesDiff}`;
+      const dayNumber = t('results.dayNumber').replace(
+        '{{day}}',
+        day.day.toString()
+      );
+      const dayTypeText = getDayTypeDisplay(day.type, t)
+        .replace(/🔥|⚖️|🌿/g, '')
+        .trim(); // Remove emojis for CSV
+
+      csvText += `"${dayNumber}","${dayTypeText}",${day.carbs},${day.fat},${day.protein},${day.calories},"${caloriesDiffStr}"\n`;
+    });
+
+    // Add summary section
+    csvText += `\n${t('results.weeklySummary')}\n`;
+    csvText += `${t('results.dailyProtein')},${summary.dailyProtein}g\n`;
+    csvText += `${t('results.weeklyCarbs')},${summary.totalCarbs}g\n`;
+    csvText += `${t('results.weeklyFat')},${summary.totalFat}g\n`;
+    csvText += `${t('results.weeklyCalories')},${summary.totalCalories}kcal\n`;
+    if (metabolicData) {
+      csvText += `${t('results.dailyTDEE')},${metabolicData.tdee}kcal\n`;
+    }
+
+    navigator.clipboard
+      .writeText(csvText)
+      .then(() => {
+        alert(t('results.copySuccess'));
+      })
+      .catch((err) => {
+        console.error(t('results.copyError'), err);
+      });
+  };
+
   return (
     <GlassCard>
       <div className="flex items-center justify-between mb-6">
@@ -483,16 +532,26 @@ export function ResultCard() {
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full">
           <div className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              onClick={handleCopyResults}
-              className="rounded-xl"
-            >
-              <span>📋</span>
-              <span className="hidden sm:inline ml-1">
-                {t('results.copyResults')}
-              </span>
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="rounded-xl">
+                  <span>📋</span>
+                  <span className="hidden sm:inline ml-1">
+                    {t('results.copyResults')}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={handleCopyAsMarkdown}>
+                  <span className="mr-2">📝</span>
+                  {t('results.copyAsMarkdown')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleCopyAsCSV}>
+                  <span className="mr-2">📊</span>
+                  {t('results.copyAsCSV')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button variant="outline" className="rounded-xl" disabled>
               <span>🖼️</span>
               <span className="hidden sm:inline ml-1">

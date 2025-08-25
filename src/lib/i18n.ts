@@ -63,6 +63,8 @@ const zhCN = {
   results: {
     title: '营养方案',
     copyResults: '复制结果',
+    copyAsMarkdown: '复制为 Markdown',
+    copyAsCSV: '复制为 CSV',
     exportPNG: '导出 PNG (待实现)',
     dailyProtein: '每日蛋白',
     weeklyCarbs: '周碳水',
@@ -183,6 +185,8 @@ const enUS = {
   results: {
     title: 'Nutrition Plan',
     copyResults: 'Copy Results',
+    copyAsMarkdown: 'Copy as Markdown',
+    copyAsCSV: 'Copy as CSV',
     exportPNG: 'Export PNG (Coming Soon)',
     dailyProtein: 'Daily Protein',
     weeklyCarbs: 'Weekly Carbs',
