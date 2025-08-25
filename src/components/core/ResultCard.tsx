@@ -188,7 +188,7 @@ function DraggableCard({
             <div className="text-xs text-slate-500">
               🔥 {t('results.totalCalories')}
             </div>
-            <div className="font-semibold text-xs">{day.calories}</div>
+            <div className="font-semibold text-xs">{day.calories}kcal</div>
           </div>
           <div className="flex justify-between items-center">
             <div className="text-xs text-slate-500">
@@ -204,7 +204,7 @@ function DraggableCard({
               }`}
             >
               {day.caloriesDiff > 0 ? '+' : ''}
-              {day.caloriesDiff}
+              {day.caloriesDiff}kcal
             </div>
           </div>
         </div>
@@ -481,7 +481,7 @@ export function ResultCard() {
       markdownText += `- ⚡ ${t('results.dailyTDEE')}: ${metabolicData.tdee}kcal\n`;
     }
     markdownText += `\n## ${t('results.dailyDetails')}\n\n`;
-    markdownText += `| ${t('results.day')} | ${t('results.dayType')} | ${t('results.workout')} | ${t('results.carbs')}(g) | ${t('results.fat')}(g) | ${t('results.protein')}(g) | ${t('results.totalCalories')}(kcal) | ${t('results.calorieDeficit')}(kcal) |\n`;
+    markdownText += `| ${t('results.day')} | ${t('results.dayType')} | ${t('results.workout')} | ${t('results.carbs')}(g) | ${t('results.fat')}(g) | ${t('results.protein')}(g) | ${t('results.totalCaloriesFull')}(kcal) | ${t('results.calorieDeficitFull')}(kcal) |\n`;
     markdownText += `|------|------|---------|---------|---------|---------|-------------|-------------|\n`;
 
     // Use orderedDays to respect user's custom sorting
@@ -520,7 +520,7 @@ export function ResultCard() {
     const { summary } = nutritionPlan;
 
     // CSV header - include workout column
-    let csvText = `${t('results.day')},${t('results.dayType')},${t('results.workout')},${t('results.carbs')}(g),${t('results.fat')}(g),${t('results.protein')}(g),${t('results.totalCalories')}(kcal),${t('results.calorieDeficit')}(kcal)\n`;
+    let csvText = `${t('results.day')},${t('results.dayType')},${t('results.workout')},${t('results.carbs')}(g),${t('results.fat')}(g),${t('results.protein')}(g),${t('results.totalCaloriesFull')}(kcal),${t('results.calorieDeficitFull')}(kcal)\n`;
 
     // Daily data - use orderedDays to respect user's custom sorting
     orderedDays.forEach((day, index) => {
