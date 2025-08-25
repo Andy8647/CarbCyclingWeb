@@ -1,10 +1,12 @@
 @import 'tw-animate-css';
 @import 'tailwindcss';
 
-/* Custom Font */
+/* MapleMono Font - Optimized Subset (67KB vs 18MB) */
 @font-face {
   font-family: 'MapleMono';
-  src: url('./assets/MapleMono-NF-CN-Regular.ttf') format('truetype');
+  src:
+    url('./assets/fonts/MapleMono-subset.woff2') format('woff2'),
+    url('./assets/fonts/MapleMono-subset.woff') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -18,11 +20,14 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Custom Font Families */
-  --font-mono: 'MapleMono', 'Menlo', 'Monaco', 'Courier New', monospace;
+  /* Font Families - MapleMono + System Fallbacks */
+  --font-mono:
+    'MapleMono', 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono',
+    'Consolas', 'Courier New', monospace;
   --font-sans:
-    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
-    'Helvetica Neue', sans-serif;
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', 'Roboto',
+    sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);

@@ -20,7 +20,8 @@
       "WebFetch(domain:colorffy.com)",
       "WebFetch(domain:blog.logrocket.com)",
       "WebFetch(domain:atlassian.design)",
-      "WebFetch(domain:usehooks-ts.com)"
+      "WebFetch(domain:usehooks-ts.com)",
+      "Bash(node:*)"
     ]
   },
   "hooks": {
