@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "deploy:build": "npm ci && npm run build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest",

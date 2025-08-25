@@ -47,7 +47,7 @@ const getDayTypeDisplay = (type: string, t: (key: string) => string) => {
 };
 
 const getWorkoutEmoji = (workoutType: string) => {
-  const workout = WORKOUT_TYPES.find(w => w.value === workoutType);
+  const workout = WORKOUT_TYPES.find((w) => w.value === workoutType);
   return workout?.emoji || '🎯';
 };
 
@@ -490,8 +490,9 @@ export function ResultCard() {
         day.caloriesDiff > 0 ? `+${day.caloriesDiff}` : `${day.caloriesDiff}`;
       const workout = dailyWorkouts[day.day] || '-';
       const workoutEmoji = getWorkoutEmoji(workout);
-      const workoutDisplay = workout === '-' ? '-' : `${workoutEmoji} ${t(`workouts.${workout}`)}`;
-      
+      const workoutDisplay =
+        workout === '-' ? '-' : `${workoutEmoji} ${t(`workouts.${workout}`)}`;
+
       markdownText += `| ${t('results.dayNumber').replace('{{day}}', (index + 1).toString())} | ${getDayTypeDisplay(day.type, t)} | ${workoutDisplay} | ${day.carbs} | ${day.fat} | ${day.protein} | ${day.calories} | ${caloriesDiffStr} |\n`;
     });
 
@@ -499,17 +500,17 @@ export function ResultCard() {
       .writeText(markdownText)
       .then(() => {
         toast({
-          variant: "success",
-          title: "📝 " + t('results.copyAsMarkdown'),
+          variant: 'success',
+          title: '📝 ' + t('results.copyAsMarkdown'),
           description: t('results.copySuccess'),
         });
       })
       .catch((err) => {
         console.error(t('results.copyError'), err);
         toast({
-          variant: "destructive",
+          variant: 'destructive',
           title: t('results.copyError'),
-          description: "Failed to copy to clipboard",
+          description: 'Failed to copy to clipboard',
         });
       });
   };
@@ -533,7 +534,7 @@ export function ResultCard() {
       const dayTypeText = getDayTypeDisplay(day.type, t)
         .replace(/🔥|⚖️|🌿/g, '')
         .trim(); // Remove emojis for CSV
-      
+
       const workout = dailyWorkouts[day.day] || '-';
       const workoutText = workout === '-' ? '-' : t(`workouts.${workout}`);
 
@@ -554,17 +555,17 @@ export function ResultCard() {
       .writeText(csvText)
       .then(() => {
         toast({
-          variant: "success",
-          title: "📊 " + t('results.copyAsCSV'),
+          variant: 'success',
+          title: '📊 ' + t('results.copyAsCSV'),
           description: t('results.copySuccess'),
         });
       })
       .catch((err) => {
         console.error(t('results.copyError'), err);
         toast({
-          variant: "destructive",
+          variant: 'destructive',
           title: t('results.copyError'),
-          description: "Failed to copy to clipboard",
+          description: 'Failed to copy to clipboard',
         });
       });
   };
