@@ -22,6 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ChevronDown } from 'lucide-react';
 import {
   draggable,
   dropTargetForElements,
@@ -388,14 +389,23 @@ export function ResultCard() {
     return calculateMetabolicData(input);
   }, [form, formData, isValid]);
 
-  // Initialize dayOrder when nutritionPlan changes
+  // Initialize dayOrder when nutritionPlan changes (only if dayOrder is empty or different cycle length)
   useEffect(() => {
     if (nutritionPlan && nutritionPlan.dailyPlans.length > 0) {
-      if (dayOrder.length !== nutritionPlan.dailyPlans.length) {
-        setDayOrder(nutritionPlan.dailyPlans.map((day) => day.day));
+      // Only reset dayOrder if it's completely empty or the cycle length changed
+      if (dayOrder.length === 0 || dayOrder.length !== nutritionPlan.dailyPlans.length) {
+        // Check if the current dayOrder contains the right day numbers for this cycle
+        const expectedDays = nutritionPlan.dailyPlans.map((day) => day.day);
+        const hasValidOrder = dayOrder.length === expectedDays.length && 
+          dayOrder.every(day => expectedDays.includes(day));
+        
+        // Only set default order if we don't have a valid saved order
+        if (!hasValidOrder) {
+          setDayOrder(expectedDays);
+        }
       }
     }
-  }, [nutritionPlan, dayOrder.length, setDayOrder]);
+  }, [nutritionPlan, dayOrder, setDayOrder]);
 
   // Reorder days based on dayOrder
   const orderedDays = useMemo(() => {
@@ -539,6 +549,7 @@ export function ResultCard() {
                   <span className="hidden sm:inline ml-1">
                     {t('results.copyResults')}
                   </span>
+                  <ChevronDown className="ml-1 h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">

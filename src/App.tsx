@@ -1,4 +1,4 @@
-import { useState, memo } from 'react';
+import { useState, memo, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Header } from '@/components/layout/Header';
@@ -9,6 +9,7 @@ import { ParticleBackground } from '@/components/shared/ParticleBackground';
 import { ThemeProvider } from '@/lib/theme-context';
 import { FormProvider, formSchema, type FormData } from '@/lib/form-context';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { useAppPersistence } from '@/lib/use-app-persistence';
 
 const StableBackground = memo(() => (
   <>
@@ -37,32 +38,101 @@ const MainContent = () => (
 MainContent.displayName = 'MainContent';
 
 function AppContent() {
-  const [unitSystem, setUnitSystem] = useState<'metric' | 'imperial'>('metric');
-  const [dailyWorkouts, setDailyWorkouts] = useState<Record<number, string>>(
-    {}
-  );
-  const [dayOrder, setDayOrder] = useState<number[]>([]);
+  const { 
+    saveFormData, 
+    getFormData, 
+    saveUserSettings, 
+    getUserSettings,
+    saveTrainingWorkouts,
+    saveTrainingOrder,
+    getTrainingConfig
+  } = useAppPersistence();
+
+  // Get saved user settings or use defaults
+  const userSettings = getUserSettings();
+  const [unitSystem, setUnitSystemState] = useState<'metric' | 'imperial'>(userSettings.unitSystem);
+  const [dailyWorkouts, setDailyWorkoutsState] = useState<Record<number, string>>({});
+  const [dayOrder, setDayOrderState] = useState<number[]>([]);
+
+  // Enhanced setters that also save to persistence
+  const setUnitSystem = (unit: 'metric' | 'imperial') => {
+    setUnitSystemState(unit);
+    saveUserSettings({ unitSystem: unit });
+  };
 
   const setDailyWorkout = (day: number, workout: string) => {
-    setDailyWorkouts((prev) => ({ ...prev, [day]: workout }));
+    setDailyWorkoutsState((prev) => {
+      const newWorkouts = { ...prev, [day]: workout };
+      // Save to persistence - we need to get current cycle days from form
+      const formData = form.getValues();
+      if (formData.cycleDays) {
+        saveTrainingWorkouts(formData.cycleDays, newWorkouts);
+      }
+      return newWorkouts;
+    });
+  };
+
+  const setDayOrder = (order: number[]) => {
+    setDayOrderState(order);
+    // Save to persistence - we need to get current cycle days from form
+    const formData = form.getValues();
+    if (formData.cycleDays) {
+      saveTrainingOrder(formData.cycleDays, order);
+    }
+  };
+
+  // Get saved form data and merge with defaults
+  const savedFormData = getFormData();
+  const formDefaults = {
+    age: 25,
+    gender: 'male' as const,
+    weight: 70,
+    height: 175,
+    activityFactor: 'moderate' as const,
+    bodyType: 'mesomorph' as const,
+    carbCoeff: 2.5,
+    proteinCoeff: 1.2,
+    fatCoeff: 0.9,
+    cycleDays: 7,
+    ...savedFormData, // Override defaults with saved data
   };
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      age: 25,
-      gender: 'male',
-      weight: 70,
-      height: 175,
-      activityFactor: 'moderate',
-      bodyType: 'mesomorph',
-      carbCoeff: 2.5,
-      proteinCoeff: 1.2,
-      fatCoeff: 0.9,
-      cycleDays: 7,
-    },
+    defaultValues: formDefaults,
     mode: 'onChange',
   });
+
+  // Save form data whenever it changes
+  useEffect(() => {
+    const subscription = form.watch((formData) => {
+      // Only save if form data is valid and not empty
+      if (formData && Object.keys(formData).length > 0) {
+        saveFormData(formData as Partial<FormData>);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, saveFormData]);
+
+  // Load training config when cycle days changes
+  useEffect(() => {
+    const subscription = form.watch((value, { name }) => {
+      if (name === 'cycleDays' && value.cycleDays) {
+        const trainingConfig = getTrainingConfig(value.cycleDays);
+        setDailyWorkoutsState(trainingConfig.dailyWorkouts);
+        setDayOrderState(trainingConfig.dayOrder);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form, getTrainingConfig]);
+
+  // Load initial training config based on default cycle days
+  useEffect(() => {
+    const cycleDays = form.getValues('cycleDays') || 7;
+    const trainingConfig = getTrainingConfig(cycleDays);
+    setDailyWorkoutsState(trainingConfig.dailyWorkouts);
+    setDayOrderState(trainingConfig.dayOrder);
+  }, [form, getTrainingConfig]); // Only run once on mount
 
   return (
     <FormProvider
