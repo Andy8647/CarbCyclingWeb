@@ -6,6 +6,7 @@ import {
   calculateMetabolicData,
   type UserInput,
   getWorkoutTypes,
+  WORKOUT_TYPES,
 } from '@/lib/calculator';
 import { Button } from '@/components/ui/button';
 import { GlassCard } from '@/components/ui/glass-card';
@@ -43,6 +44,11 @@ const getDayTypeDisplay = (type: string, t: (key: string) => string) => {
     default:
       return type;
   }
+};
+
+const getWorkoutEmoji = (workoutType: string) => {
+  const workout = WORKOUT_TYPES.find(w => w.value === workoutType);
+  return workout?.emoji || '🎯';
 };
 
 // 可拖拽的营养卡片
@@ -463,7 +469,7 @@ export function ResultCard() {
   const handleCopyAsMarkdown = () => {
     if (!nutritionPlan) return;
 
-    const { summary, dailyPlans } = nutritionPlan;
+    const { summary } = nutritionPlan;
 
     let markdownText = `# ${t('results.carbCyclingPlan')}\n\n`;
     markdownText += `## ${t('results.weeklySummary')}\n`;
@@ -475,13 +481,18 @@ export function ResultCard() {
       markdownText += `- ⚡ ${t('results.dailyTDEE')}: ${metabolicData.tdee}kcal\n`;
     }
     markdownText += `\n## ${t('results.dailyDetails')}\n\n`;
-    markdownText += `| ${t('results.day')} | ${t('results.dayType')} | ${t('results.carbs')}(g) | ${t('results.fat')}(g) | ${t('results.protein')}(g) | ${t('results.totalCalories')}(kcal) | ${t('results.calorieDeficit')}(kcal) |\n`;
-    markdownText += `|------|------|---------|---------|---------|-------------|-------------|\n`;
+    markdownText += `| ${t('results.day')} | ${t('results.dayType')} | ${t('results.workout')} | ${t('results.carbs')}(g) | ${t('results.fat')}(g) | ${t('results.protein')}(g) | ${t('results.totalCalories')}(kcal) | ${t('results.calorieDeficit')}(kcal) |\n`;
+    markdownText += `|------|------|---------|---------|---------|---------|-------------|-------------|\n`;
 
-    dailyPlans.forEach((day) => {
+    // Use orderedDays to respect user's custom sorting
+    orderedDays.forEach((day, index) => {
       const caloriesDiffStr =
         day.caloriesDiff > 0 ? `+${day.caloriesDiff}` : `${day.caloriesDiff}`;
-      markdownText += `| ${t('results.dayNumber').replace('{{day}}', day.day.toString())} | ${getDayTypeDisplay(day.type, t)} | ${day.carbs} | ${day.fat} | ${day.protein} | ${day.calories} | ${caloriesDiffStr} |\n`;
+      const workout = dailyWorkouts[day.day] || '-';
+      const workoutEmoji = getWorkoutEmoji(workout);
+      const workoutDisplay = workout === '-' ? '-' : `${workoutEmoji} ${t(`workouts.${workout}`)}`;
+      
+      markdownText += `| ${t('results.dayNumber').replace('{{day}}', (index + 1).toString())} | ${getDayTypeDisplay(day.type, t)} | ${workoutDisplay} | ${day.carbs} | ${day.fat} | ${day.protein} | ${day.calories} | ${caloriesDiffStr} |\n`;
     });
 
     navigator.clipboard
@@ -506,24 +517,27 @@ export function ResultCard() {
   const handleCopyAsCSV = () => {
     if (!nutritionPlan) return;
 
-    const { summary, dailyPlans } = nutritionPlan;
+    const { summary } = nutritionPlan;
 
-    // CSV header
-    let csvText = `${t('results.day')},${t('results.dayType')},${t('results.carbs')}(g),${t('results.fat')}(g),${t('results.protein')}(g),${t('results.totalCalories')}(kcal),${t('results.calorieDeficit')}(kcal)\n`;
+    // CSV header - include workout column
+    let csvText = `${t('results.day')},${t('results.dayType')},${t('results.workout')},${t('results.carbs')}(g),${t('results.fat')}(g),${t('results.protein')}(g),${t('results.totalCalories')}(kcal),${t('results.calorieDeficit')}(kcal)\n`;
 
-    // Daily data
-    dailyPlans.forEach((day) => {
+    // Daily data - use orderedDays to respect user's custom sorting
+    orderedDays.forEach((day, index) => {
       const caloriesDiffStr =
         day.caloriesDiff > 0 ? `+${day.caloriesDiff}` : `${day.caloriesDiff}`;
       const dayNumber = t('results.dayNumber').replace(
         '{{day}}',
-        day.day.toString()
+        (index + 1).toString()
       );
       const dayTypeText = getDayTypeDisplay(day.type, t)
         .replace(/🔥|⚖️|🌿/g, '')
         .trim(); // Remove emojis for CSV
+      
+      const workout = dailyWorkouts[day.day] || '-';
+      const workoutText = workout === '-' ? '-' : t(`workouts.${workout}`);
 
-      csvText += `"${dayNumber}","${dayTypeText}",${day.carbs},${day.fat},${day.protein},${day.calories},"${caloriesDiffStr}"\n`;
+      csvText += `"${dayNumber}","${dayTypeText}","${workoutText}",${day.carbs},${day.fat},${day.protein},${day.calories},"${caloriesDiffStr}"\n`;
     });
 
     // Add summary section
