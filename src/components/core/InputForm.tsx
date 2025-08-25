@@ -15,6 +15,11 @@ import { SectionCard } from '@/components/ui/section-card';
 import { RadioCard } from '@/components/ui/radio-card';
 import { SliderSection } from '@/components/ui/slider-section';
 import { useFormContext } from '@/lib/form-context';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export function InputForm() {
   const { t } = useTranslation();
@@ -42,13 +47,11 @@ export function InputForm() {
 
     const { carbCoeff, proteinCoeff, fatCoeff } = coefficients[bodyType];
 
-    // Batch update all values at once to avoid race conditions
-    setTimeout(() => {
-      setValue('bodyType', bodyType, { shouldValidate: true });
-      setValue('carbCoeff', carbCoeff, { shouldValidate: true });
-      setValue('proteinCoeff', proteinCoeff, { shouldValidate: true });
-      setValue('fatCoeff', fatCoeff, { shouldValidate: true });
-    }, 0);
+    // Use React's batching - no need for setTimeout, React will batch these updates
+    setValue('bodyType', bodyType, { shouldValidate: true });
+    setValue('carbCoeff', carbCoeff, { shouldValidate: true });
+    setValue('proteinCoeff', proteinCoeff, { shouldValidate: true });
+    setValue('fatCoeff', fatCoeff, { shouldValidate: true });
   };
 
   const convertWeight = (kg: number, to: 'metric' | 'imperial') => {
@@ -251,13 +254,14 @@ export function InputForm() {
               {/* Nutrition coefficients - bottom section */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <CompactInput
+                  key={`carb-${watchedValues.bodyType}`}
                   label={t('nutrition.carbCoeff')}
                   emoji="🍞"
                   type="number"
                   step="0.1"
                   min="2.0"
                   max="8.0"
-                  defaultValue={watchedValues.carbCoeff || 5.0}
+                  value={watchedValues.carbCoeff || 5.0}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === '') {
@@ -271,13 +275,14 @@ export function InputForm() {
                   unit="g/kg"
                 />
                 <CompactInput
+                  key={`protein-${watchedValues.bodyType}`}
                   label={t('nutrition.proteinCoeff')}
                   emoji="🥩"
                   type="number"
                   step="0.1"
                   min="0.8"
                   max="2.5"
-                  defaultValue={watchedValues.proteinCoeff || 1.2}
+                  value={watchedValues.proteinCoeff || 1.2}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === '') {
@@ -291,13 +296,14 @@ export function InputForm() {
                   unit="g/kg"
                 />
                 <CompactInput
+                  key={`fat-${watchedValues.bodyType}`}
                   label={t('nutrition.fatCoeff')}
                   emoji="🥑"
                   type="number"
                   step="0.1"
                   min="0.5"
                   max="1.5"
-                  defaultValue={watchedValues.fatCoeff || 1.0}
+                  value={watchedValues.fatCoeff || 1.0}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === '') {
@@ -321,30 +327,45 @@ export function InputForm() {
             </SectionCard>
           </div>
 
-          {/* Column 3: Cycle days + Activity - 1 unit */}
+          {/* Column 3: Activity Settings - 1 unit */}
           <div>
-            <SectionCard title={t('activity.title')} emoji="📅">
-              <div className="space-y-2">
-                <SliderSection
-                  title=""
-                  emoji=""
-                  value={watchedValues.cycleDays}
-                  onValueChange={(value) =>
-                    setValue('cycleDays', value, { shouldValidate: true })
-                  }
-                  min={3}
-                  max={7}
-                  step={1}
-                  unit={t('activity.days')}
-                  options={[3, 4, 5, 6, 7]}
-                  getDescription={() => ''}
-                />
+            <SectionCard title={t('activity.title')} emoji="⚙️">
+              <div className="space-y-4">
+                {/* Cycle Days */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-light text-foreground flex items-center gap-1">
+                    <span className="text-sm">📅</span>
+                    <span>{t('activity.cycleDays')}</span>
+                  </Label>
+                  <SliderSection
+                    title=""
+                    emoji=""
+                    value={watchedValues.cycleDays}
+                    onValueChange={(value) =>
+                      setValue('cycleDays', value, { shouldValidate: true })
+                    }
+                    min={3}
+                    max={7}
+                    step={1}
+                    unit={t('activity.days')}
+                    options={[3, 4, 5, 6, 7]}
+                    getDescription={() => ''}
+                  />
+                </div>
 
                 {/* Activity Factor */}
                 <div className="space-y-2">
                   <Label className="text-xs font-light text-foreground flex items-center gap-1">
-                    <span className="text-xs">🏃</span>
+                    <span className="text-sm">🏃</span>
                     <span>{t('activity.activityLevel')}</span>
+                    <Tooltip>
+                      <TooltipTrigger className="text-xs text-muted-foreground cursor-help ml-1 hover:text-foreground transition-colors">
+                        ?
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs">
+                        {t('activity.activityTooltip')}
+                      </TooltipContent>
+                    </Tooltip>
                   </Label>
                   <Select
                     value={watchedValues.activityFactor}
@@ -361,7 +382,7 @@ export function InputForm() {
                       )
                     }
                   >
-                    <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm text-center w-full">
+                    <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm text-center w-full mt-2">
                       <SelectValue placeholder={t('activity.activityLevel')} />
                     </SelectTrigger>
                     <SelectContent sideOffset={4}>

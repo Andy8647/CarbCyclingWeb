@@ -23,7 +23,7 @@ export function RadioCard({
 }: RadioCardProps) {
   return (
     <div
-      className={`p-2 sm:p-3 cursor-pointer transition-all duration-200 rounded-lg bg-white dark:bg-muted ${
+      className={`p-2 sm:p-3 cursor-pointer md:transition-colors md:duration-150 rounded-lg bg-white dark:bg-muted touch-manipulation select-none ${
         isSelected
           ? 'bg-slate-200 dark:bg-secondary'
           : 'hover:bg-slate-100 dark:hover:bg-secondary/50'

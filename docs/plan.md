@@ -56,36 +56,6 @@
 9. **单位系统完善** - kg/lb转换优化
 10. **性能优化** - 代码分割和懒加载
 
-## 修改建议：活动系数 Dropdown
-
-### Label
-
-- 改为：`活动系数*`
-- 解释：更准确地表达这是一个用于计算 TDEE 的参数，而不是日常活动描述。
-
-### Tooltip 提示文案
-
-- 中文：
-
-  > 活动系数用于计算 TDEE（每日总能量消耗），不会影响碳循环计划的分配。若不确定，推荐选择“中度”。
-
-- 英文：
-
-  > Activity factor is used to calculate TDEE (total daily energy expenditure). It does not affect carb cycling plan distribution. If unsure, choose "Moderate".
-
-### Dropdown Options 示例
-
-- 久坐 – 几乎不运动（办公室） | Sedentary – Office job, little/no exercise
-- 轻度 – 轻运动 1–3 次/周 | Lightly active – Exercise 1–3 times/week
-- 中度 – 规律训练 3–5 次/周 | Moderate – Exercise 3–5 times/week
-- 活跃 – 高强度训练 6–7 次/周 | Very active – Exercise 6–7 times/week
-- 极高 – 职业运动员 / 体力劳动 | Extra active – Athlete or physical job
-
-### 视觉/交互建议
-
-- Label 右侧加 `?` 或 `*`，hover 时显示 tooltip。
-- 默认值可设置为 **中度 (Moderate)**，符合大多数健身用户使用场景。
-
 ## 🛠 技术实现规划
 
 ### 响应式布局断点设计
@@ -192,7 +162,23 @@ src/
 - 响应式优化：多断点适配 (768px/1280px)
 - 复制功能：Markdown格式复制到剪贴板
 
-### 🎯 v0.3 下一步计划
+### ✅ v0.3 性能与体验优化 (2024-08-25)
+
+**已完成的修复**:
+1. **Select组件性能优化** - 移除transform动画和zoom效果，解决移动端卡顿
+2. **Radio组件响应优化** - 禁用移动端过渡动画，提升点击响应速度  
+3. **体型切换系数更新** - 修复营养系数未自动切换问题，改用React批处理
+4. **完整双语支持** - 补全移动端IOSCard组件和accessibility提示的翻译
+5. **活动系数UI改进** - 重构为平级结构，添加专业tooltip组件，优化用户体验
+6. **粒子背景性能调优** - 降低FPS和粒子数量，减少移动端性能影响
+
+**技术改进**:
+- 添加shadcn/ui Tooltip组件，提供专业的hover提示体验
+- 优化动画策略：桌面端保留轻量动画，移动端完全禁用
+- 统一emoji大小和视觉层级
+- 完善i18n翻译覆盖，支持参数化字符串
+
+### 🎯 v0.4 下一步计划
 
 1. **响应式布局改进**: 1024px以下切换到表格布局
 2. **导出功能**: CSV和PNG格式导出

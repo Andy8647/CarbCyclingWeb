@@ -7,7 +7,7 @@ const languages = [
 ];
 
 export function LanguageSwitcher() {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
 
   const currentLanguage =
     languages.find((lang) => lang.code === i18n.language) || languages[0];
@@ -24,7 +24,9 @@ export function LanguageSwitcher() {
       size="sm"
       onClick={handleLanguageSwitch}
       className="h-8 w-8 p-0 hover:bg-transparent dark:hover:bg-transparent rounded-full transition-all duration-200 cursor-pointer"
-      title={`Switch to ${nextLanguage.name}`}
+      title={t('accessibility.switchToLanguage', {
+        language: nextLanguage.name,
+      })}
     >
       <span className="text-xl">{currentLanguage.flag}</span>
     </Button>

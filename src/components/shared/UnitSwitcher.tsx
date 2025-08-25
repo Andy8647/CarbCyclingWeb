@@ -1,9 +1,9 @@
-// import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { useFormContext } from '@/lib/form-context';
 
 export function UnitSwitcher() {
-  // const { t } = useTranslation();
+  const { t } = useTranslation();
   const { unitSystem, setUnitSystem } = useFormContext();
 
   const handleUnitSwitch = () => {
@@ -21,7 +21,12 @@ export function UnitSwitcher() {
       size="sm"
       onClick={handleUnitSwitch}
       className="h-8 w-8 p-0 hover:bg-transparent dark:hover:bg-transparent rounded-full transition-all duration-200 cursor-pointer"
-      title={`Switch to ${unitSystem === 'metric' ? 'Imperial' : 'Metric'} units`}
+      title={t('accessibility.switchToUnits', {
+        units:
+          unitSystem === 'metric'
+            ? t('accessibility.unitsImperial')
+            : t('accessibility.unitsMetric'),
+      })}
     >
       <span className="text-xl">{getUnitIcon()}</span>
     </Button>

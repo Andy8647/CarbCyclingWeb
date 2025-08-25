@@ -8,6 +8,7 @@ import { ResultCard } from '@/components/core/ResultCard';
 import { ParticleBackground } from '@/components/shared/ParticleBackground';
 import { ThemeProvider } from '@/lib/theme-context';
 import { FormProvider, formSchema, type FormData } from '@/lib/form-context';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const StableBackground = memo(() => (
   <>
@@ -94,7 +95,9 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="carb-cycling-theme">
-      <AppContent />
+      <TooltipProvider delayDuration={300}>
+        <AppContent />
+      </TooltipProvider>
     </ThemeProvider>
   );
 }

@@ -48,14 +48,17 @@ const zhCN = {
     },
   },
   activity: {
-    title: '循环天数',
+    title: '活动参数',
+    cycleDays: '循环天数',
     days: '天',
-    activityLevel: '每日活动量',
-    sedentary: '久坐',
-    light: '轻度',
-    moderate: '中度',
-    active: '活跃',
-    very_active: '极活跃',
+    activityLevel: '活动系数',
+    activityTooltip:
+      '活动系数用于计算 TDEE（每日总能量消耗），不会影响碳循环计划的分配。若不确定，推荐选择"中度"。',
+    sedentary: '久坐 – 几乎不运动（办公室）',
+    light: '轻度 – 轻运动 1–3 次/周',
+    moderate: '中度 – 规律训练 3–5 次/周',
+    active: '活跃 – 高强度训练 6–7 次/周',
+    very_active: '极高 – 职业运动员 / 体力劳动',
   },
   results: {
     title: '营养方案',
@@ -107,6 +110,16 @@ const zhCN = {
   footer: {
     disclaimer: '本计算器仅供参考，具体饮食请咨询专业营养师。',
   },
+  accessibility: {
+    switchToLanguage: '切换到{{language}}',
+    currentTheme: '当前主题：{{theme}}',
+    switchToUnits: '切换到{{units}}单位',
+    themeLight: '浅色',
+    themeDark: '深色',
+    themeSystem: '系统',
+    unitsMetric: '公制',
+    unitsImperial: '英制',
+  },
 };
 
 // 英文翻译
@@ -129,13 +142,13 @@ const enUS = {
     title: 'Carb Cycling Calculator',
   },
   basicInfo: {
-    title: 'Basic Info',
+    title: 'Basic Information',
     ageUnit: 'yrs',
     heightUnit: 'cm',
     weightUnit: 'kg',
   },
   nutrition: {
-    title: 'Nutrition Coefficients',
+    title: 'Macronutrient Settings',
     bodyType: 'Body Type',
     endomorph: 'Endomorph',
     mesomorph: 'Mesomorph',
@@ -145,24 +158,27 @@ const enUS = {
     fatCoeff: 'Fat',
     descriptions: {
       endomorph:
-        'Endomorph: Gains weight easily, slower metabolism, suitable for low-carb high-protein diet. Protein: 0.8-2.5g/kg body weight.',
+        'Endomorph: Prone to weight gain with a slower metabolism. Best suited for a low-carb, high-protein diet. Suggested protein intake: 0.8–2.5 g/kg body weight.',
       mesomorph:
-        'Mesomorph: Muscular build, balanced metabolism, flexible nutrition allocation. Protein: 0.8-2.5g/kg body weight.',
+        'Mesomorph: Muscular build with balanced metabolism. Can adapt flexibly to different nutrition strategies. Suggested protein intake: 0.8–2.5 g/kg body weight.',
       ectomorph:
-        'Ectomorph: Lean build, hard to gain weight, fast metabolism, needs more carbs. Protein: 0.8-2.5g/kg body weight.',
+        'Ectomorph: Naturally lean with a fast metabolism. Requires more carbs to maintain weight. Suggested protein intake: 0.8–2.5 g/kg body weight.',
       default:
-        'Select body type to see nutrition recommendations. Protein: 0.8-2.5g/kg body weight, adjust based on training intensity.',
+        'Select a body type to view tailored nutrition guidance. Suggested protein intake: 0.8–2.5 g/kg body weight, adjusted by training intensity.',
     },
   },
   activity: {
-    title: 'Cycle Days',
+    title: 'Activity Settings',
+    cycleDays: 'Cycle Length',
     days: 'days',
-    activityLevel: 'Daily Activity',
-    sedentary: 'Sedentary',
-    light: 'Light',
-    moderate: 'Moderate',
-    active: 'Active',
-    very_active: 'Very Active',
+    activityLevel: 'Activity Factor',
+    activityTooltip:
+      'Activity factor is used to calculate TDEE (total daily energy expenditure). It does not affect carb cycling plan distribution. If unsure, choose "Moderate".',
+    sedentary: 'Sedentary – Office job, little/no exercise',
+    light: 'Lightly active – Exercise 1–3 times/week',
+    moderate: 'Moderate – Exercise 3–5 times/week',
+    active: 'Very active – Exercise 6–7 times/week',
+    very_active: 'Extra active – Athlete or physical job',
   },
   results: {
     title: 'Nutrition Plan',
@@ -172,8 +188,8 @@ const enUS = {
     weeklyCarbs: 'Weekly Carbs',
     weeklyFat: 'Weekly Fat',
     weeklyCalories: 'Weekly Calories',
-    dailyTDEE: 'Daily TDEE',
-    calorieInfo: 'Calorie Info',
+    dailyTDEE: 'TDEE',
+    calorieInfo: 'Calories',
     dayTypes: {
       high: '🔥 High Carb',
       medium: '⚖️ Medium Carb',
@@ -183,21 +199,21 @@ const enUS = {
     fat: 'Fat',
     protein: 'Protein',
     totalCalories: 'Total Calories',
-    calorieDeficit: 'Calorie Diff',
+    calorieDeficit: 'Calorie Deficit',
     workout: 'Workout',
     selectWorkout: 'Select Workout',
     nutritionBreakdown: 'Nutrition Breakdown',
     dayNumber: 'Day {{day}}',
-    dropCardHere: 'Drop card here',
-    fillFormFirst: 'Please fill in complete information',
+    dropCardHere: 'Drag & drop here',
+    fillFormFirst: 'Please complete all required fields',
     fillFormDescription:
-      'Once weight, body type, protein coefficient and cycle days are set, your 3-7 day plan will be displayed here instantly.',
-    carbCyclingPlan: 'Carb Cycling Diet Plan',
+      'Once weight, body type, protein setting, and cycle length are set, a 3–7 day plan will be generated instantly.',
+    carbCyclingPlan: 'Carb Cycling Plan',
     weeklySummary: 'Weekly Summary',
-    dailyDetails: 'Daily Details',
+    dailyDetails: 'Daily Breakdown',
     day: 'Day',
-    dayType: 'Day Type',
-    copySuccess: 'Results copied to clipboard!',
+    dayType: 'Type',
+    copySuccess: 'Copied to clipboard!',
     copyError: 'Copy failed',
   },
   workouts: {
@@ -213,7 +229,17 @@ const enUS = {
   },
   footer: {
     disclaimer:
-      'This calculator is for reference only. Please consult a professional nutritionist for specific diet plans.',
+      'This calculator is for reference only. Please consult a certified nutritionist for personalized dietary advice.',
+  },
+  accessibility: {
+    switchToLanguage: 'Switch to {{language}}',
+    currentTheme: 'Current theme: {{theme}}',
+    switchToUnits: 'Switch to {{units}} units',
+    themeLight: 'light',
+    themeDark: 'dark',
+    themeSystem: 'system',
+    unitsMetric: 'metric',
+    unitsImperial: 'imperial',
   },
 };
 

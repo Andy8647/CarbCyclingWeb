@@ -27,14 +27,14 @@ export function ParticleBackground({
           value: 'transparent',
         },
       },
-      fpsLimit: 30,
+      fpsLimit: 20, // Reduced for better mobile performance
       fullScreen: {
         enable: true,
         zIndex: -1,
       },
       particles: {
         number: {
-          value: 25,
+          value: 20, // Balanced particle count for visual appeal and performance
           density: {
             enable: true,
             area: 1200,
@@ -72,7 +72,7 @@ export function ParticleBackground({
         },
         move: {
           enable: true,
-          speed: isAnimating ? 3 : 1,
+          speed: isAnimating ? 2 : 0.5, // Reduced speed for smoother performance
           direction: isAnimating ? ('top' as const) : ('none' as const),
           random: !isAnimating,
           straight: isAnimating,
@@ -83,7 +83,7 @@ export function ParticleBackground({
         rotate: {
           animation: {
             enable: true,
-            speed: 2,
+            speed: 1, // Reduced rotation speed for better mobile performance
             sync: false,
           },
         },

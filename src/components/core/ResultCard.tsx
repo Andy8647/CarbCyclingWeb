@@ -248,7 +248,10 @@ function DayColumn({
       <div className="mb-3 p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800">
         <div className="flex items-center justify-center">
           <h3 className="font-semibold text-sm">
-            {t('results.dayNumber').replace('{{day}}', (columnIndex + 1).toString())}
+            {t('results.dayNumber').replace(
+              '{{day}}',
+              (columnIndex + 1).toString()
+            )}
           </h3>
         </div>
       </div>
@@ -306,7 +309,7 @@ function useScreenSize() {
 
 export function ResultCard() {
   const { t } = useTranslation();
-  const { form, dailyWorkouts, setDailyWorkout, dayOrder, setDayOrder, unitSystem } =
+  const { form, dailyWorkouts, setDailyWorkout, dayOrder, setDayOrder } =
     useFormContext();
 
   const isLargeScreen = useScreenSize();

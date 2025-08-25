@@ -82,7 +82,7 @@ function IOSSquareCard({
       {/* 头部：天数和类型 */}
       <div className="flex flex-col items-center mb-3">
         <div className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1">
-          第{day.day}天
+          {t('results.dayNumber', { day: day.day })}
         </div>
         <div className="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
           {getDayTypeDisplay(day.type, t)}
@@ -97,7 +97,7 @@ function IOSSquareCard({
         onClick={(e) => e.stopPropagation()}
       >
         <label className="text-xs font-medium text-slate-500 mb-1.5 block">
-          🏋️ 训练
+          🏋️ {t('results.workout')}
         </label>
         <div onPointerDown={(e) => e.stopPropagation()}>
           <Select
@@ -164,13 +164,17 @@ function IOSSquareCard({
         {/* 热量信息 */}
         <div className="pt-2 border-t border-slate-200 dark:border-slate-600 space-y-1">
           <div className="flex justify-between items-center">
-            <div className="text-xs text-slate-500">🔥 {t('results.totalCalories')}</div>
+            <div className="text-xs text-slate-500">
+              🔥 {t('results.totalCalories')}
+            </div>
             <div className="font-semibold text-xs text-slate-700 dark:text-slate-300">
               {day.calories}
             </div>
           </div>
           <div className="flex justify-between items-center">
-            <div className="text-xs text-slate-500">📈 {t('results.calorieDeficit')}</div>
+            <div className="text-xs text-slate-500">
+              📈 {t('results.calorieDeficit')}
+            </div>
             <div
               className={`font-semibold text-xs ${
                 day.caloriesDiff > 0
