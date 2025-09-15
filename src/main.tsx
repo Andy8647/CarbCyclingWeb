@@ -24,10 +24,7 @@ createRoot(document.getElementById('root')!).render(
         apiKey={PH_KEY!}
         options={{
           api_host: PH_HOST,
-          capture_pageview: true,
-          autocapture: true,
-          persistence: 'localStorage',
-          respect_dnt: true,
+          defaults: '2025-05-24',
         }}
       >
         <App />
