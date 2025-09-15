@@ -1,15 +1,5 @@
 // Lightweight analytics bootstrap for Cloudflare Web Analytics + PostHog
-
-declare global {
-  interface Window {
-    posthog?: {
-      init?: (key: string, options?: Record<string, any>) => void;
-      capture?: (event: string, properties?: Record<string, any>) => void;
-      identify?: (id: string, properties?: Record<string, any>) => void;
-      reset?: () => void;
-    };
-  }
-}
+import posthog from 'posthog-js';
 
 function initCloudflareWebAnalytics() {
   try {
@@ -38,23 +28,13 @@ function initPostHog() {
       (import.meta.env.VITE_POSTHOG_HOST as string | undefined) ||
       'https://app.posthog.com';
 
-    // Inject PostHog array loader and then init
-    const s = document.createElement('script');
-    s.async = true;
-    s.src = `${host.replace(/\/$/, '')}/static/array.js`;
-    s.onload = () => {
-      try {
-        window.posthog?.init?.(key, {
-          api_host: host,
-          capture_pageview: true,
-          autocapture: true,
-          // Keep storage light and respect user
-          persistence: 'localStorage',
-          respect_dnt: true,
-        });
-      } catch {}
-    };
-    document.head.appendChild(s);
+    posthog.init(key, {
+      api_host: host,
+      capture_pageview: true,
+      autocapture: true,
+      persistence: 'localStorage',
+      respect_dnt: true,
+    });
   } catch (err) {
     // no-op
   }
@@ -67,9 +47,20 @@ export function initAnalytics() {
 
 export function track(event: string, properties?: Record<string, any>) {
   try {
-    window.posthog?.capture?.(event, properties);
+    posthog.capture(event, properties);
   } catch {
     // no-op
   }
 }
 
+export function identify(id: string, properties?: Record<string, any>) {
+  try {
+    posthog.identify(id, properties);
+  } catch {}
+}
+
+export function resetIdentity() {
+  try {
+    posthog.reset();
+  } catch {}
+}
