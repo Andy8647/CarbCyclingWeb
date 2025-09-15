@@ -32,6 +32,7 @@ import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 // Removed unused imports for cleaner code
 import { IOSGridLayout } from './IOSGridLayout';
 import { useToast } from '@/lib/use-toast';
+import { exportNodeToPNG } from '@/lib/export-to-png';
 
 const getDayTypeDisplay = (type: string, t: (key: string) => string) => {
   switch (type) {
@@ -113,7 +114,7 @@ function DraggableCard({
     >
       {/* 日型标签 */}
       <div className="flex justify-center mb-3">
-        <div className="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
+        <div className="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 whitespace-nowrap">
           {getDayTypeDisplay(day.type, t)}
         </div>
       </div>
@@ -125,7 +126,7 @@ function DraggableCard({
         onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
       >
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 block">
+        <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 block whitespace-nowrap">
           🏋️ {t('results.workout')}
         </label>
         <div onPointerDown={(e) => e.stopPropagation()}>
@@ -152,7 +153,7 @@ function DraggableCard({
 
       {/* 营养数据 */}
       <div className="space-y-2.5">
-        <div className="text-xs font-medium text-slate-600 dark:text-slate-400">
+        <div className="text-xs font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
           📊 {t('results.nutritionBreakdown')}
         </div>
 
@@ -185,13 +186,13 @@ function DraggableCard({
         {/* 热量信息 */}
         <div className="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
           <div className="flex justify-between items-center">
-            <div className="text-xs text-slate-500">
+            <div className="text-xs text-slate-500 whitespace-nowrap">
               🔥 {t('results.totalCalories')}
             </div>
             <div className="font-semibold text-xs">{day.calories}kcal</div>
           </div>
           <div className="flex justify-between items-center">
-            <div className="text-xs text-slate-500">
+            <div className="text-xs text-slate-500 whitespace-nowrap">
               📈 {t('results.calorieDeficit')}
             </div>
             <div
@@ -326,6 +327,8 @@ export function ResultCard() {
   const { toast } = useToast();
   const { form, dailyWorkouts, setDailyWorkout, dayOrder, setDayOrder } =
     useFormContext();
+
+  const exportRef = useRef<HTMLDivElement>(null);
 
   const isLargeScreen = useScreenSize();
 
@@ -570,6 +573,42 @@ export function ResultCard() {
       });
   };
 
+  const handleExportPNG = async () => {
+    try {
+      if (!nutritionPlan) {
+        toast({
+          variant: 'destructive',
+          title: t('results.copyError'),
+          description: 'No results to export',
+        });
+        return;
+      }
+      const node = exportRef.current;
+      if (!node) return;
+
+      await exportNodeToPNG(node, {
+        fileName: 'carb-cycling-plan.png',
+        pixelRatio: 3,
+        // Exclude any element tagged explicitly
+        filter: (n) =>
+          !(n instanceof HTMLElement && n.hasAttribute('data-export-exclude')),
+      });
+
+      toast({
+        variant: 'success',
+        title: '🖼️ ' + t('results.exportPNG'),
+        description: t('results.exportSuccess'),
+      });
+    } catch (err) {
+      console.error('Export PNG failed', err);
+      toast({
+        variant: 'destructive',
+        title: t('results.exportError'),
+        description: 'Failed to export PNG',
+      });
+    }
+  };
+
   return (
     <GlassCard>
       <div className="flex items-center justify-between mb-6">
@@ -579,7 +618,10 @@ export function ResultCard() {
             {t('results.title')}
           </h2>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full">
+        <div
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full"
+          data-export-exclude
+        >
           <div className="flex flex-wrap gap-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -602,7 +644,11 @@ export function ResultCard() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Button variant="outline" className="rounded-xl" disabled>
+            <Button
+              variant="outline"
+              className="rounded-xl"
+              onClick={handleExportPNG}
+            >
               <span>🖼️</span>
               <span className="hidden sm:inline ml-1">
                 {t('results.exportPNG')}
@@ -612,13 +658,13 @@ export function ResultCard() {
         </div>
       </div>
 
-      <div>
+      <div ref={exportRef} className="p-4 sm:p-6">
         {nutritionPlan ? (
           <div className="space-y-4">
             {/* 周度摘要卡片 - 单行布局 */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1">
+                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1 whitespace-nowrap">
                   <span className="text-sm">🥩</span>
                   <span>{t('results.dailyProtein')}</span>
                 </div>
@@ -627,7 +673,7 @@ export function ResultCard() {
                 </div>
               </div>
               <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1">
+                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1 whitespace-nowrap">
                   <span className="text-sm">🍚</span>
                   <span>{t('results.weeklyCarbs')}</span>
                 </div>
@@ -636,7 +682,7 @@ export function ResultCard() {
                 </div>
               </div>
               <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1">
+                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1 whitespace-nowrap">
                   <span className="text-sm">🥜</span>
                   <span>{t('results.weeklyFat')}</span>
                 </div>
@@ -645,7 +691,7 @@ export function ResultCard() {
                 </div>
               </div>
               <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1">
+                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1 whitespace-nowrap">
                   <span className="text-sm">🔥</span>
                   <span>{t('results.calorieInfo')}</span>
                 </div>
