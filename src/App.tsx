@@ -131,13 +131,13 @@ function AppContent() {
     return () => subscription.unsubscribe();
   }, [form, getTrainingConfig]);
 
-  // Load initial training config based on default cycle days
+  // Load initial training config based on default cycle days (run once)
   useEffect(() => {
     const cycleDays = form.getValues('cycleDays') || 7;
     const trainingConfig = getTrainingConfig(cycleDays);
     setDailyWorkoutsState(trainingConfig.dailyWorkouts);
     setDayOrderState(trainingConfig.dayOrder);
-  }, [form, getTrainingConfig]); // Only run once on mount
+  }, [form]);
 
   return (
     <FormProvider

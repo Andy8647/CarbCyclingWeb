@@ -64,7 +64,8 @@ export const createDefaultCycleTrainingConfig = (
   cycleDays: number
 ): CycleTrainingConfig => ({
   dailyWorkouts: {},
-  dayOrder: Array.from({ length: cycleDays }, (_, i) => i),
+  // Day numbers are 1-based to match NutritionPlan.day
+  dayOrder: Array.from({ length: cycleDays }, (_, i) => i + 1),
   lastUpdated: Date.now(),
 });
 

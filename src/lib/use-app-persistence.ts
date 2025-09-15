@@ -94,10 +94,47 @@ export function useAppPersistence() {
 
   const getTrainingConfig = useCallback(
     (cycleDays: number): CycleTrainingConfig => {
-      return (
+      const stored =
         appState.trainingConfigs[cycleDays] ||
-        createDefaultCycleTrainingConfig(cycleDays)
-      );
+        createDefaultCycleTrainingConfig(cycleDays);
+
+      // Normalize to 1-based day numbers and valid range
+      const expectedDays = Array.from({ length: cycleDays }, (_, i) => i + 1);
+
+      // Normalize dayOrder
+      let normalizedDayOrder = stored.dayOrder;
+      const hasValidOrder =
+        Array.isArray(normalizedDayOrder) &&
+        normalizedDayOrder.length === expectedDays.length &&
+        normalizedDayOrder.every((d) => expectedDays.includes(d));
+      if (!hasValidOrder) {
+        normalizedDayOrder = expectedDays;
+      }
+
+      // Normalize dailyWorkouts (migrate 0-based keys -> 1-based)
+      const workoutKeys = Object.keys(stored.dailyWorkouts || {});
+      const hasZeroKey = workoutKeys.some((k) => parseInt(k, 10) === 0);
+      let normalizedDailyWorkouts = stored.dailyWorkouts || {};
+      if (hasZeroKey) {
+        normalizedDailyWorkouts = {};
+        for (const k of workoutKeys) {
+          const idx = parseInt(k, 10);
+          if (Number.isFinite(idx)) {
+            const newKey = idx + 1; // shift to 1-based
+            if (expectedDays.includes(newKey)) {
+              normalizedDailyWorkouts[newKey] = stored.dailyWorkouts[idx];
+            }
+          }
+        }
+      }
+
+      const normalized: CycleTrainingConfig = {
+        ...stored,
+        dayOrder: normalizedDayOrder,
+        dailyWorkouts: normalizedDailyWorkouts,
+      };
+
+      return normalized;
     },
     [appState.trainingConfigs]
   );
