@@ -3,7 +3,8 @@ import posthog from 'posthog-js';
 
 function initPostHog() {
   try {
-    if (!import.meta.env.PROD) return;
+    const enableDev = (import.meta.env.VITE_POSTHOG_ENABLE_DEV as string | undefined) === 'true';
+    if (!(import.meta.env.PROD || enableDev)) return;
     const key = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
     if (!key) return;
     const host =
@@ -17,6 +18,10 @@ function initPostHog() {
       persistence: 'localStorage',
       respect_dnt: true,
     });
+    if (enableDev) {
+      // Helpful logs in dev
+      try { posthog.debug(true); } catch {}
+    }
   } catch (err) {
     // no-op
   }
