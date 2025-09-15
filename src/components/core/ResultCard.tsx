@@ -578,7 +578,7 @@ export function ResultCard() {
       if (!nutritionPlan) {
         toast({
           variant: 'destructive',
-          title: t('results.copyError'),
+          title: t('results.exportError'),
           description: 'No results to export',
         });
         return;
@@ -586,13 +586,20 @@ export function ResultCard() {
       const node = exportRef.current;
       if (!node) return;
 
-      await exportNodeToPNG(node, {
-        fileName: 'carb-cycling-plan.png',
-        pixelRatio: 3,
-        // Exclude any element tagged explicitly
-        filter: (n) =>
-          !(n instanceof HTMLElement && n.hasAttribute('data-export-exclude')),
-      });
+      // Temporarily add padding for export only
+      const prevPadding = node.style.padding;
+      node.style.padding = '24px';
+      try {
+        await exportNodeToPNG(node, {
+          fileName: 'carb-cycling-plan.png',
+          pixelRatio: 3,
+          // Exclude any element tagged explicitly
+          filter: (n) =>
+            !(n instanceof HTMLElement && n.hasAttribute('data-export-exclude')),
+        });
+      } finally {
+        node.style.padding = prevPadding;
+      }
 
       toast({
         variant: 'success',
@@ -658,7 +665,7 @@ export function ResultCard() {
         </div>
       </div>
 
-      <div ref={exportRef} className="p-4 sm:p-6">
+      <div ref={exportRef}>
         {nutritionPlan ? (
           <div className="space-y-4">
             {/* 周度摘要卡片 - 单行布局 */}
