@@ -11,8 +11,6 @@ import { FormProvider, formSchema, type FormData } from '@/lib/form-context';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/toaster';
 import { useAppPersistence } from '@/lib/use-app-persistence';
-import { HelmetProvider } from 'react-helmet-async';
-import { DefaultSEO } from '@/lib/seo';
 
 const StableBackground = memo(() => (
   <>
@@ -172,14 +170,11 @@ function AppContent() {
 
 function App() {
   return (
-    <HelmetProvider>
-      <ThemeProvider defaultTheme="system" storageKey="carb-cycling-theme">
-        <TooltipProvider delayDuration={300}>
-          <DefaultSEO />
-          <AppContent />
-        </TooltipProvider>
-      </ThemeProvider>
-    </HelmetProvider>
+    <ThemeProvider defaultTheme="system" storageKey="carb-cycling-theme">
+      <TooltipProvider delayDuration={300}>
+        <AppContent />
+      </TooltipProvider>
+    </ThemeProvider>
   );
 }
 
