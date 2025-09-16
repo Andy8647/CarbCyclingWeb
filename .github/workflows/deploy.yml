@@ -67,6 +67,12 @@ jobs:
           # Secrets: VITE_PUBLIC_POSTHOG_KEY; Variables (optional): VITE_PUBLIC_POSTHOG_HOST
           VITE_PUBLIC_POSTHOG_KEY: ${{ secrets.VITE_PUBLIC_POSTHOG_KEY }}
           VITE_PUBLIC_POSTHOG_HOST: ${{ vars.VITE_PUBLIC_POSTHOG_HOST }}
+          # SEO / Meta configuration
+          VITE_SITE_URL: ${{ vars.VITE_SITE_URL }}
+          VITE_SITE_NAME: ${{ vars.VITE_SITE_NAME }}
+          VITE_META_DESCRIPTION: ${{ vars.VITE_META_DESCRIPTION }}
+          VITE_OG_IMAGE: ${{ vars.VITE_OG_IMAGE }}
+          VITE_TWITTER_HANDLE: ${{ vars.VITE_TWITTER_HANDLE }}
 
       - name: Deploy with Wrangler
         uses: cloudflare/wrangler-action@v3
