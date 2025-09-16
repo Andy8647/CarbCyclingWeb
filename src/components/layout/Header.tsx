@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher';
 import { UnitSwitcher } from '@/components/shared/UnitSwitcher';
+import { GitHubLink } from '@/components/shared/GitHubLink';
 
 export function Header() {
   const { t } = useTranslation();
@@ -86,6 +87,7 @@ export function Header() {
         <UnitSwitcher />
         <LanguageSwitcher />
         <ThemeToggle />
+        <GitHubLink />
       </div>
     </header>
   );
