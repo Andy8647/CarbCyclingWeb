@@ -43,6 +43,8 @@ jobs:
     name: Deploy to Cloudflare Pages
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment:
+      name: production
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -59,6 +61,12 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          # PostHog configuration for production builds
+          # Add these in GitHub: Settings > Environments > production
+          # Secrets: VITE_PUBLIC_POSTHOG_KEY; Variables (optional): VITE_PUBLIC_POSTHOG_HOST
+          VITE_PUBLIC_POSTHOG_KEY: ${{ secrets.VITE_PUBLIC_POSTHOG_KEY }}
+          VITE_PUBLIC_POSTHOG_HOST: ${{ vars.VITE_PUBLIC_POSTHOG_HOST }}
 
       - name: Deploy with Wrangler
         uses: cloudflare/wrangler-action@v3
