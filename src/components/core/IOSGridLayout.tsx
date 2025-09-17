@@ -7,12 +7,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { getWorkoutTypes } from '@/lib/calculator';
 import {
   draggable,
   dropTargetForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
+import type {
+  DayMealPlan,
+  FoodItem,
+  MealPortion,
+  MealSlotId,
+} from '@/lib/persistence-types';
+import { normalizeDayMealPlan } from '@/lib/meal-planner';
+import { MealSlotPlanner } from './MealSlotPlanner';
 
 const getDayTypeDisplay = (type: string, t: (key: string) => string) => {
   switch (type) {
@@ -41,16 +50,31 @@ interface IOSSquareCardProps {
   day: DayData;
   dailyWorkouts: Record<number, string>;
   setDailyWorkout: (day: number, workout: string) => void;
+  mealPlan: DayMealPlan;
+  foodLibrary: FoodItem[];
+  onUpdateMealSlot: (
+    dayNumber: number,
+    slotId: MealSlotId,
+    portions: MealPortion[]
+  ) => void;
+  onAddCustomFood: (
+    food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
+  ) => FoodItem;
 }
 
 function IOSSquareCard({
   day,
   dailyWorkouts,
   setDailyWorkout,
+  mealPlan,
+  foodLibrary,
+  onUpdateMealSlot,
+  onAddCustomFood,
 }: IOSSquareCardProps) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [showMeals, setShowMeals] = useState(false);
 
   useEffect(() => {
     const element = ref.current;
@@ -159,36 +183,66 @@ function IOSSquareCard({
               {day.protein}g
             </div>
           </div>
-        </div>
+      </div>
 
-        {/* 热量信息 */}
-        <div className="pt-2 border-t border-slate-200 dark:border-slate-600 space-y-1">
-          <div className="flex justify-between items-center">
-            <div className="text-xs text-slate-500">
-              🔥 {t('results.totalCalories')}
-            </div>
-            <div className="font-semibold text-xs text-slate-700 dark:text-slate-300">
-              {day.calories}
-            </div>
+      {/* 热量信息 */}
+      <div className="pt-2 border-t border-slate-200 dark:border-slate-600 space-y-1">
+        <div className="flex justify-between items-center">
+          <div className="text-xs text-slate-500">
+            🔥 {t('results.totalCalories')}
           </div>
-          <div className="flex justify-between items-center">
-            <div className="text-xs text-slate-500">
-              📈 {t('results.calorieDeficit')}
-            </div>
-            <div
-              className={`font-semibold text-xs ${
-                day.caloriesDiff > 0
-                  ? 'text-green-600 dark:text-green-400'
-                  : day.caloriesDiff < 0
-                    ? 'text-red-600 dark:text-red-400'
-                    : 'text-yellow-600 dark:text-yellow-400'
-              }`}
-            >
-              {day.caloriesDiff > 0 ? '+' : ''}
-              {day.caloriesDiff}
-            </div>
+          <div className="font-semibold text-xs text-slate-700 dark:text-slate-300">
+            {day.calories}
           </div>
         </div>
+        <div className="flex justify-between items-center">
+          <div className="text-xs text-slate-500">
+            📈 {t('results.calorieDeficit')}
+          </div>
+          <div
+            className={`font-semibold text-xs ${
+              day.caloriesDiff > 0
+                ? 'text-green-600 dark:text-green-400'
+                : day.caloriesDiff < 0
+                  ? 'text-red-600 dark:text-red-400'
+                  : 'text-yellow-600 dark:text-yellow-400'
+            }`}
+          >
+            {day.caloriesDiff > 0 ? '+' : ''}
+            {day.caloriesDiff}
+          </div>
+        </div>
+      </div>
+    </div>
+
+      <div className="mt-3 space-y-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full"
+          onClick={() => setShowMeals((prev) => !prev)}
+        >
+          {showMeals
+            ? t('mealPlanner.hideMealsForDay')
+            : t('mealPlanner.showMealsForDay')}
+        </Button>
+        {showMeals && (
+          <MealSlotPlanner
+            dayNumber={day.day}
+            dayMealPlan={mealPlan}
+            foodLibrary={foodLibrary}
+            onUpdateSlot={(slotId, portions) =>
+              onUpdateMealSlot(day.day, slotId, portions)
+            }
+            onAddCustomFood={onAddCustomFood}
+            targetMacros={{
+              carbs: day.carbs,
+              protein: day.protein,
+              fat: day.fat,
+              calories: day.calories,
+            }}
+          />
+        )}
       </div>
     </div>
   );
@@ -205,6 +259,16 @@ interface IOSGridLayoutProps {
   dailyWorkouts: Record<number, string>;
   setDailyWorkout: (day: number, workout: string) => void;
   onDrop: (dragData: DragData, targetIndex: number) => void;
+  foodLibrary: FoodItem[];
+  dayMealPlans: Record<number, DayMealPlan>;
+  onMealSlotChange: (
+    dayNumber: number,
+    slotId: MealSlotId,
+    portions: MealPortion[]
+  ) => void;
+  onAddCustomFood: (
+    food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
+  ) => FoodItem;
 }
 
 export function IOSGridLayout({
@@ -212,6 +276,10 @@ export function IOSGridLayout({
   dailyWorkouts,
   setDailyWorkout,
   onDrop,
+  foodLibrary,
+  dayMealPlans,
+  onMealSlotChange,
+  onAddCustomFood,
 }: IOSGridLayoutProps) {
   const gridRef = useRef<HTMLDivElement>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -243,19 +311,28 @@ export function IOSGridLayout({
 
   return (
     <div ref={gridRef} className="grid grid-cols-2 gap-4 p-2 max-w-2xl mx-auto">
-      {orderedDays.map((day, index) => (
-        <DropZoneWrapper
-          key={`ios-card-${day.day}`}
-          index={index}
-          isDraggedOver={dragOverIndex === index}
-        >
-          <IOSSquareCard
-            day={day}
-            dailyWorkouts={dailyWorkouts}
-            setDailyWorkout={setDailyWorkout}
-          />
-        </DropZoneWrapper>
-      ))}
+      {orderedDays.map((day, index) => {
+        const mealPlanForDay =
+          dayMealPlans[day.day] || normalizeDayMealPlan();
+
+        return (
+          <DropZoneWrapper
+            key={`ios-card-${day.day}`}
+            index={index}
+            isDraggedOver={dragOverIndex === index}
+          >
+            <IOSSquareCard
+              day={day}
+              dailyWorkouts={dailyWorkouts}
+              setDailyWorkout={setDailyWorkout}
+              mealPlan={mealPlanForDay}
+              foodLibrary={foodLibrary}
+              onUpdateMealSlot={onMealSlotChange}
+              onAddCustomFood={onAddCustomFood}
+            />
+          </DropZoneWrapper>
+        );
+      })}
     </div>
   );
 }

@@ -1,6 +1,70 @@
 import type { FormData } from './form-context';
 
 /**
+ * Meal planner slot identifiers
+ */
+export type MealSlotId =
+  | 'breakfast'
+  | 'morning_snack'
+  | 'lunch'
+  | 'pre_workout'
+  | 'post_workout'
+  | 'dinner'
+  | 'evening_snack';
+
+/**
+ * Nutritional breakdown for a given serving
+ */
+export interface MacroProfile {
+  carbs: number;
+  protein: number;
+  fat: number;
+  calories: number;
+}
+
+/**
+ * Food or ingredient definition used by the meal planner
+ */
+export interface FoodItem {
+  id: string;
+  name: string;
+  category: string;
+  defaultServing: string;
+  macros: MacroProfile;
+  preparation?: 'raw' | 'cooked';
+  emoji?: string;
+  isCustom?: boolean;
+  createdAt?: number;
+  updatedAt?: number;
+}
+
+/**
+ * Meal entry referencing a food item with the chosen serving multiplier
+ */
+export interface MealPortion {
+  id: string;
+  foodId: string;
+  servings: number;
+  note?: string;
+}
+
+/**
+ * Meal plan for a single day keyed by meal slots
+ */
+export type DayMealPlan = Record<MealSlotId, MealPortion[]>;
+
+/**
+ * Stored meal plan for a cycle length
+ */
+export interface CycleMealPlan {
+  dayMeals: Record<number, DayMealPlan>;
+  lastUpdated: number;
+}
+
+export type CustomFoodMap = Record<string, FoodItem>;
+export type MealPlans = Record<number, CycleMealPlan>;
+
+/**
  * User Settings (Header configuration)
  * - Theme preference
  * - Language preference
@@ -43,6 +107,10 @@ export interface PersistentAppState {
   userSettings: UserSettings;
   /** Training configurations for different cycle lengths */
   trainingConfigs: TrainingConfigurations;
+  /** User defined foods for the planner */
+  customFoods: CustomFoodMap;
+  /** Stored meal plans by cycle length */
+  mealPlans: MealPlans;
   /** Metadata */
   version: string;
   lastSaved: number;
@@ -70,12 +138,70 @@ export const createDefaultCycleTrainingConfig = (
 });
 
 /**
+ * Meal slot definitions shared by the planner UI
+ */
+export const MEAL_SLOT_DEFINITIONS: Array<{
+  id: MealSlotId;
+  icon: string;
+  translationKey: string;
+}> = [
+  { id: 'breakfast', icon: '🍳', translationKey: 'mealPlanner.slots.breakfast' },
+  {
+    id: 'morning_snack',
+    icon: '🥜',
+    translationKey: 'mealPlanner.slots.morning_snack',
+  },
+  { id: 'lunch', icon: '🥗', translationKey: 'mealPlanner.slots.lunch' },
+  {
+    id: 'pre_workout',
+    icon: '⚡',
+    translationKey: 'mealPlanner.slots.pre_workout',
+  },
+  {
+    id: 'post_workout',
+    icon: '💪',
+    translationKey: 'mealPlanner.slots.post_workout',
+  },
+  { id: 'dinner', icon: '🍽️', translationKey: 'mealPlanner.slots.dinner' },
+  {
+    id: 'evening_snack',
+    icon: '🍵',
+    translationKey: 'mealPlanner.slots.evening_snack',
+  },
+];
+
+export const MEAL_SLOT_IDS = MEAL_SLOT_DEFINITIONS.map((slot) => slot.id);
+
+export const createEmptyDayMealPlan = (): DayMealPlan => {
+  return MEAL_SLOT_IDS.reduce((acc, slot) => {
+    acc[slot] = [];
+    return acc;
+  }, {} as DayMealPlan);
+};
+
+export const createDefaultCycleMealPlan = (
+  cycleDays: number
+): CycleMealPlan => {
+  const dayMeals: Record<number, DayMealPlan> = {};
+  for (let day = 1; day <= cycleDays; day += 1) {
+    dayMeals[day] = createEmptyDayMealPlan();
+  }
+
+  return {
+    dayMeals,
+    lastUpdated: Date.now(),
+  };
+};
+
+/**
  * Default values for complete app state
  */
 export const defaultPersistentAppState: PersistentAppState = {
   formData: {},
   userSettings: defaultUserSettings,
   trainingConfigs: {},
+  customFoods: {},
+  mealPlans: {},
   version: '1.0.0',
   lastSaved: Date.now(),
 };

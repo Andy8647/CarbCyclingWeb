@@ -1,16 +1,28 @@
 import { useCallback } from 'react';
 import { useLocalStorage } from './use-local-storage';
 import type {
+  CycleMealPlan,
+  CycleTrainingConfig,
+  DayMealPlan,
+  FoodItem,
+  MealPortion,
+  MealSlotId,
   PersistentAppState,
   UserSettings,
-  CycleTrainingConfig,
 } from './persistence-types';
 import {
   defaultPersistentAppState,
   defaultUserSettings,
   createDefaultCycleTrainingConfig,
+  createDefaultCycleMealPlan,
   STORAGE_KEYS,
 } from './persistence-types';
+import {
+  mergeFoodLibrary,
+  normalizeCycleMealPlan,
+  normalizeDayMealPlan,
+} from './meal-planner';
+import { createId } from './utils';
 import type { FormData } from './form-context';
 
 /**
@@ -153,6 +165,202 @@ export function useAppPersistence() {
     [saveTrainingConfig]
   );
 
+  // Food library persistence
+  const getCustomFoods = useCallback((): Record<string, FoodItem> => {
+    return appState.customFoods || {};
+  }, [appState.customFoods]);
+
+  const addCustomFood = useCallback(
+    (food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>): FoodItem => {
+      const timestamp = Date.now();
+      const id = createId('food');
+      const newFood: FoodItem = {
+        ...food,
+        id,
+        isCustom: true,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      };
+
+      const currentFoods = appState.customFoods || {};
+
+      updateAppState({
+        customFoods: {
+          ...currentFoods,
+          [id]: newFood,
+        },
+      });
+
+      return newFood;
+    },
+    [appState.customFoods, updateAppState]
+  );
+
+  const updateCustomFood = useCallback(
+    (
+      id: string,
+      updates: Partial<Omit<FoodItem, 'id' | 'isCustom'>>
+    ): FoodItem | null => {
+      const currentFoods = appState.customFoods || {};
+      const existing = currentFoods[id];
+      if (!existing) return null;
+
+      const updated: FoodItem = {
+        ...existing,
+        ...updates,
+        isCustom: true,
+        updatedAt: Date.now(),
+      };
+
+      updateAppState({
+        customFoods: {
+          ...currentFoods,
+          [id]: updated,
+        },
+      });
+
+      return updated;
+    },
+    [appState.customFoods, updateAppState]
+  );
+
+  const removeCustomFood = useCallback(
+    (id: string) => {
+      const currentFoods = appState.customFoods || {};
+      if (!currentFoods[id]) return;
+
+      const { [id]: _removed, ...rest } = currentFoods;
+
+      // Also remove any meal portions referencing the deleted food
+      const updatedMealPlans: Record<number, CycleMealPlan> = {};
+      const storedMealPlans = appState.mealPlans || {};
+      for (const [cycleKey, plan] of Object.entries(storedMealPlans)) {
+        const cycleDays = Number(cycleKey);
+        const normalizedDayMeals = normalizeCycleMealPlan(
+          cycleDays,
+          plan
+        );
+
+        let hasChanges = false;
+        const cleanedDayMeals: Record<number, DayMealPlan> = {};
+
+        for (const [dayKey, dayPlan] of Object.entries(normalizedDayMeals)) {
+          const planDay = Number(dayKey);
+          const cleanedDayPlan = normalizeDayMealPlan(dayPlan);
+
+          for (const slot of Object.keys(cleanedDayPlan) as MealSlotId[]) {
+            const filteredPortions = cleanedDayPlan[slot].filter(
+              (portion) => portion.foodId !== id
+            );
+            if (filteredPortions.length !== cleanedDayPlan[slot].length) {
+              hasChanges = true;
+            }
+            cleanedDayPlan[slot] = filteredPortions;
+          }
+
+          cleanedDayMeals[planDay] = cleanedDayPlan;
+        }
+
+        if (hasChanges) {
+          updatedMealPlans[cycleDays] = {
+            dayMeals: cleanedDayMeals,
+            lastUpdated: Date.now(),
+          };
+        }
+      }
+
+      updateAppState({
+        customFoods: rest,
+        mealPlans: {
+          ...storedMealPlans,
+          ...updatedMealPlans,
+        },
+      });
+    },
+    [appState.customFoods, appState.mealPlans, updateAppState]
+  );
+
+  const getFoodLibrary = useCallback((): FoodItem[] => {
+    return mergeFoodLibrary(appState.customFoods || {});
+  }, [appState.customFoods]);
+
+  // Meal plan persistence
+  const getMealPlan = useCallback(
+    (cycleDays: number): CycleMealPlan => {
+      const storedPlan = appState.mealPlans?.[cycleDays];
+
+      if (!storedPlan) {
+        return createDefaultCycleMealPlan(cycleDays);
+      }
+
+      return {
+        dayMeals: normalizeCycleMealPlan(cycleDays, storedPlan),
+        lastUpdated: storedPlan.lastUpdated,
+      };
+    },
+    [appState.mealPlans]
+  );
+
+  const setMealPlanForDay = useCallback(
+    (cycleDays: number, day: number, dayPlan: DayMealPlan) => {
+      const current = appState.mealPlans?.[cycleDays] ||
+        createDefaultCycleMealPlan(cycleDays);
+
+      const normalizedDayMeals = normalizeCycleMealPlan(cycleDays, current);
+      normalizedDayMeals[day] = normalizeDayMealPlan(dayPlan);
+
+      updateAppState({
+        mealPlans: {
+          ...(appState.mealPlans || {}),
+          [cycleDays]: {
+            dayMeals: normalizedDayMeals,
+            lastUpdated: Date.now(),
+          },
+        },
+      });
+    },
+    [appState.mealPlans, updateAppState]
+  );
+
+  const setMealPortionsForSlot = useCallback(
+    (
+      cycleDays: number,
+      day: number,
+      slotId: MealSlotId,
+      portions: MealPortion[]
+    ) => {
+      const current = appState.mealPlans?.[cycleDays] ||
+        createDefaultCycleMealPlan(cycleDays);
+      const normalizedDayMeals = normalizeCycleMealPlan(cycleDays, current);
+      const normalizedDayPlan = normalizeDayMealPlan(normalizedDayMeals[day]);
+      normalizedDayPlan[slotId] = portions;
+      normalizedDayMeals[day] = normalizedDayPlan;
+
+      updateAppState({
+        mealPlans: {
+          ...(appState.mealPlans || {}),
+          [cycleDays]: {
+            dayMeals: normalizedDayMeals,
+            lastUpdated: Date.now(),
+          },
+        },
+      });
+    },
+    [appState.mealPlans, updateAppState]
+  );
+
+  const resetMealPlan = useCallback(
+    (cycleDays: number) => {
+      updateAppState({
+        mealPlans: {
+          ...(appState.mealPlans || {}),
+          [cycleDays]: createDefaultCycleMealPlan(cycleDays),
+        },
+      });
+    },
+    [appState.mealPlans, updateAppState]
+  );
+
   // Utility functions
   const clearAllData = useCallback(() => {
     removeAppState();
@@ -207,6 +415,19 @@ export function useAppPersistence() {
     getTrainingConfig,
     saveTrainingWorkouts,
     saveTrainingOrder,
+
+    // Food library methods
+    getFoodLibrary,
+    getCustomFoods,
+    addCustomFood,
+    updateCustomFood,
+    removeCustomFood,
+
+    // Meal plan methods
+    getMealPlan,
+    setMealPlanForDay,
+    setMealPortionsForSlot,
+    resetMealPlan,
 
     // Utility methods
     clearAllData,

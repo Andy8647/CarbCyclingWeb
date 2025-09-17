@@ -1,4 +1,4 @@
-import { useState, memo, useEffect } from 'react';
+import { useState, memo, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Header } from '@/components/layout/Header';
@@ -47,6 +47,15 @@ function AppContent() {
     saveTrainingWorkouts,
     saveTrainingOrder,
     getTrainingConfig,
+    getFoodLibrary,
+    getCustomFoods,
+    addCustomFood,
+    updateCustomFood,
+    removeCustomFood,
+    getMealPlan,
+    setMealPlanForDay,
+    setMealPortionsForSlot,
+    resetMealPlan,
   } = useAppPersistence();
 
   // Get saved user settings or use defaults
@@ -85,6 +94,9 @@ function AppContent() {
       saveTrainingOrder(formData.cycleDays, order);
     }
   };
+
+  const foodLibrary = useMemo(() => getFoodLibrary(), [getFoodLibrary]);
+  const customFoods = useMemo(() => getCustomFoods(), [getCustomFoods]);
 
   // Get saved form data and merge with defaults
   const savedFormData = getFormData();
@@ -148,6 +160,15 @@ function AppContent() {
       setDailyWorkout={setDailyWorkout}
       dayOrder={dayOrder}
       setDayOrder={setDayOrder}
+      foodLibrary={foodLibrary}
+      customFoods={customFoods}
+      addCustomFood={addCustomFood}
+      updateCustomFood={updateCustomFood}
+      removeCustomFood={removeCustomFood}
+      getMealPlan={getMealPlan}
+      setMealPlanForDay={setMealPlanForDay}
+      setMealPortionsForSlot={setMealPortionsForSlot}
+      resetMealPlan={resetMealPlan}
     >
       <div
         className="min-h-screen text-foreground relative flex flex-col select-none"

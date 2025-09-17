@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState, useRef } from 'react';
+import { useMemo, useEffect, useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from '@/lib/form-context';
 import {
@@ -33,6 +33,15 @@ import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { IOSGridLayout } from './IOSGridLayout';
 import { useToast } from '@/lib/use-toast';
 import { exportNodeToPNG } from '@/lib/export-to-png';
+import type {
+  DayMealPlan,
+  FoodItem,
+  MealPortion,
+  MealSlotId,
+} from '@/lib/persistence-types';
+import { normalizeDayMealPlan } from '@/lib/meal-planner';
+import { MealSlotPlanner } from './MealSlotPlanner';
+import { FoodLibraryPanel } from './FoodLibraryPanel';
 
 const getDayTypeDisplay = (type: string, t: (key: string) => string) => {
   switch (type) {
@@ -221,6 +230,16 @@ interface DayColumnProps {
   dailyWorkouts: Record<number, string>;
   setDailyWorkout: (day: number, workout: string) => void;
   onDrop: (dragData: DragData, columnIndex: number) => void;
+  mealPlan: DayMealPlan;
+  foodLibrary: FoodItem[];
+  onUpdateMealSlot: (
+    dayNumber: number,
+    slotId: MealSlotId,
+    portions: MealPortion[]
+  ) => void;
+  onAddCustomFood: (
+    food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
+  ) => FoodItem;
   t: (key: string) => string;
 }
 
@@ -230,6 +249,10 @@ function DayColumn({
   dailyWorkouts,
   setDailyWorkout,
   onDrop,
+  mealPlan,
+  foodLibrary,
+  onUpdateMealSlot,
+  onAddCustomFood,
   t,
 }: DayColumnProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -296,6 +319,24 @@ function DayColumn({
           </div>
         )}
       </div>
+
+      {day && (
+        <MealSlotPlanner
+          dayNumber={day.day}
+          dayMealPlan={mealPlan}
+          foodLibrary={foodLibrary}
+          onUpdateSlot={(slotId, portions) =>
+            onUpdateMealSlot(day.day, slotId, portions)
+          }
+          onAddCustomFood={onAddCustomFood}
+          targetMacros={{
+            carbs: day.carbs,
+            protein: day.protein,
+            fat: day.fat,
+            calories: day.calories,
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -325,17 +366,63 @@ function useScreenSize() {
 export function ResultCard() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { form, dailyWorkouts, setDailyWorkout, dayOrder, setDayOrder } =
-    useFormContext();
+  const {
+    form,
+    dailyWorkouts,
+    setDailyWorkout,
+    dayOrder,
+    setDayOrder,
+    foodLibrary,
+    addCustomFood,
+    removeCustomFood,
+    getMealPlan,
+    setMealPortionsForSlot,
+    resetMealPlan,
+  } = useFormContext();
 
   const exportRef = useRef<HTMLDivElement>(null);
 
   const isLargeScreen = useScreenSize();
+  const [showFoodLibrary, setShowFoodLibrary] = useState(false);
 
   // 营养数据（克数和卡路里）在公制和英制中是相同的，不需转换
 
   const formData = form?.watch();
   const isValid = form?.formState.isValid;
+
+  const cycleDays = formData?.cycleDays ?? 0;
+
+  const mealPlan = useMemo(() => {
+    if (!cycleDays) return null;
+    return getMealPlan(cycleDays);
+  }, [getMealPlan, cycleDays]);
+
+  const dayMealPlans = useMemo(() => {
+    if (!mealPlan) return {} as Record<number, DayMealPlan>;
+    const plans: Record<number, DayMealPlan> = {};
+    for (const [key, plan] of Object.entries(mealPlan.dayMeals)) {
+      const dayNumber = Number(key);
+      plans[dayNumber] = normalizeDayMealPlan(plan);
+    }
+    return plans;
+  }, [mealPlan]);
+
+  const handleMealSlotUpdate = useCallback(
+    (dayNumber: number, slotId: MealSlotId, portions: MealPortion[]) => {
+      if (!cycleDays) return;
+      setMealPortionsForSlot(cycleDays, dayNumber, slotId, portions);
+    },
+    [cycleDays, setMealPortionsForSlot]
+  );
+
+  const handleResetMealPlan = useCallback(() => {
+    if (!cycleDays) return;
+    resetMealPlan(cycleDays);
+    toast({
+      variant: 'success',
+      title: t('mealPlanner.resetSuccess'),
+    });
+  }, [cycleDays, resetMealPlan, toast, t]);
 
   const nutritionPlan = useMemo(() => {
     if (
@@ -630,6 +717,18 @@ export function ResultCard() {
           data-export-exclude
         >
           <div className="flex flex-wrap gap-3">
+            <Button
+              variant={showFoodLibrary ? 'default' : 'outline'}
+              className="rounded-xl"
+              onClick={() => setShowFoodLibrary((prev) => !prev)}
+            >
+              <span>🍱</span>
+              <span className="hidden sm:inline ml-1">
+                {showFoodLibrary
+                  ? t('mealPlanner.hideLibrary')
+                  : t('mealPlanner.showLibrary')}
+              </span>
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="rounded-xl">
@@ -648,6 +747,13 @@ export function ResultCard() {
                 <DropdownMenuItem onClick={handleCopyAsCSV}>
                   <span className="mr-2">📊</span>
                   {t('results.copyAsCSV')}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleResetMealPlan}
+                  disabled={!cycleDays}
+                >
+                  <span className="mr-2">♻️</span>
+                  {t('mealPlanner.resetPlanAction')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -716,6 +822,16 @@ export function ResultCard() {
               </div>
             </div>
 
+            {showFoodLibrary && (
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/40 p-4">
+                <FoodLibraryPanel
+                  foods={foodLibrary}
+                  onAddCustomFood={addCustomFood}
+                  onRemoveFood={removeCustomFood}
+                />
+              </div>
+            )}
+
             {/* Layout conditional rendering based on screen size */}
             {isLargeScreen ? (
               /* Kanban Board layout for large screens (>= 1024px) */
@@ -728,17 +844,27 @@ export function ResultCard() {
                     overflowX: orderedDays.length > 7 ? 'auto' : 'visible',
                   }}
                 >
-                  {Array.from({ length: orderedDays.length }, (_, index) => (
-                    <DayColumn
-                      key={`column-${index}`}
-                      columnIndex={index}
-                      day={orderedDays[index]}
-                      dailyWorkouts={dailyWorkouts}
-                      setDailyWorkout={setDailyWorkout}
-                      onDrop={handleDrop}
-                      t={t}
-                    />
-                  ))}
+                  {orderedDays.map((dayData, index) => {
+                    if (!dayData) return null;
+                    const mealPlanForDay =
+                      dayMealPlans[dayData.day] || normalizeDayMealPlan();
+
+                    return (
+                      <DayColumn
+                        key={`column-${dayData.day}`}
+                        columnIndex={index}
+                        day={dayData}
+                        dailyWorkouts={dailyWorkouts}
+                        setDailyWorkout={setDailyWorkout}
+                        onDrop={handleDrop}
+                        mealPlan={mealPlanForDay}
+                        foodLibrary={foodLibrary}
+                        onUpdateMealSlot={handleMealSlotUpdate}
+                        t={t}
+                        onAddCustomFood={addCustomFood}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             ) : (
@@ -748,6 +874,10 @@ export function ResultCard() {
                 dailyWorkouts={dailyWorkouts}
                 setDailyWorkout={setDailyWorkout}
                 onDrop={handleGridDrop}
+                foodLibrary={foodLibrary}
+                dayMealPlans={dayMealPlans}
+                onMealSlotChange={handleMealSlotUpdate}
+                onAddCustomFood={addCustomFood}
               />
             )}
           </div>
