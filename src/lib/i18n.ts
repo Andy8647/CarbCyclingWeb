@@ -36,6 +36,11 @@ const zhCN = {
     carbCoeff: '碳水',
     proteinCoeff: '蛋白质',
     fatCoeff: '脂肪',
+    macroEmojis: {
+      carbs: '🍚',
+      protein: '🍖',
+      fat: '🥜',
+    },
     descriptions: {
       endomorph:
         '内胚型：易增重，代谢较慢，适合低碳水高蛋白饮食。蛋白质建议0.8-2.5g/kg体重。',
@@ -167,6 +172,11 @@ const zhCN = {
     quickAddSubmit: '保存并选用',
     addMealSlot: '添加餐次',
     removeSlot: '移除{{slot}}',
+    macroEmojis: {
+      carbs: '🍚',
+      protein: '🍖',
+      fat: '🥜',
+    },
     categories: {
       protein: '蛋白质',
       carb: '碳水',
@@ -297,6 +307,11 @@ const enUS = {
     carbCoeff: 'Carbs',
     proteinCoeff: 'Protein',
     fatCoeff: 'Fat',
+    macroEmojis: {
+      carbs: '🍞',
+      protein: '🥩',
+      fat: '🥑',
+    },
     descriptions: {
       endomorph:
         'Endomorph: Prone to weight gain with a slower metabolism. Best suited for a low-carb, high-protein diet. Suggested protein intake: 0.8–2.5 g/kg body weight.',
@@ -430,6 +445,11 @@ const enUS = {
     quickAddSubmit: 'Save & select',
     addMealSlot: 'Add meal slot',
     removeSlot: 'Remove {{slot}}',
+    macroEmojis: {
+      carbs: '🍞',
+      protein: '🥩',
+      fat: '🥑',
+    },
     categories: {
       protein: 'Protein',
       carb: 'Carb',

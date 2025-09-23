@@ -121,9 +121,8 @@ function SlotSection({
   const [servings, setServings] = useState<number>(1);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [pendingFoodId, setPendingFoodId] = useState<string | null>(null);
-  const [quickForm, setQuickForm] = useState<QuickAddFormState>(
-    QUICK_FORM_DEFAULTS
-  );
+  const [quickForm, setQuickForm] =
+    useState<QuickAddFormState>(QUICK_FORM_DEFAULTS);
   const resetQuickForm = useCallback(
     () => setQuickForm({ ...QUICK_FORM_DEFAULTS }),
     []
@@ -146,6 +145,9 @@ function SlotSection({
     );
   }, [foodLibrary, t]);
   const selectedFood = selectedFoodId ? foodLookup[selectedFoodId] : undefined;
+  const macroEmojis = t('mealPlanner.macroEmojis', {
+    returnObjects: true,
+  }) as Record<string, string>;
 
   const isAmountUnit = (unit?: ServingUnit) =>
     unit === 'per_100g' || unit === 'per_100ml';
@@ -368,8 +370,7 @@ function SlotSection({
 
     const newFood = onAddCustomFood({
       name: quickForm.name.trim(),
-      category:
-        quickForm.category.trim() || t('mealPlanner.customCategory'),
+      category: quickForm.category.trim() || t('mealPlanner.customCategory'),
       defaultServing: quickForm.defaultServing.trim(),
       servingUnit: quickForm.servingUnit,
       macros: {
@@ -500,9 +501,18 @@ function SlotSection({
           const isExpanded = expandedPortions[portion.id] ?? false;
           const macroBadges = [
             { icon: food?.emoji || '🍽️', value: servingLine || '' },
-            { icon: '🍚', value: `${macros.carbs}g` },
-            { icon: '🥩', value: `${macros.protein}g` },
-            { icon: '🥜', value: `${macros.fat}g` },
+            {
+              icon: macroEmojis?.carbs ?? '🍚',
+              value: `${macros.carbs}g`,
+            },
+            {
+              icon: macroEmojis?.protein ?? '🥩',
+              value: `${macros.protein}g`,
+            },
+            {
+              icon: macroEmojis?.fat ?? '🥜',
+              value: `${macros.fat}g`,
+            },
             { icon: '🔥', value: `${macros.calories} kcal` },
           ];
 
@@ -621,35 +631,39 @@ function SlotSection({
                 }}
               >
                 <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder={t('mealPlanner.searchPlaceholder')} />
+                  <SelectValue
+                    placeholder={t('mealPlanner.searchPlaceholder')}
+                  />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
-                  {localizedFoodLibrary.map(({ food, name, serving, unitLabel }) => (
-                    <SelectItem key={food.id} value={food.id}>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-medium flex items-center gap-1">
-                          <span>{food.emoji || '🍽️'}</span>
-                          <span>{name}</span>
-                        </span>
-                        <span className="text-[11px] text-slate-500 flex items-center gap-1">
-                          {unitLabel && <span>{unitLabel}</span>}
-                          {unitLabel && serving && (
-                            <span>·</span>
-                          )}
-                          {serving && <span>{serving}</span>}
-                          {food.preparation && (
-                            <span>
-                              {food.preparation === 'raw'
-                                ? t('mealPlanner.preparationShort.raw')
-                                : t('mealPlanner.preparationShort.cooked')}
-                            </span>
-                          )}
-                        </span>
-                      </div>
-                    </SelectItem>
-                  ))}
+                  {localizedFoodLibrary.map(
+                    ({ food, name, serving, unitLabel }) => (
+                      <SelectItem key={food.id} value={food.id}>
+                        <div className="flex flex-col">
+                          <span className="text-xs font-medium flex items-center gap-1">
+                            <span>{food.emoji || '🍽️'}</span>
+                            <span>{name}</span>
+                          </span>
+                          <span className="text-[11px] text-slate-500 flex items-center gap-1">
+                            {unitLabel && <span>{unitLabel}</span>}
+                            {unitLabel && serving && <span>·</span>}
+                            {serving && <span>{serving}</span>}
+                            {food.preparation && (
+                              <span>
+                                {food.preparation === 'raw'
+                                  ? t('mealPlanner.preparationShort.raw')
+                                  : t('mealPlanner.preparationShort.cooked')}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    )
+                  )}
                   <SelectItem value="__add_new_food__">
-                    <span className="text-xs">➕ {t('mealPlanner.quickAddLabel')}</span>
+                    <span className="text-xs">
+                      ➕ {t('mealPlanner.quickAddLabel')}
+                    </span>
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -737,7 +751,9 @@ function SlotSection({
               }
             >
               <SelectTrigger className="h-9 text-sm">
-                <SelectValue placeholder={t('mealPlanner.servingUnitPlaceholder')} />
+                <SelectValue
+                  placeholder={t('mealPlanner.servingUnitPlaceholder')}
+                />
               </SelectTrigger>
               <SelectContent>
                 {SERVING_UNIT_OPTIONS.map((unit) => (
@@ -935,7 +951,9 @@ export function MealSlotPlanner({
                     : 'border-amber-500 text-amber-600 dark:text-amber-400'
               )}
             >
-              {t('mealPlanner.carbsDiff', { value: renderDiff(diff.carbs, 'g') })}
+              {t('mealPlanner.carbsDiff', {
+                value: renderDiff(diff.carbs, 'g'),
+              })}
             </span>
             <span
               className={cn(

@@ -109,6 +109,10 @@ export function InputForm() {
     }
   };
 
+  const nutritionEmojis = t('nutrition.macroEmojis', {
+    returnObjects: true,
+  }) as Record<string, string>;
+
   return (
     <GlassCard>
       <div className="space-y-3">
@@ -256,7 +260,7 @@ export function InputForm() {
                 <CompactInput
                   key={`carb-${watchedValues.bodyType}`}
                   label={t('nutrition.carbCoeff')}
-                  emoji="🍞"
+                  emoji={nutritionEmojis?.carbs ?? '🍞'}
                   type="number"
                   step="0.1"
                   min="2.0"
@@ -277,7 +281,7 @@ export function InputForm() {
                 <CompactInput
                   key={`protein-${watchedValues.bodyType}`}
                   label={t('nutrition.proteinCoeff')}
-                  emoji="🥩"
+                  emoji={nutritionEmojis?.protein ?? '🥩'}
                   type="number"
                   step="0.1"
                   min="0.8"
@@ -298,7 +302,7 @@ export function InputForm() {
                 <CompactInput
                   key={`fat-${watchedValues.bodyType}`}
                   label={t('nutrition.fatCoeff')}
-                  emoji="🥑"
+                  emoji={nutritionEmojis?.fat ?? '🥑'}
                   type="number"
                   step="0.1"
                   min="0.5"
