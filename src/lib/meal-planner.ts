@@ -265,15 +265,18 @@ export function calculateDayTotals(
   dayPlan: DayMealPlan,
   foodLookup: Record<string, FoodItem>
 ): MacroProfile {
-  return MEAL_SLOT_IDS.reduce<MacroProfile>((totals, slotId) => {
-    const slotTotals = calculateSlotTotals(dayPlan[slotId], foodLookup);
-    return {
-      carbs: Math.round((totals.carbs + slotTotals.carbs) * 10) / 10,
-      protein: Math.round((totals.protein + slotTotals.protein) * 10) / 10,
-      fat: Math.round((totals.fat + slotTotals.fat) * 10) / 10,
-      calories: totals.calories + slotTotals.calories,
-    };
-  }, { carbs: 0, protein: 0, fat: 0, calories: 0 });
+  return MEAL_SLOT_IDS.reduce<MacroProfile>(
+    (totals, slotId) => {
+      const slotTotals = calculateSlotTotals(dayPlan[slotId], foodLookup);
+      return {
+        carbs: Math.round((totals.carbs + slotTotals.carbs) * 10) / 10,
+        protein: Math.round((totals.protein + slotTotals.protein) * 10) / 10,
+        fat: Math.round((totals.fat + slotTotals.fat) * 10) / 10,
+        calories: totals.calories + slotTotals.calories,
+      };
+    },
+    { carbs: 0, protein: 0, fat: 0, calories: 0 }
+  );
 }
 
 export type MealSlotDefinition = (typeof MEAL_SLOT_DEFINITIONS)[number];

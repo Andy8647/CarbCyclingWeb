@@ -37,3 +37,42 @@
 - i18n with `i18next` (`src/lib/i18n.ts`).
 - Drag-and-drop via `@dnd-kit/*` and Atlaskit pragmatic DnD.
 - Persistence uses `localStorage` helpers (`use-local-storage.ts`, `use-app-persistence.ts`).
+
+# Refactor Plan
+
+## Large File Decomposition
+
+- src/components/core/MealSlotPlanner.tsx → split into container, SlotSection, PortionCard,
+  QuickAddModal; move helpers to src/lib/meal-slot-utils.ts.
+- src/components/core/ResultCard.tsx → extract data logic to src/lib/result-card-logic.ts;
+  create focused subcomponents under src/components/core/result-card/.
+- src/lib/i18n.ts → break into namespace modules (e.g., lib/i18n/core.ts, lib/i18n/meal-
+  planner.ts) and re-export via an index.
+- src/components/core/FoodLibraryPanel.tsx → move filter/search logic into
+  useFoodLibraryFilters (src/lib/hooks/); split list/item views into components/core/food-
+  library/.
+- src/components/core/InputForm.tsx → carve grouped sections (user settings, targets,
+  validation) into smaller child components.
+- src/components/core/IOSGridLayout.tsx → extract layout math/drag adapters to src/lib/
+  grid-layout.ts; keep JSX wrapper lean.
+
+## Trim Unnecessary Effects
+
+- MealSlotPlanner → replace useEffect re-syncing servings with derived values; handle
+  pending food selection inline post onAddCustomFood.
+- MealSlotPlanner → eliminate useEffect toggling quick add visibility by deriving state
+  from isAdding and callbacks.
+- App.tsx → convert training config useEffect to useMemo/useCallback with proper deps.
+- Review remaining hooks after decomposition, preferring memoized computations over
+  state+effect pairs.
+
+## Additional Cleanups
+
+- Centralize meal planner helpers in src/lib/meal-planner.ts; expose granular functions for
+  shared use.
+- Create hook modules (useMealSlotState, useQuickAddForm) under src/lib/hooks/ for
+  refactored components.
+- Share prop types via src/components/core/meal-slot/types.ts to keep cross-file typing
+  aligned.
+- Expand tests (src/lib/__tests__/calculator.test.ts + new files) to cover extracted
+  utilities and quick-add flows.

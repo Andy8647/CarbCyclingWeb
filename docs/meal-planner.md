@@ -10,6 +10,5 @@
 8. the "Day X" on mobile view is wrong, it should always be the index+1 of the postion of that card no matter how user drag it 
 9. for the food option, we also want to enable user to set the unit, might be per 100g/ml, per piece, per half piece, but per cup or per bowl is too vague 
 10. the nutrition inputs now swap emojis per locale (en: 🍞/🥑/🥩, zh: 🍚/🥜/🍖) so carb/fat/protein match local expectations
-11. improve meal slot selection header UI:
-  - align emoji with meal name, add button and delete button
-  - when add a food option, make the search-able drodown and the serve/weight and the add button in one line
+11. meal slot header now shows the slot emoji + name on one line, localized macro icons without units, and the add/remove buttons stay compact; the add-food row keeps the search dropdown, weight input, and add button in a single line
+  - for the nutrition marcos, do not add padding and background, adn remove the 'g' unit to make sure them appear in one line

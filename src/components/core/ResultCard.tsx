@@ -83,6 +83,7 @@ interface DraggableCardProps {
   dailyWorkouts: Record<number, string>;
   setDailyWorkout: (day: number, workout: string) => void;
   t: (key: string) => string;
+  macroEmojis: Record<string, string>;
 }
 
 function DraggableCard({
@@ -90,6 +91,7 @@ function DraggableCard({
   dailyWorkouts,
   setDailyWorkout,
   t,
+  macroEmojis,
 }: DraggableCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -161,36 +163,36 @@ function DraggableCard({
       </div>
 
       {/* 营养数据 */}
-      <div className="space-y-2.5">
-        <div className="text-xs font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
-          📊 {t('results.nutritionBreakdown')}
-        </div>
-
-        <div className="space-y-1.5">
-          <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
-            <div className="flex items-center gap-0.5">
-              <span className="text-xs">🍚</span>
-              <span className="text-xs">{t('results.carbs')}</span>
+          <div className="space-y-2.5">
+            <div className="text-xs font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
+              📊 {t('results.nutritionBreakdown')}
             </div>
-            <div className="font-semibold text-xs">{day.carbs}g</div>
-          </div>
 
-          <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
-            <div className="flex items-center gap-0.5">
-              <span className="text-xs">🥜</span>
-              <span className="text-xs">{t('results.fat')}</span>
-            </div>
-            <div className="font-semibold text-xs">{day.fat}g</div>
-          </div>
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
+                <div className="flex items-center gap-0.5">
+                  <span className="text-xs">{macroEmojis.carbs ?? '🍞'}</span>
+                  <span className="text-xs">{t('results.carbs')}</span>
+                </div>
+                <div className="font-semibold text-xs">{day.carbs}g</div>
+              </div>
 
-          <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
-            <div className="flex items-center gap-0.5">
-              <span className="text-xs">🥩</span>
-              <span className="text-xs">{t('results.protein')}</span>
+              <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
+                <div className="flex items-center gap-0.5">
+                  <span className="text-xs">{macroEmojis.fat ?? '🥑'}</span>
+                  <span className="text-xs">{t('results.fat')}</span>
+                </div>
+                <div className="font-semibold text-xs">{day.fat}g</div>
+              </div>
+
+              <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
+                <div className="flex items-center gap-0.5">
+                  <span className="text-xs">{macroEmojis.protein ?? '🥩'}</span>
+                  <span className="text-xs">{t('results.protein')}</span>
+                </div>
+                <div className="font-semibold text-xs">{day.protein}g</div>
+              </div>
             </div>
-            <div className="font-semibold text-xs">{day.protein}g</div>
-          </div>
-        </div>
 
         {/* 热量信息 */}
         <div className="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
@@ -241,6 +243,7 @@ interface DayColumnProps {
     food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
   ) => FoodItem;
   t: (key: string) => string;
+  macroIcons: Record<'carbs' | 'protein' | 'fat', string>;
 }
 
 function DayColumn({
@@ -254,6 +257,7 @@ function DayColumn({
   onUpdateMealSlot,
   onAddCustomFood,
   t,
+  macroIcons,
 }: DayColumnProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [isDraggedOver, setIsDraggedOver] = useState(false);
@@ -308,6 +312,7 @@ function DayColumn({
             dailyWorkouts={dailyWorkouts}
             setDailyWorkout={setDailyWorkout}
             t={t}
+            macroEmojis={macroIcons}
           />
         )}
         {!day && (
@@ -384,6 +389,14 @@ export function ResultCard() {
 
   const isLargeScreen = useScreenSize();
   const [showFoodLibrary, setShowFoodLibrary] = useState(false);
+  const resultsMacroEmojis = t('results.macroEmojis', {
+    returnObjects: true,
+  }) as Record<string, string>;
+  const macroIcons = {
+    carbs: resultsMacroEmojis?.carbs ?? '🍞',
+    protein: resultsMacroEmojis?.protein ?? '🥩',
+    fat: resultsMacroEmojis?.fat ?? '🥑',
+  };
 
   // 营养数据（克数和卡路里）在公制和英制中是相同的，不需转换
 
@@ -563,9 +576,9 @@ export function ResultCard() {
 
     let markdownText = `# ${t('results.carbCyclingPlan')}\n\n`;
     markdownText += `## ${t('results.weeklySummary')}\n`;
-    markdownText += `- 🥩 ${t('results.dailyProtein')}: ${summary.dailyProtein}g\n`;
-    markdownText += `- 🍚 ${t('results.weeklyCarbs')}: ${summary.totalCarbs}g\n`;
-    markdownText += `- 🥜 ${t('results.weeklyFat')}: ${summary.totalFat}g\n`;
+    markdownText += `- ${macroIcons.protein} ${t('results.dailyProtein')}: ${summary.dailyProtein}g\n`;
+    markdownText += `- ${macroIcons.carbs} ${t('results.weeklyCarbs')}: ${summary.totalCarbs}g\n`;
+    markdownText += `- ${macroIcons.fat} ${t('results.weeklyFat')}: ${summary.totalFat}g\n`;
     markdownText += `- 🔥 ${t('results.weeklyCalories')}: ${summary.totalCalories}kcal\n`;
     if (metabolicData) {
       markdownText += `- ⚡ ${t('results.dailyTDEE')}: ${metabolicData.tdee}kcal\n`;
@@ -778,7 +791,7 @@ export function ResultCard() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
                 <div className="text-xs text-slate-500 flex items-center gap-1 mb-1 whitespace-nowrap">
-                  <span className="text-sm">🥩</span>
+                  <span className="text-sm">{macroIcons.protein}</span>
                   <span>{t('results.dailyProtein')}</span>
                 </div>
                 <div className="text-sm sm:text-lg font-semibold">
@@ -787,7 +800,7 @@ export function ResultCard() {
               </div>
               <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
                 <div className="text-xs text-slate-500 flex items-center gap-1 mb-1 whitespace-nowrap">
-                  <span className="text-sm">🍚</span>
+                  <span className="text-sm">{macroIcons.carbs}</span>
                   <span>{t('results.weeklyCarbs')}</span>
                 </div>
                 <div className="text-sm sm:text-lg font-semibold">
@@ -796,7 +809,7 @@ export function ResultCard() {
               </div>
               <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
                 <div className="text-xs text-slate-500 flex items-center gap-1 mb-1 whitespace-nowrap">
-                  <span className="text-sm">🥜</span>
+                  <span className="text-sm">{macroIcons.fat}</span>
                   <span>{t('results.weeklyFat')}</span>
                 </div>
                 <div className="text-sm sm:text-lg font-semibold">
@@ -862,6 +875,7 @@ export function ResultCard() {
                         onUpdateMealSlot={handleMealSlotUpdate}
                         t={t}
                         onAddCustomFood={addCustomFood}
+                        macroIcons={macroIcons}
                       />
                     );
                   })}

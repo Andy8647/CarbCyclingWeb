@@ -255,6 +255,21 @@ function SlotSection({
     () => calculateSlotTotals(portions, foodLookup),
     [portions, foodLookup]
   );
+  const formatBadgeValue = (value: number) => Math.round(value * 10) / 10;
+  const headerMacroBadges = [
+    {
+      icon: macroEmojis?.carbs ?? '🍚',
+      value: formatBadgeValue(totals.carbs),
+    },
+    {
+      icon: macroEmojis?.protein ?? '🍖',
+      value: formatBadgeValue(totals.protein),
+    },
+    {
+      icon: macroEmojis?.fat ?? '🥜',
+      value: formatBadgeValue(totals.fat),
+    },
+  ];
 
   const handleAddInputChange = (value: string) => {
     if (value === '') {
@@ -416,16 +431,20 @@ function SlotSection({
           <span className="text-lg" aria-hidden>
             {slotDefinition.icon}
           </span>
-          <div>
-            <div className="text-sm font-semibold">
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
               {t(slotDefinition.translationKey)}
-            </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">
-              {t('mealPlanner.slotTotals', {
-                carbs: totals.carbs,
-                protein: totals.protein,
-                fat: totals.fat,
-              })}
+            </span>
+            <div className="mt-0.5 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+              {headerMacroBadges.map((badge) => (
+                <span
+                  key={`${slotId}-${badge.icon}`}
+                  className="inline-flex items-center gap-1"
+                >
+                  <span>{badge.icon}</span>
+                  <span>{badge.value}</span>
+                </span>
+              ))}
             </div>
           </div>
         </div>
@@ -503,17 +522,17 @@ function SlotSection({
             { icon: food?.emoji || '🍽️', value: servingLine || '' },
             {
               icon: macroEmojis?.carbs ?? '🍚',
-              value: `${macros.carbs}g`,
+              value: formatBadgeValue(macros.carbs),
             },
             {
               icon: macroEmojis?.protein ?? '🥩',
-              value: `${macros.protein}g`,
+              value: formatBadgeValue(macros.protein),
             },
             {
               icon: macroEmojis?.fat ?? '🥜',
-              value: `${macros.fat}g`,
+              value: formatBadgeValue(macros.fat),
             },
-            { icon: '🔥', value: `${macros.calories} kcal` },
+            { icon: '🔥', value: Math.round(macros.calories) },
           ];
 
           return (
@@ -561,14 +580,20 @@ function SlotSection({
                       {preparationLabel}
                     </div>
                   )}
-                  <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-600 dark:text-slate-300">
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
                     {macroBadges.map((badge) => (
                       <span
                         key={badge.icon}
-                        className="inline-flex items-center gap-1 rounded-full bg-slate-200/70 px-2 py-1 dark:bg-slate-700/40"
+                        className="inline-flex items-center gap-1"
                       >
                         <span>{badge.icon}</span>
-                        {badge.value && <span>{badge.value}</span>}
+                        {badge.value !== '' && (
+                          <span>
+                            {typeof badge.value === 'number'
+                              ? badge.value
+                              : badge.value}
+                          </span>
+                        )}
                       </span>
                     ))}
                   </div>
@@ -610,10 +635,10 @@ function SlotSection({
 
         {isAdding && (
           <div className="rounded-md border border-dashed border-slate-300 dark:border-slate-700 p-2 space-y-2">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                {t('mealPlanner.chooseFood')}
-              </label>
+            <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
+              {t('mealPlanner.chooseFood')}
+            </label>
+            <div className="flex flex-wrap items-center gap-2">
               <Select
                 value={selectedFoodId}
                 onValueChange={(value) => {
@@ -630,10 +655,8 @@ function SlotSection({
                   setServings(getDefaultInputValue(targetFood?.servingUnit));
                 }}
               >
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue
-                    placeholder={t('mealPlanner.searchPlaceholder')}
-                  />
+                <SelectTrigger className="h-8 w-48 text-xs">
+                  <SelectValue placeholder={t('mealPlanner.searchPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
                   {localizedFoodLibrary.map(
@@ -667,13 +690,11 @@ function SlotSection({
                   </SelectItem>
                 </SelectContent>
               </Select>
-            </div>
 
-            <div className="flex items-center gap-2">
-              <label className="text-xs text-slate-600 dark:text-slate-300">
-                {addInputLabel}
-              </label>
               <div className="flex items-center gap-1">
+                <label className="text-xs text-slate-600 dark:text-slate-300">
+                  {addInputLabel}
+                </label>
                 <Input
                   type="number"
                   inputMode="decimal"
@@ -681,7 +702,7 @@ function SlotSection({
                   step={addInputStep}
                   value={addInputValue}
                   onChange={(event) => handleAddInputChange(event.target.value)}
-                  className="w-24 h-8 text-xs"
+                  className="h-8 w-24 text-xs"
                 />
                 {addInputSuffix && (
                   <span className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -689,6 +710,7 @@ function SlotSection({
                   </span>
                 )}
               </div>
+
               <Button
                 size="sm"
                 onClick={handleAddPortion}
