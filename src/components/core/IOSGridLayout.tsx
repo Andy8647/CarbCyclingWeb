@@ -48,6 +48,7 @@ interface DayData {
 
 interface IOSSquareCardProps {
   day: DayData;
+  displayOrder: number;
   dailyWorkouts: Record<number, string>;
   setDailyWorkout: (day: number, workout: string) => void;
   mealPlan: DayMealPlan;
@@ -64,6 +65,7 @@ interface IOSSquareCardProps {
 
 function IOSSquareCard({
   day,
+  displayOrder,
   dailyWorkouts,
   setDailyWorkout,
   mealPlan,
@@ -106,7 +108,7 @@ function IOSSquareCard({
       {/* 头部：天数和类型 */}
       <div className="flex flex-col items-center mb-3">
         <div className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1">
-          {t('results.dayNumber', { day: day.day })}
+          {t('results.dayNumber', { day: displayOrder })}
         </div>
         <div className="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
           {getDayTypeDisplay(day.type, t)}
@@ -323,6 +325,7 @@ export function IOSGridLayout({
           >
             <IOSSquareCard
               day={day}
+              displayOrder={index + 1}
               dailyWorkouts={dailyWorkouts}
               setDailyWorkout={setDailyWorkout}
               mealPlan={mealPlanForDay}

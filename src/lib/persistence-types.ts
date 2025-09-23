@@ -22,14 +22,34 @@ export interface MacroProfile {
   calories: number;
 }
 
+export type ServingUnit =
+  | 'per_100g'
+  | 'per_100ml'
+  | 'per_piece'
+  | 'per_half_piece';
+
+export const SERVING_UNIT_OPTIONS: ServingUnit[] = [
+  'per_100g',
+  'per_100ml',
+  'per_piece',
+  'per_half_piece',
+];
+
 /**
  * Food or ingredient definition used by the meal planner
  */
 export interface FoodItem {
   id: string;
   name: string;
+  /** Optional translation key for name */
+  nameKey?: string;
   category: string;
+  /** Optional translation key for category */
+  categoryKey?: string;
   defaultServing: string;
+  servingUnit?: ServingUnit;
+  /** Optional translation key for serving description */
+  defaultServingKey?: string;
   macros: MacroProfile;
   preparation?: 'raw' | 'cooked';
   emoji?: string;

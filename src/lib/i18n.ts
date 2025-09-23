@@ -129,12 +129,26 @@ const zhCN = {
     fieldName: '食材名称',
     fieldCategory: '分类',
     fieldServing: '每份',
+    fieldServingUnit: '基础单位',
     fieldCarbs: '碳水 (g)',
     fieldProtein: '蛋白 (g)',
     fieldFat: '脂肪 (g)',
     fieldPreparation: '称重状态',
     fieldEmoji: '图标 Emoji',
     submitNewFood: '保存',
+    servingUnitPlaceholder: '选择单位',
+    servingUnitHint: '宏量营养应按照该基础单位记录。',
+    servingInputLabel: {
+      default: '份数',
+      per_100g: '重量 (克)',
+      per_100ml: '容量 (毫升)',
+      per_piece: '份数',
+      per_half_piece: '半份数',
+    },
+    servingInputSuffix: {
+      per_100g: '克',
+      per_100ml: '毫升',
+    },
     addFoodErrorTitle: '请完善食材信息',
     addFoodErrorDescription: '名称、份量与宏量营养需要填写完整。',
     customCategory: '自定义',
@@ -151,6 +165,62 @@ const zhCN = {
     quickAddLabel: '快速添加食材',
     quickAddTitle: '快速添加新食材',
     quickAddSubmit: '保存并选用',
+    addMealSlot: '添加餐次',
+    removeSlot: '移除{{slot}}',
+    categories: {
+      protein: '蛋白质',
+      carb: '碳水',
+      fat: '脂肪',
+      supplement: '补剂',
+    },
+    foods: {
+      chickenBreast: {
+        name: '鸡胸肉',
+        serving: '100 克熟重',
+      },
+      salmon: {
+        name: '三文鱼排',
+        serving: '100 克熟重',
+      },
+      whey: {
+        name: '乳清蛋白粉',
+        serving: '1 勺（30 克）',
+      },
+      egg: {
+        name: '全蛋',
+        serving: '1 枚大号鸡蛋',
+      },
+      brownRice: {
+        name: '糙米',
+        serving: '100 克熟重',
+      },
+      sweetPotato: {
+        name: '红薯',
+        serving: '100 克烤熟',
+      },
+      banana: {
+        name: '香蕉',
+        serving: '1 根中等大小',
+      },
+      avocado: {
+        name: '牛油果',
+        serving: '1/2 个中等大小',
+      },
+      almonds: {
+        name: '杏仁',
+        serving: '100 克',
+      },
+      greekYogurt: {
+        name: '希腊酸奶',
+        serving: '100 克',
+      },
+    },
+    servingUnits: {
+      per_100g: '每 100 克',
+      per_100ml: '每 100 毫升',
+      per_piece: '每 1 份',
+      per_half_piece: '每半份',
+    },
     slots: {
       breakfast: '早餐',
       morning_snack: '上午加餐',
@@ -321,12 +391,26 @@ const enUS = {
     fieldName: 'Name',
     fieldCategory: 'Category',
     fieldServing: 'Serving size',
+    fieldServingUnit: 'Base unit',
     fieldCarbs: 'Carbs (g)',
     fieldProtein: 'Protein (g)',
     fieldFat: 'Fat (g)',
     fieldPreparation: 'State when weighed',
     fieldEmoji: 'Emoji',
     submitNewFood: 'Save food',
+    servingUnitPlaceholder: 'Select unit',
+    servingUnitHint: 'Record macros for this base amount.',
+    servingInputLabel: {
+      default: 'Servings',
+      per_100g: 'Amount (g)',
+      per_100ml: 'Amount (ml)',
+      per_piece: 'Pieces',
+      per_half_piece: 'Half pieces',
+    },
+    servingInputSuffix: {
+      per_100g: 'g',
+      per_100ml: 'ml',
+    },
     addFoodErrorTitle: 'Check the food details',
     addFoodErrorDescription:
       'Name, serving size, and macronutrients are required.',
@@ -344,6 +428,62 @@ const enUS = {
     quickAddLabel: 'Quick add food',
     quickAddTitle: 'Add a new food on the fly',
     quickAddSubmit: 'Save & select',
+    addMealSlot: 'Add meal slot',
+    removeSlot: 'Remove {{slot}}',
+    categories: {
+      protein: 'Protein',
+      carb: 'Carb',
+      fat: 'Fat',
+      supplement: 'Supplement',
+    },
+    foods: {
+      chickenBreast: {
+        name: 'Chicken breast',
+        serving: '100 g cooked',
+      },
+      salmon: {
+        name: 'Salmon fillet',
+        serving: '100 g cooked',
+      },
+      whey: {
+        name: 'Whey protein',
+        serving: '1 scoop (30 g)',
+      },
+      egg: {
+        name: 'Whole egg',
+        serving: '1 large egg',
+      },
+      brownRice: {
+        name: 'Brown rice',
+        serving: '100 g cooked',
+      },
+      sweetPotato: {
+        name: 'Sweet potato',
+        serving: '100 g baked',
+      },
+      banana: {
+        name: 'Banana',
+        serving: '1 medium',
+      },
+      avocado: {
+        name: 'Avocado',
+        serving: '1/2 medium',
+      },
+      almonds: {
+        name: 'Almonds',
+        serving: '100 g',
+      },
+      greekYogurt: {
+        name: 'Greek yogurt',
+        serving: '100 g',
+      },
+    },
+    servingUnits: {
+      per_100g: 'Per 100 g',
+      per_100ml: 'Per 100 ml',
+      per_piece: 'Per piece',
+      per_half_piece: 'Per half piece',
+    },
     slots: {
       breakfast: 'Breakfast',
       morning_snack: 'Morning snack',

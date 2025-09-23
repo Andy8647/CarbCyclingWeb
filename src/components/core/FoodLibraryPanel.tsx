@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { FoodItem } from '@/lib/persistence-types';
+import type { FoodItem, ServingUnit } from '@/lib/persistence-types';
+import { SERVING_UNIT_OPTIONS } from '@/lib/persistence-types';
 import { useToast } from '@/lib/use-toast';
 
 interface FoodLibraryPanelProps {
@@ -26,6 +27,7 @@ interface FoodFormState {
   name: string;
   category: string;
   defaultServing: string;
+  servingUnit: ServingUnit;
   carbs: string;
   protein: string;
   fat: string;
@@ -37,6 +39,7 @@ const emptyForm: FoodFormState = {
   name: '',
   category: '',
   defaultServing: '',
+  servingUnit: 'per_100g',
   carbs: '',
   protein: '',
   fat: '',
@@ -55,22 +58,64 @@ export function FoodLibraryPanel({
   const [showForm, setShowForm] = useState(false);
   const [formState, setFormState] = useState<FoodFormState>(emptyForm);
 
+  const localizedFoods = useMemo(() => {
+    const mapped = foods.map((food) => {
+      const name = food.nameKey ? t(food.nameKey) : food.name;
+      const category = food.categoryKey ? t(food.categoryKey) : food.category;
+      const serving = food.defaultServingKey
+        ? t(food.defaultServingKey)
+        : food.defaultServing;
+      const unitLabel = food.servingUnit
+        ? t(`mealPlanner.servingUnits.${food.servingUnit}`)
+        : '';
+      const preparationLabel = food.preparation
+        ? food.preparation === 'raw'
+          ? t('mealPlanner.preparationRaw')
+          : t('mealPlanner.preparationCooked')
+        : '';
+
+      return {
+        food,
+        name,
+        category,
+        serving,
+        unitLabel,
+        preparationLabel,
+      };
+    });
+
+    return mapped.sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+    );
+  }, [foods, t]);
+
   const filteredFoods = useMemo(() => {
-    if (!search.trim()) return foods;
+    if (!search.trim()) return localizedFoods;
     const query = search.trim().toLowerCase();
-    return foods.filter((food) =>
+    return localizedFoods.filter(({
+      food,
+      name,
+      category,
+      serving,
+      unitLabel,
+      preparationLabel,
+    }) =>
       [
+        name,
+        category,
+        serving,
+        unitLabel,
+        preparationLabel,
         food.name,
         food.category,
         food.defaultServing,
-        food.preparation,
         food.emoji,
       ]
         .join(' ')
         .toLowerCase()
         .includes(query)
     );
-  }, [foods, search]);
+  }, [localizedFoods, search]);
 
   const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -102,6 +147,7 @@ export function FoodLibraryPanel({
       name: formState.name.trim(),
       category: formState.category.trim() || t('mealPlanner.customCategory'),
       defaultServing: formState.defaultServing.trim(),
+      servingUnit: formState.servingUnit,
       macros: {
         carbs: Math.round(carbs * 10) / 10,
         protein: Math.round(protein * 10) / 10,
@@ -200,6 +246,33 @@ export function FoodLibraryPanel({
               className="h-8 text-sm"
               required
             />
+          </div>
+
+          <div className="space-y-1">
+            <Label className="text-xs">{t('mealPlanner.fieldServingUnit')}</Label>
+            <Select
+              value={formState.servingUnit}
+              onValueChange={(value: ServingUnit) =>
+                setFormState((prev) => ({
+                  ...prev,
+                  servingUnit: value,
+                }))
+              }
+            >
+              <SelectTrigger className="h-8 text-sm">
+                <SelectValue placeholder={t('mealPlanner.servingUnitPlaceholder')} />
+              </SelectTrigger>
+              <SelectContent>
+                {SERVING_UNIT_OPTIONS.map((unit) => (
+                  <SelectItem key={unit} value={unit}>
+                    {t(`mealPlanner.servingUnits.${unit}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500">
+              {t('mealPlanner.servingUnitHint')}
+            </p>
           </div>
 
           <div className="space-y-1">
@@ -309,7 +382,14 @@ export function FoodLibraryPanel({
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-        {filteredFoods.map((food) => (
+        {filteredFoods.map(({
+          food,
+          name,
+          category,
+          serving,
+          unitLabel,
+          preparationLabel,
+        }) => (
           <div
             key={food.id}
             className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white/75 dark:bg-slate-900/60 p-3 space-y-2"
@@ -319,7 +399,7 @@ export function FoodLibraryPanel({
                 <div className="flex items-center gap-2">
                   <span className="text-base">{food.emoji || '🍽️'}</span>
                   <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                    {food.name}
+                    {name}
                   </span>
                   {food.isCustom && (
                     <span className="text-[11px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
@@ -328,16 +408,22 @@ export function FoodLibraryPanel({
                   )}
                 </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400">
-                  {food.defaultServing}
+                  {unitLabel || serving ? (
+                    <>
+                      {unitLabel}
+                      {unitLabel && serving && (
+                        <span className="text-slate-400 dark:text-slate-500"> · {serving}</span>
+                      )}
+                      {!unitLabel && serving}
+                    </>
+                  ) : null}
                 </div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {food.category}
+                  {category}
                 </div>
-                {food.preparation && (
+                {food.preparation && preparationLabel && (
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {food.preparation === 'raw'
-                      ? t('mealPlanner.preparationRaw')
-                      : t('mealPlanner.preparationCooked')}
+                    {preparationLabel}
                   </div>
                 )}
               </div>
