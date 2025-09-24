@@ -165,7 +165,11 @@ export const MEAL_SLOT_DEFINITIONS: Array<{
   icon: string;
   translationKey: string;
 }> = [
-  { id: 'breakfast', icon: '🍳', translationKey: 'mealPlanner.slots.breakfast' },
+  {
+    id: 'breakfast',
+    icon: '🍳',
+    translationKey: 'mealPlanner.slots.breakfast',
+  },
   {
     id: 'morning_snack',
     icon: '🥜',

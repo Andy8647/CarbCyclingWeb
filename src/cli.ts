@@ -2,7 +2,6 @@
 
 import {
   calculateNutritionPlan,
-  calculateMetabolicData,
   type UserInput,
   type BodyType,
   type ProteinLevel,

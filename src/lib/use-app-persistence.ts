@@ -171,7 +171,9 @@ export function useAppPersistence() {
   }, [appState.customFoods]);
 
   const addCustomFood = useCallback(
-    (food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>): FoodItem => {
+    (
+      food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
+    ): FoodItem => {
       const timestamp = Date.now();
       const id = createId('food');
       const newFood: FoodItem = {
@@ -229,17 +231,15 @@ export function useAppPersistence() {
       const currentFoods = appState.customFoods || {};
       if (!currentFoods[id]) return;
 
-      const { [id]: _removed, ...rest } = currentFoods;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [id]: _, ...rest } = currentFoods;
 
       // Also remove any meal portions referencing the deleted food
       const updatedMealPlans: Record<number, CycleMealPlan> = {};
       const storedMealPlans = appState.mealPlans || {};
       for (const [cycleKey, plan] of Object.entries(storedMealPlans)) {
         const cycleDays = Number(cycleKey);
-        const normalizedDayMeals = normalizeCycleMealPlan(
-          cycleDays,
-          plan
-        );
+        const normalizedDayMeals = normalizeCycleMealPlan(cycleDays, plan);
 
         let hasChanges = false;
         const cleanedDayMeals: Record<number, DayMealPlan> = {};
@@ -303,7 +303,8 @@ export function useAppPersistence() {
 
   const setMealPlanForDay = useCallback(
     (cycleDays: number, day: number, dayPlan: DayMealPlan) => {
-      const current = appState.mealPlans?.[cycleDays] ||
+      const current =
+        appState.mealPlans?.[cycleDays] ||
         createDefaultCycleMealPlan(cycleDays);
 
       const normalizedDayMeals = normalizeCycleMealPlan(cycleDays, current);
@@ -329,7 +330,8 @@ export function useAppPersistence() {
       slotId: MealSlotId,
       portions: MealPortion[]
     ) => {
-      const current = appState.mealPlans?.[cycleDays] ||
+      const current =
+        appState.mealPlans?.[cycleDays] ||
         createDefaultCycleMealPlan(cycleDays);
       const normalizedDayMeals = normalizeCycleMealPlan(cycleDays, current);
       const normalizedDayPlan = normalizeDayMealPlan(normalizedDayMeals[day]);

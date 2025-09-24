@@ -31,9 +31,11 @@ export function applyEnvSEO() {
     (import.meta.env.VITE_META_DESCRIPTION as string | undefined) ||
     'Open-source carb cycling planner that generates a personalized weekly macro plan with drag-and-drop, CSV/Markdown export, and PNG sharing. No login required.';
   const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined) || '';
-  const OG_IMAGE = (import.meta.env.VITE_OG_IMAGE as string | undefined) || '/og.png';
-  const TWITTER_HANDLE = import.meta.env
-    .VITE_TWITTER_HANDLE as string | undefined;
+  const OG_IMAGE =
+    (import.meta.env.VITE_OG_IMAGE as string | undefined) || '/og.png';
+  const TWITTER_HANDLE = import.meta.env.VITE_TWITTER_HANDLE as
+    | string
+    | undefined;
 
   const origin = SITE_URL || window.location.origin;
   const pageUrl = `${origin}${window.location.pathname}`;
@@ -72,4 +74,3 @@ export function applyEnvSEO() {
   setMeta('twitter:image', imageUrl);
   if (TWITTER_HANDLE) setMeta('twitter:site', TWITTER_HANDLE);
 }
-

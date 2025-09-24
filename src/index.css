@@ -96,13 +96,13 @@
   --ring: #528bff;
 }
 
-  @layer base {
-    * {
-      @apply border-border outline-ring;
-    }
-    body {
+@layer base {
+  * {
+    @apply border-border outline-ring;
+  }
+  body {
     @apply bg-background text-foreground font-sans;
-    }
+  }
 
   /* Hide scrollbars */
   ::-webkit-scrollbar {

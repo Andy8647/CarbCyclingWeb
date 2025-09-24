@@ -49,7 +49,11 @@ interface FormContextType {
   ) => FoodItem | null;
   removeCustomFood: (id: string) => void;
   getMealPlan: (cycleDays: number) => CycleMealPlan;
-  setMealPlanForDay: (cycleDays: number, day: number, plan: DayMealPlan) => void;
+  setMealPlanForDay: (
+    cycleDays: number,
+    day: number,
+    plan: DayMealPlan
+  ) => void;
   setMealPortionsForSlot: (
     cycleDays: number,
     day: number,
@@ -99,7 +103,11 @@ export function FormProvider({
   ) => FoodItem | null;
   removeCustomFood: (id: string) => void;
   getMealPlan: (cycleDays: number) => CycleMealPlan;
-  setMealPlanForDay: (cycleDays: number, day: number, plan: DayMealPlan) => void;
+  setMealPlanForDay: (
+    cycleDays: number,
+    day: number,
+    plan: DayMealPlan
+  ) => void;
   setMealPortionsForSlot: (
     cycleDays: number,
     day: number,
