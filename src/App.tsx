@@ -1,4 +1,4 @@
-import { useState, memo, useEffect, useMemo } from 'react';
+import { useState, memo, useEffect, useMemo, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Header } from '@/components/layout/Header';
@@ -131,25 +131,31 @@ function AppContent() {
     return () => subscription.unsubscribe();
   }, [form, saveFormData]);
 
+  // Memoized function to update training config
+  const updateTrainingConfig = useCallback(
+    (cycleDays: number) => {
+      const trainingConfig = getTrainingConfig(cycleDays);
+      setDailyWorkoutsState(trainingConfig.dailyWorkouts);
+      setDayOrderState(trainingConfig.dayOrder);
+    },
+    [getTrainingConfig]
+  );
+
   // Load training config when cycle days changes
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === 'cycleDays' && value.cycleDays) {
-        const trainingConfig = getTrainingConfig(value.cycleDays);
-        setDailyWorkoutsState(trainingConfig.dailyWorkouts);
-        setDayOrderState(trainingConfig.dayOrder);
+        updateTrainingConfig(value.cycleDays);
       }
     });
     return () => subscription.unsubscribe();
-  }, [form, getTrainingConfig]);
+  }, [form, updateTrainingConfig]);
 
   // Load initial training config based on default cycle days (run once)
   useEffect(() => {
     const cycleDays = form.getValues('cycleDays') || 7;
-    const trainingConfig = getTrainingConfig(cycleDays);
-    setDailyWorkoutsState(trainingConfig.dailyWorkouts);
-    setDayOrderState(trainingConfig.dayOrder);
-  }, [form]);
+    updateTrainingConfig(cycleDays);
+  }, [form, updateTrainingConfig]);
 
   return (
     <FormProvider

@@ -7,7 +7,11 @@ import {
   type MealSlotId,
   MEAL_SLOT_DEFINITIONS,
 } from '@/lib/persistence-types';
-import { buildFoodLookup, calculateDayTotals } from '@/lib/meal-planner';
+import {
+  buildFoodLookup,
+  calculateDayTotals,
+  deriveVisibleSlots,
+} from '@/lib/meal-planner';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,7 +21,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
-import { deriveVisibleSlots } from '@/lib/meal-slot-utils';
 import { SlotSection } from '@/components/core/meal-slot';
 
 interface MealSlotPlannerProps {

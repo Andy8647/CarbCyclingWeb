@@ -9,11 +9,6 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { getWorkoutTypes } from '@/lib/calculator';
-import {
-  draggable,
-  dropTargetForElements,
-} from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import type {
   DayMealPlan,
   FoodItem,
@@ -22,19 +17,13 @@ import type {
 } from '@/lib/persistence-types';
 import { normalizeDayMealPlan } from '@/lib/meal-planner';
 import { MealSlotPlanner } from './MealSlotPlanner';
-
-const getDayTypeDisplay = (type: string, t: (key: string) => string) => {
-  switch (type) {
-    case 'high':
-      return t('results.dayTypes.high');
-    case 'medium':
-      return t('results.dayTypes.medium');
-    case 'low':
-      return t('results.dayTypes.low');
-    default:
-      return type;
-  }
-};
+import {
+  getDayTypeDisplay,
+  createDraggableCard,
+  createGridDropTarget,
+  createCellDropTarget,
+  type DragData,
+} from '@/lib/grid-layout';
 
 interface DayData {
   day: number;
@@ -85,18 +74,12 @@ function IOSSquareCard({
     const element = ref.current;
     if (!element) return;
 
-    return combine(
-      draggable({
-        element,
-        getInitialData: () => ({
-          type: 'card',
-          day: day.day,
-          dayData: day,
-        }),
-        onDragStart: () => setIsDragging(true),
-        onDrop: () => setIsDragging(false),
-      })
-    );
+    return createDraggableCard({
+      element,
+      dayData: day,
+      onDragStart: () => setIsDragging(true),
+      onDrop: () => setIsDragging(false),
+    });
   }, [day]);
 
   return (
@@ -253,12 +236,6 @@ function IOSSquareCard({
   );
 }
 
-interface DragData {
-  type: string;
-  day: number;
-  dayData: DayData;
-}
-
 interface IOSGridLayoutProps {
   orderedDays: DayData[];
   dailyWorkouts: Record<number, string>;
@@ -294,23 +271,13 @@ export function IOSGridLayout({
     const element = gridRef.current;
     if (!element) return;
 
-    return dropTargetForElements({
+    return createGridDropTarget({
       element,
-      canDrop: ({ source }) => source.data.type === 'card',
-      onDragEnter: () => {},
-      onDragLeave: () => setDragOverIndex(null),
-      onDrop: ({ source, location }) => {
+      onDrop: (dragData, targetIndex) => {
         setDragOverIndex(null);
-
-        // 获取拖放的目标位置
-        const dropTargets = location.current.dropTargets;
-        if (dropTargets.length > 0) {
-          const targetIndex = dropTargets[0].data.gridIndex as number;
-          if (typeof targetIndex === 'number') {
-            onDrop(source.data as unknown as DragData, targetIndex);
-          }
-        }
+        onDrop(dragData, targetIndex);
       },
+      onDragLeave: () => setDragOverIndex(null),
     });
   }, [onDrop]);
 
@@ -359,13 +326,7 @@ function DropZoneWrapper({
     const element = ref.current;
     if (!element) return;
 
-    return dropTargetForElements({
-      element,
-      getData: () => ({ gridIndex: index }),
-      canDrop: ({ source }) => source.data.type === 'card',
-      onDragEnter: () => {},
-      onDragLeave: () => {},
-    });
+    return createCellDropTarget({ element, index });
   }, [index]);
 
   return (

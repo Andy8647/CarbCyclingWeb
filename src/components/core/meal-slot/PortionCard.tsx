@@ -2,12 +2,12 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, ChevronDown } from 'lucide-react';
-import { calculatePortionMacros } from '@/lib/meal-planner';
 import {
+  calculatePortionMacros,
   convertServingsToInput,
   formatBadgeValue,
   getInputStep,
-} from '@/lib/meal-slot-utils';
+} from '@/lib/meal-planner';
 import type { PortionCardProps } from './types';
 
 export function PortionCard({

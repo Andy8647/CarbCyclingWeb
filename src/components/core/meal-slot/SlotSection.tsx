@@ -16,14 +16,12 @@ import {
   calculateSlotTotals,
   createMealPortion,
   getMealSlotDefinition,
-} from '@/lib/meal-planner';
-import {
   convertInputToServings,
   formatBadgeValue,
   getDefaultInputValue,
   getInputStep,
   roundToTwo,
-} from '@/lib/meal-slot-utils';
+} from '@/lib/meal-planner';
 import { PortionCard } from './PortionCard';
 import { QuickAddModal } from './QuickAddModal';
 import type { SlotSectionProps, QuickAddFormState } from './types';
