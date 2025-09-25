@@ -2,16 +2,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
-import { Input } from '@/components/ui/input';
-import { NumberInput } from '@/components/ui/number-input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Edit3, Trash2 } from 'lucide-react';
+import { Edit3 } from 'lucide-react';
+import { CreateOrUpdateFoodModal } from './CreateOrUpdateFoodModal';
 import type { FoodGridProps, FoodFormState } from './types';
 import type { ServingUnit } from '@/lib/persistence-types';
 
@@ -35,6 +27,12 @@ export function FoodGrid({
     emoji: '',
   });
 
+  const editServingUnitOptions: ServingUnit[] = [
+    'per_100g',
+    'per_100ml',
+    'per_piece',
+  ];
+
   const handleEditFood = (foodId: string) => {
     const food = filteredFoods.find((f) => f.food.id === foodId)?.food;
     if (!food) return;
@@ -43,7 +41,7 @@ export function FoodGrid({
       name: food.name,
       category: food.category,
       defaultServing: food.defaultServing,
-      servingUnit: food.servingUnit,
+      servingUnit: food.servingUnit ?? 'per_100g',
       carbs: food.macros.carbs.toString(),
       protein: food.macros.protein.toString(),
       fat: food.macros.fat.toString(),
@@ -91,8 +89,19 @@ export function FoodGrid({
     setEditingFood(null);
   };
 
-  const updateEditFormField = (field: string, value: string | ServingUnit) => {
+  const handleEditFieldChange = <Key extends keyof FoodFormState>(
+    field: Key,
+    value: FoodFormState[Key]
+  ) => {
     setEditFormState((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleEditServingUnitChange = (unit: ServingUnit) => {
+    setEditFormState((prev) => ({
+      ...prev,
+      servingUnit: unit,
+      defaultServing: unit === 'per_100g' || unit === 'per_100ml' ? '100' : '1',
+    }));
   };
 
   const handleConfirmDelete = () => {
@@ -100,6 +109,12 @@ export function FoodGrid({
       onRemoveFood(deletingFood);
       setDeletingFood(null);
     }
+  };
+
+  const handleDeleteFromModal = () => {
+    if (!editingFood) return;
+    setDeletingFood(editingFood);
+    setEditingFood(null);
   };
 
   return (
@@ -169,18 +184,6 @@ export function FoodGrid({
                   </div>
                 </div>
               </div>
-
-              <div className="flex justify-end">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
-                  onClick={() => setDeletingFood(food.id)}
-                >
-                  <Trash2 className="h-3 w-3 mr-1" />
-                  删除
-                </Button>
-              </div>
             </div>
           )
         )}
@@ -191,153 +194,27 @@ export function FoodGrid({
         )}
       </div>
 
-      {/* Edit Food Modal */}
-      <Modal
+      <CreateOrUpdateFoodModal
         open={!!editingFood}
+        mode="update"
+        formState={editFormState}
         onClose={() => setEditingFood(null)}
-        title="编辑食材"
-      >
-        <div className="space-y-3">
-          {/* 第一行：食材名称 + Emoji */}
-          <div className="grid grid-cols-[2fr_1fr] gap-2">
-            <Input
-              placeholder={t('mealPlanner.foodNamePlaceholder')}
-              value={editFormState.name}
-              onChange={(event) =>
-                updateEditFormField('name', event.target.value)
-              }
-              className="h-9 text-sm"
-            />
-            <Input
-              value={editFormState.emoji}
-              maxLength={4}
-              placeholder={t('mealPlanner.emojiPlaceholder')}
-              onChange={(event) =>
-                updateEditFormField('emoji', event.target.value)
-              }
-              className="h-9 text-sm"
-            />
-          </div>
-
-          {/* 第二行：单位选择 + 份量输入 + 生熟重 */}
-          <div className="flex gap-2">
-            <Select
-              value={editFormState.servingUnit}
-              onValueChange={(value) => {
-                updateEditFormField('servingUnit', value as ServingUnit);
-                const defaultValue =
-                  value === 'per_100g'
-                    ? '100'
-                    : value === 'per_100ml'
-                      ? '100'
-                      : '1';
-                updateEditFormField('defaultServing', defaultValue);
-              }}
-            >
-              <SelectTrigger className="h-9 text-sm">
-                <SelectValue placeholder={t('mealPlanner.unitPlaceholder')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="per_100g">g</SelectItem>
-                <SelectItem value="per_100ml">ml</SelectItem>
-                <SelectItem value="per_piece">
-                  {t('mealPlanner.servingUnits.per_piece')}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            <Input
-              value={editFormState.defaultServing}
-              onChange={(event) =>
-                updateEditFormField('defaultServing', event.target.value)
-              }
-              className="h-9 text-sm flex-1"
-            />
-            <Select
-              value={editFormState.preparation}
-              onValueChange={(value: 'raw' | 'cooked') =>
-                updateEditFormField('preparation', value)
-              }
-            >
-              <SelectTrigger className="h-9 text-sm">
-                <SelectValue
-                  placeholder={t('mealPlanner.preparationPlaceholder')}
-                />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="raw">
-                  {t('mealPlanner.preparationRaw')}
-                </SelectItem>
-                <SelectItem value="cooked">
-                  {t('mealPlanner.preparationCooked')}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* 第三行：营养素 */}
-          <div className="grid grid-cols-3 gap-2">
-            <div className="space-y-1">
-              <label className="text-xs text-slate-500 dark:text-slate-400">
-                {t('mealPlanner.carbsLabel')}
-              </label>
-              <NumberInput
-                step={0.1}
-                min={0}
-                value={editFormState.carbs}
-                onChange={(value) => updateEditFormField('carbs', value)}
-                className="h-9 text-sm"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs text-slate-500 dark:text-slate-400">
-                {t('mealPlanner.proteinLabel')}
-              </label>
-              <NumberInput
-                step={0.1}
-                min={0}
-                value={editFormState.protein}
-                onChange={(value) => updateEditFormField('protein', value)}
-                className="h-9 text-sm"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-xs text-slate-500 dark:text-slate-400">
-                {t('mealPlanner.fatLabel')}
-              </label>
-              <NumberInput
-                step={0.1}
-                min={0}
-                value={editFormState.fat}
-                onChange={(value) => updateEditFormField('fat', value)}
-                className="h-9 text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setEditingFood(null)}
-            >
-              {t('common.cancel')}
-            </Button>
-            <Button size="sm" onClick={handleUpdateFood}>
-              保存修改
-            </Button>
-          </div>
-        </div>
-      </Modal>
+        onSubmit={handleUpdateFood}
+        onFieldChange={handleEditFieldChange}
+        onServingUnitChange={handleEditServingUnitChange}
+        servingUnitOptions={editServingUnitOptions}
+        onDelete={handleDeleteFromModal}
+      />
 
       {/* Delete Confirmation Modal */}
       <Modal
         open={!!deletingFood}
         onClose={() => setDeletingFood(null)}
-        title="确认删除"
+        title={t('mealPlanner.deleteFoodTitle')}
       >
         <div className="space-y-4">
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            确定要删除这个食材吗？此操作无法撤销。
+            {t('mealPlanner.deleteFoodDescription')}
           </p>
           <div className="flex justify-end gap-2">
             <Button
@@ -352,7 +229,7 @@ export function FoodGrid({
               size="sm"
               onClick={handleConfirmDelete}
             >
-              删除
+              {t('mealPlanner.removeCustomFood')}
             </Button>
           </div>
         </div>

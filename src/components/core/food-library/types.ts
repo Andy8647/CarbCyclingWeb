@@ -25,6 +25,26 @@ export interface FoodLibraryPanelProps {
   onRemoveFood: (id: string) => void;
 }
 
+export interface CreateOrUpdateFoodModalProps {
+  open: boolean;
+  mode: 'create' | 'update';
+  formState: FoodFormState;
+  onClose: () => void;
+  onSubmit: () => void;
+  onFieldChange: <Key extends keyof FoodFormState>(
+    field: Key,
+    value: FoodFormState[Key]
+  ) => void;
+  title?: string;
+  submitLabel?: string;
+  cancelLabel?: string;
+  servingUnitOptions?: ServingUnit[];
+  onServingUnitChange?: (unit: ServingUnit) => void;
+  showCategoryField?: boolean;
+  onDelete?: () => void;
+  deleteLabel?: string;
+}
+
 export interface FoodLibraryHeaderProps {
   search: string;
   onSearchChange: (value: string) => void;

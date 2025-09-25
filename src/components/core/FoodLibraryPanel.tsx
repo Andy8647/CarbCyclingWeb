@@ -19,10 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  SERVING_UNIT_OPTIONS,
-  type ServingUnit,
-} from '@/lib/persistence-types';
+import { type ServingUnit } from '@/lib/persistence-types';
 
 const emptyForm: FoodFormState = {
   name: '',

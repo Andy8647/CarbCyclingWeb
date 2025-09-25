@@ -2,20 +2,10 @@ import type {
   FoodItem,
   MealPortion,
   MealSlotId,
-  ServingUnit,
 } from '@/lib/persistence-types';
+import type { FoodFormState } from '@/components/core/food-library/types';
 
-export interface QuickAddFormState {
-  name: string;
-  category: string;
-  defaultServing: string;
-  servingUnit: ServingUnit;
-  carbs: string;
-  protein: string;
-  fat: string;
-  preparation: 'raw' | 'cooked';
-  emoji: string;
-}
+export type QuickAddFormState = FoodFormState;
 
 export interface SlotSectionProps {
   slotId: MealSlotId;
@@ -36,12 +26,4 @@ export interface PortionCardProps {
   onToggleExpanded: () => void;
   onRemove: () => void;
   onPortionInputChange: (value: string) => void;
-}
-
-export interface QuickAddModalProps {
-  open: boolean;
-  onClose: () => void;
-  formState: QuickAddFormState;
-  onFormChange: (formState: QuickAddFormState) => void;
-  onSubmit: () => void;
 }

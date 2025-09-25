@@ -2,14 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { NumberInput } from '@/components/ui/number-input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { MinusCircle, Plus, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, MinusCircle, Plus, X } from 'lucide-react';
 import { useToast } from '@/lib/use-toast';
 import {
   buildFoodLookup,
@@ -22,8 +15,9 @@ import {
   getInputStep,
   roundToTwo,
 } from '@/lib/meal-planner';
+import { CreateOrUpdateFoodModal } from '@/components/core/food-library';
 import { PortionCard } from './PortionCard';
-import { QuickAddModal } from './QuickAddModal';
+import { FoodSelect, type LocalizedFoodOption } from './FoodSelect';
 import type { SlotSectionProps, QuickAddFormState } from './types';
 
 const QUICK_FORM_DEFAULTS: QuickAddFormState = {
@@ -50,6 +44,7 @@ export function SlotSection({
   const { t } = useTranslation();
   const { toast } = useToast();
   const slotDefinition = getMealSlotDefinition(slotId);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [selectedFoodId, setSelectedFoodId] = useState('');
   const [servings, setServings] = useState<number>(1);
@@ -66,9 +61,19 @@ export function SlotSection({
     []
   );
 
+  const handleQuickFormFieldChange = useCallback(
+    <Key extends keyof QuickAddFormState>(
+      field: Key,
+      value: QuickAddFormState[Key]
+    ) => {
+      setQuickForm((prev) => ({ ...prev, [field]: value }));
+    },
+    [setQuickForm]
+  );
+
   const foodLookup = useMemo(() => buildFoodLookup(foodLibrary), [foodLibrary]);
 
-  const localizedFoodLibrary = useMemo(() => {
+  const localizedFoodLibrary = useMemo<LocalizedFoodOption[]>(() => {
     const mapped = foodLibrary.map((food) => ({
       food,
       name: food.nameKey ? t(food.nameKey) : food.name,
@@ -247,6 +252,7 @@ export function SlotSection({
   };
 
   const handleToggleAdding = () => {
+    setIsCollapsed(false);
     setIsAdding((prev) => {
       const next = !prev;
       if (!prev) {
@@ -346,6 +352,32 @@ export function SlotSection({
             variant="ghost"
             size="icon"
             className="h-7 w-7"
+            onClick={() => {
+              setIsCollapsed((prev) => {
+                const next = !prev;
+                if (next) {
+                  setIsAdding(false);
+                  setShowQuickAdd(false);
+                }
+                return next;
+              });
+            }}
+            aria-label={
+              isCollapsed
+                ? t('mealPlanner.showMealSlots')
+                : t('mealPlanner.hideMealSlots')
+            }
+          >
+            {isCollapsed ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronUp className="h-4 w-4" />
+            )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
             onClick={handleToggleAdding}
             aria-label={t('mealPlanner.addFoodToSlot')}
           >
@@ -367,7 +399,7 @@ export function SlotSection({
         </div>
       </div>
 
-      {portions.length > 0 && (
+      {!isCollapsed && portions.length > 0 && (
         <div className="px-3 pb-1">
           <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
             {headerMacroBadges.map((badge) => (
@@ -383,128 +415,87 @@ export function SlotSection({
         </div>
       )}
 
-      <div className="px-3 py-2 space-y-2">
-        {portions.length === 0 && !isAdding && (
-          <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
-            <MinusCircle className="h-3.5 w-3.5" />
-            <span>{t('mealPlanner.emptySlotHint')}</span>
-          </div>
-        )}
-
-        {portions.map((portion) => (
-          <PortionCard
-            key={portion.id}
-            portion={portion}
-            food={foodLookup[portion.foodId]}
-            isExpanded={expandedPortions[portion.id] ?? false}
-            onToggleExpanded={() => toggleExpandedPortion(portion.id)}
-            onRemove={() => handleRemove(portion.id)}
-            onPortionInputChange={(value) =>
-              handlePortionInputChange(portion.id, value)
-            }
-          />
-        ))}
-
-        {isAdding && (
-          <div className="rounded-md border border-dashed border-slate-300 dark:border-slate-700 p-2 space-y-2">
-            <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
-              {t('mealPlanner.chooseFood')}
-            </label>
-            <div className="flex flex-col gap-2">
-              <Select
-                value={selectedFoodId}
-                onValueChange={(value) => {
-                  if (value === '__add_new_food__') {
-                    resetQuickForm();
-                    setShowQuickAdd(true);
-                    setSelectedFoodId('');
-                    setServings(1);
-                    return;
-                  }
-                  setShowQuickAdd(false);
-                  setSelectedFoodId(value);
-                  const targetFood = foodLookup[value];
-                  setServings(getDefaultInputValue(targetFood?.servingUnit));
-                }}
-              >
-                <SelectTrigger className="h-8 w-full text-xs">
-                  <SelectValue placeholder={t('mealPlanner.searchPlaceholder')}>
-                    {selectedFoodId &&
-                      selectedFoodId !== '__add_new_food__' && (
-                        <div className="flex items-center gap-1 truncate">
-                          <span>
-                            {foodLookup[selectedFoodId]?.emoji || '🍽️'}
-                          </span>
-                          <span className="truncate">
-                            {foodLookup[selectedFoodId]?.nameKey
-                              ? t(foodLookup[selectedFoodId].nameKey)
-                              : foodLookup[selectedFoodId]?.name}
-                          </span>
-                        </div>
-                      )}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className="max-h-60">
-                  {localizedFoodLibrary.map(
-                    ({ food, name, serving, unitLabel }) => (
-                      <SelectItem key={food.id} value={food.id}>
-                        <div className="flex flex-col">
-                          <span className="text-xs font-medium flex items-center gap-1">
-                            <span>{food.emoji || '🍽️'}</span>
-                            <span>{name}</span>
-                          </span>
-                          <span className="text-[11px] text-slate-500 flex items-center gap-1">
-                            {unitLabel && <span>{unitLabel}</span>}
-                            {unitLabel && serving && <span>·</span>}
-                            {serving && <span>{serving}</span>}
-                            {food.preparation && (
-                              <span>
-                                {food.preparation === 'raw'
-                                  ? t('mealPlanner.preparationShort.raw')
-                                  : t('mealPlanner.preparationShort.cooked')}
-                              </span>
-                            )}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    )
-                  )}
-                  <SelectItem value="__add_new_food__">
-                    <span className="text-xs">
-                      ➕ {t('mealPlanner.quickAddLabel')}
-                    </span>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-
-              <NumberInput
-                min={0}
-                step={addInputStep}
-                value={addInputValue}
-                onChange={handleAddInputChange}
-                unit={addInputSuffix}
-                className="h-8 w-full text-xs"
-              />
-
-              <Button
-                size="sm"
-                onClick={handleAddPortion}
-                disabled={!selectedFoodId}
-                className="w-full"
-              >
-                {t('mealPlanner.addFood')}
-              </Button>
+      {!isCollapsed && (
+        <div className="px-3 py-2 space-y-2">
+          {portions.length === 0 && !isAdding && (
+            <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+              <MinusCircle className="h-3.5 w-3.5" />
+              <span>{t('mealPlanner.emptySlotHint')}</span>
             </div>
-          </div>
-        )}
-      </div>
+          )}
 
-      <QuickAddModal
+          {portions.map((portion) => (
+            <PortionCard
+              key={portion.id}
+              portion={portion}
+              food={foodLookup[portion.foodId]}
+              isExpanded={expandedPortions[portion.id] ?? false}
+              onToggleExpanded={() => toggleExpandedPortion(portion.id)}
+              onRemove={() => handleRemove(portion.id)}
+              onPortionInputChange={(value) =>
+                handlePortionInputChange(portion.id, value)
+              }
+            />
+          ))}
+
+          {isAdding && (
+            <div className="rounded-md border border-dashed border-slate-300 dark:border-slate-700 p-2 space-y-2">
+              <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                {t('mealPlanner.chooseFood')}
+              </label>
+              <div className="flex flex-col gap-2">
+                <FoodSelect
+                  selectedFoodId={selectedFoodId}
+                  foodLookup={foodLookup}
+                  options={localizedFoodLibrary}
+                  placeholder={t('mealPlanner.searchPlaceholder')}
+                  quickAddLabel={t('mealPlanner.quickAddLabel')}
+                  onValueChange={(value) => {
+                    setIsCollapsed(false);
+                    if (value === '__add_new_food__') {
+                      resetQuickForm();
+                      setShowQuickAdd(true);
+                      setSelectedFoodId('');
+                      setServings(1);
+                      return;
+                    }
+                    setShowQuickAdd(false);
+                    setSelectedFoodId(value);
+                    const targetFood = foodLookup[value];
+                    setServings(getDefaultInputValue(targetFood?.servingUnit));
+                  }}
+                />
+
+                <NumberInput
+                  min={0}
+                  step={addInputStep}
+                  value={addInputValue}
+                  onChange={handleAddInputChange}
+                  unit={addInputSuffix}
+                  className="h-8 w-full text-xs"
+                />
+
+                <Button
+                  size="sm"
+                  onClick={handleAddPortion}
+                  disabled={!selectedFoodId}
+                  className="w-full"
+                >
+                  {t('mealPlanner.addFood')}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <CreateOrUpdateFoodModal
         open={showQuickAdd}
-        onClose={handleQuickAddCancel}
+        mode="create"
         formState={quickForm}
-        onFormChange={setQuickForm}
+        onClose={handleQuickAddCancel}
         onSubmit={handleQuickAddSubmit}
+        onFieldChange={handleQuickFormFieldChange}
       />
     </div>
   );

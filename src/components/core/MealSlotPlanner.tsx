@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   type DayMealPlan,
@@ -43,6 +43,7 @@ interface MealSlotPlannerProps {
     fat: number;
     calories: number;
   };
+  className?: string;
 }
 
 export function MealSlotPlanner({
@@ -52,18 +53,14 @@ export function MealSlotPlanner({
   onUpdateSlot,
   onAddCustomFood,
   targetMacros,
+  className,
 }: MealSlotPlannerProps) {
   const { t } = useTranslation();
   const foodLookup = useMemo(() => buildFoodLookup(foodLibrary), [foodLibrary]);
-  const previousDayRef = useRef(dayNumber);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const visibleSlots = useMemo(() => {
-    if (previousDayRef.current !== dayNumber) {
-      previousDayRef.current = dayNumber;
-    }
-    return deriveVisibleSlots(dayMealPlan);
-  }, [dayNumber, dayMealPlan]);
+  const visibleSlots = useMemo(
+    () => deriveVisibleSlots(dayMealPlan),
+    [dayMealPlan]
+  );
 
   const availableSlots = useMemo(
     () =>
@@ -91,79 +88,38 @@ export function MealSlotPlanner({
     carbs: Math.round((dayTotals.carbs - targetMacros.carbs) * 10) / 10,
     protein: Math.round((dayTotals.protein - targetMacros.protein) * 10) / 10,
     fat: Math.round((dayTotals.fat - targetMacros.fat) * 10) / 10,
-    calories: dayTotals.calories - targetMacros.calories,
   };
 
-  const renderDiff = (value: number, suffix: string) => {
-    if (value === 0) return `${value}${suffix}`;
-    const sign = value > 0 ? '+' : '';
-    return `${sign}${value}${suffix}`;
+  const getDiffTextClass = (value: number) => {
+    if (value === 0) return 'text-slate-500 dark:text-slate-400';
+    return value > 0
+      ? 'text-green-600 dark:text-green-400'
+      : 'text-red-600 dark:text-red-400';
   };
 
   return (
-    <div className="mt-3 space-y-3">
+    <div className={cn('flex h-full flex-col space-y-3', className)}>
       <div className="rounded-lg bg-slate-100/70 dark:bg-slate-800/70 px-3 py-2">
-        <div className="flex items-center gap-2">
-          <div ref={scrollContainerRef} className="flex-1 overflow-hidden">
-            <div
-              className={cn(
-                'flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 min-w-max',
-                'animate-scroll-horizontal hover:animate-none' // 临时强制启用动画测试
-              )}
-            >
-              <span
-                className={cn(
-                  'px-2 py-0.5 rounded-full border flex items-center gap-1 whitespace-nowrap',
-                  diff.carbs === 0
-                    ? 'border-slate-300'
-                    : diff.carbs > 0
-                      ? 'border-green-500 text-green-600 dark:text-green-400'
-                      : 'border-amber-500 text-amber-600 dark:text-amber-400'
-                )}
-              >
-                <span>🍚</span>
-                <span>{renderDiff(diff.carbs, 'g')}</span>
+        <div className="flex items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-300">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1">
+              <span>🍚</span>
+              <span className={getDiffTextClass(diff.carbs)}>
+                {diff.carbs >= 0 ? `+${diff.carbs}` : diff.carbs}g
               </span>
-              <span
-                className={cn(
-                  'px-2 py-0.5 rounded-full border flex items-center gap-1 whitespace-nowrap',
-                  diff.protein === 0
-                    ? 'border-slate-300'
-                    : diff.protein > 0
-                      ? 'border-green-500 text-green-600 dark:text-green-400'
-                      : 'border-amber-500 text-amber-600 dark:text-amber-400'
-                )}
-              >
-                <span>🍖</span>
-                <span>{renderDiff(diff.protein, 'g')}</span>
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span>🍖</span>
+              <span className={getDiffTextClass(diff.protein)}>
+                {diff.protein >= 0 ? `+${diff.protein}` : diff.protein}g
               </span>
-              <span
-                className={cn(
-                  'px-2 py-0.5 rounded-full border flex items-center gap-1 whitespace-nowrap',
-                  diff.fat === 0
-                    ? 'border-slate-300'
-                    : diff.fat > 0
-                      ? 'border-green-500 text-green-600 dark:text-green-400'
-                      : 'border-amber-500 text-amber-600 dark:text-amber-400'
-                )}
-              >
-                <span>🥜</span>
-                <span>{renderDiff(diff.fat, 'g')}</span>
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span>🥜</span>
+              <span className={getDiffTextClass(diff.fat)}>
+                {diff.fat >= 0 ? `+${diff.fat}` : diff.fat}g
               </span>
-              <span
-                className={cn(
-                  'px-2 py-0.5 rounded-full border flex items-center gap-1 whitespace-nowrap',
-                  diff.calories === 0
-                    ? 'border-slate-300'
-                    : diff.calories > 0
-                      ? 'border-green-500 text-green-600 dark:text-green-400'
-                      : 'border-amber-500 text-amber-600 dark:text-amber-400'
-                )}
-              >
-                <span>🔥</span>
-                <span>{renderDiff(diff.calories, 'kcal')}</span>
-              </span>
-            </div>
+            </span>
           </div>
           <div className="flex-shrink-0">
             {availableSlots.length > 0 ? (
@@ -222,7 +178,7 @@ export function MealSlotPlanner({
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="flex-1 space-y-2 pr-1">
         {visibleSlots.map((slotId) => (
           <SlotSection
             key={`${dayNumber}-${slotId}`}

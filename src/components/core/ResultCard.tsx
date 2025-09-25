@@ -21,6 +21,7 @@ import type {
 import { normalizeDayMealPlan } from '@/lib/meal-planner';
 import { FoodLibraryPanel } from './FoodLibraryPanel';
 import { DayColumn } from '@/components/core/result-card';
+import { MealSlotPlanner } from './MealSlotPlanner';
 import { useScreenSize } from '@/lib/hooks/use-screen-size';
 import {
   calculateNutritionData,
@@ -42,6 +43,7 @@ export function ResultCard() {
     setDayOrder,
     foodLibrary,
     addCustomFood,
+    updateCustomFood,
     removeCustomFood,
     getMealPlan,
     setMealPortionsForSlot,
@@ -51,6 +53,10 @@ export function ResultCard() {
   const exportRef = useRef<HTMLDivElement>(null);
   const isLargeScreen = useScreenSize();
   const [showFoodLibrary, setShowFoodLibrary] = useState(false);
+  const [showMealSlots, setShowMealSlots] = useState(false);
+  const [columnHeights, setColumnHeights] = useState<Record<number, number>>(
+    {}
+  );
 
   const resultsMacroEmojis = t('results.macroEmojis', {
     returnObjects: true,
@@ -130,6 +136,36 @@ export function ResultCard() {
     () => reorderDays(nutritionPlan, dayOrder),
     [nutritionPlan, dayOrder]
   );
+
+  const handleColumnHeightChange = useCallback(
+    (dayId: number, height: number) => {
+      setColumnHeights((previous) => {
+        const roundedHeight = Math.round(height);
+        if (previous[dayId] === roundedHeight) {
+          return previous;
+        }
+
+        return {
+          ...previous,
+          [dayId]: roundedHeight,
+        };
+      });
+    },
+    []
+  );
+
+  const maxColumnHeight = useMemo(() => {
+    return orderedDays.reduce((maxHeight, day) => {
+      if (!day) return maxHeight;
+
+      const height = columnHeights[day.day];
+      if (typeof height !== 'number') {
+        return maxHeight;
+      }
+
+      return height > maxHeight ? height : maxHeight;
+    }, 0);
+  }, [columnHeights, orderedDays]);
 
   const handleDrop = (dragData: DragData, targetColumnIndex: number) => {
     if (dragData.type !== 'card') return;
@@ -280,6 +316,18 @@ export function ResultCard() {
         >
           <div className="flex flex-wrap gap-3">
             <Button
+              variant={showMealSlots ? 'default' : 'outline'}
+              className="rounded-xl"
+              onClick={() => setShowMealSlots((prev) => !prev)}
+            >
+              <span>🥗</span>
+              <span className="hidden sm:inline ml-1">
+                {showMealSlots
+                  ? t('mealPlanner.hideMealSlots')
+                  : t('mealPlanner.showMealSlots')}
+              </span>
+            </Button>
+            <Button
               variant={showFoodLibrary ? 'default' : 'outline'}
               className="rounded-xl"
               onClick={() => setShowFoodLibrary((prev) => !prev)}
@@ -389,6 +437,11 @@ export function ResultCard() {
                 <FoodLibraryPanel
                   foods={foodLibrary}
                   onAddCustomFood={addCustomFood}
+                  onUpdateFood={(id, food) => {
+                    updateCustomFood(id, {
+                      ...food,
+                    });
+                  }}
                   onRemoveFood={removeCustomFood}
                 />
               </div>
@@ -408,6 +461,7 @@ export function ResultCard() {
                 >
                   {orderedDays.map((dayData, index) => {
                     if (!dayData) return null;
+
                     const mealPlanForDay =
                       dayMealPlans[dayData.day] || normalizeDayMealPlan();
 
@@ -419,12 +473,36 @@ export function ResultCard() {
                         dailyWorkouts={dailyWorkouts}
                         setDailyWorkout={setDailyWorkout}
                         onDrop={handleDrop}
-                        mealPlan={mealPlanForDay}
-                        foodLibrary={foodLibrary}
-                        onUpdateMealSlot={handleMealSlotUpdate}
-                        onAddCustomFood={addCustomFood}
                         macroIcons={macroIcons}
-                      />
+                        onHeightChange={handleColumnHeightChange}
+                        syncedHeight={
+                          maxColumnHeight > 0 ? maxColumnHeight : undefined
+                        }
+                        measuredHeight={columnHeights[dayData.day]}
+                      >
+                        {showMealSlots && (
+                          <MealSlotPlanner
+                            dayNumber={dayData.day}
+                            dayMealPlan={mealPlanForDay}
+                            foodLibrary={foodLibrary}
+                            onUpdateSlot={(slotId, portions) =>
+                              handleMealSlotUpdate(
+                                dayData.day,
+                                slotId,
+                                portions
+                              )
+                            }
+                            onAddCustomFood={addCustomFood}
+                            targetMacros={{
+                              carbs: dayData.carbs,
+                              protein: dayData.protein,
+                              fat: dayData.fat,
+                              calories: dayData.calories,
+                            }}
+                            className="flex-1"
+                          />
+                        )}
+                      </DayColumn>
                     );
                   })}
                 </div>
@@ -436,10 +514,11 @@ export function ResultCard() {
                 dailyWorkouts={dailyWorkouts}
                 setDailyWorkout={setDailyWorkout}
                 onDrop={handleGridDrop}
-                foodLibrary={foodLibrary}
                 dayMealPlans={dayMealPlans}
+                foodLibrary={foodLibrary}
                 onMealSlotChange={handleMealSlotUpdate}
                 onAddCustomFood={addCustomFood}
+                showMealSlots={showMealSlots}
               />
             )}
           </div>

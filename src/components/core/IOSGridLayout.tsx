@@ -7,16 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
 import { getWorkoutTypes } from '@/lib/calculator';
-import type {
-  DayMealPlan,
-  FoodItem,
-  MealPortion,
-  MealSlotId,
-} from '@/lib/persistence-types';
-import { normalizeDayMealPlan } from '@/lib/meal-planner';
-import { MealSlotPlanner } from './MealSlotPlanner';
 import {
   getDayTypeDisplay,
   createDraggableCard,
@@ -24,6 +15,14 @@ import {
   createCellDropTarget,
   type DragData,
 } from '@/lib/grid-layout';
+import { normalizeDayMealPlan } from '@/lib/meal-planner';
+import { MealSlotPlanner } from './MealSlotPlanner';
+import type {
+  DayMealPlan,
+  FoodItem,
+  MealPortion,
+  MealSlotId,
+} from '@/lib/persistence-types';
 
 interface DayData {
   day: number;
@@ -40,16 +39,6 @@ interface IOSSquareCardProps {
   displayOrder: number;
   dailyWorkouts: Record<number, string>;
   setDailyWorkout: (day: number, workout: string) => void;
-  mealPlan: DayMealPlan;
-  foodLibrary: FoodItem[];
-  onUpdateMealSlot: (
-    dayNumber: number,
-    slotId: MealSlotId,
-    portions: MealPortion[]
-  ) => void;
-  onAddCustomFood: (
-    food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
-  ) => FoodItem;
 }
 
 function IOSSquareCard({
@@ -57,15 +46,10 @@ function IOSSquareCard({
   displayOrder,
   dailyWorkouts,
   setDailyWorkout,
-  mealPlan,
-  foodLibrary,
-  onUpdateMealSlot,
-  onAddCustomFood,
 }: IOSSquareCardProps) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [showMeals, setShowMeals] = useState(false);
   const macroEmojis = t('results.macroEmojis', {
     returnObjects: true,
   }) as Record<string, string>;
@@ -202,36 +186,6 @@ function IOSSquareCard({
           </div>
         </div>
       </div>
-
-      <div className="mt-3 space-y-2">
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full"
-          onClick={() => setShowMeals((prev) => !prev)}
-        >
-          {showMeals
-            ? t('mealPlanner.hideMealsForDay')
-            : t('mealPlanner.showMealsForDay')}
-        </Button>
-        {showMeals && (
-          <MealSlotPlanner
-            dayNumber={day.day}
-            dayMealPlan={mealPlan}
-            foodLibrary={foodLibrary}
-            onUpdateSlot={(slotId, portions) =>
-              onUpdateMealSlot(day.day, slotId, portions)
-            }
-            onAddCustomFood={onAddCustomFood}
-            targetMacros={{
-              carbs: day.carbs,
-              protein: day.protein,
-              fat: day.fat,
-              calories: day.calories,
-            }}
-          />
-        )}
-      </div>
     </div>
   );
 }
@@ -241,8 +195,8 @@ interface IOSGridLayoutProps {
   dailyWorkouts: Record<number, string>;
   setDailyWorkout: (day: number, workout: string) => void;
   onDrop: (dragData: DragData, targetIndex: number) => void;
-  foodLibrary: FoodItem[];
   dayMealPlans: Record<number, DayMealPlan>;
+  foodLibrary: FoodItem[];
   onMealSlotChange: (
     dayNumber: number,
     slotId: MealSlotId,
@@ -251,6 +205,7 @@ interface IOSGridLayoutProps {
   onAddCustomFood: (
     food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
   ) => FoodItem;
+  showMealSlots: boolean;
 }
 
 export function IOSGridLayout({
@@ -258,10 +213,11 @@ export function IOSGridLayout({
   dailyWorkouts,
   setDailyWorkout,
   onDrop,
-  foodLibrary,
   dayMealPlans,
+  foodLibrary,
   onMealSlotChange,
   onAddCustomFood,
+  showMealSlots,
 }: IOSGridLayoutProps) {
   const gridRef = useRef<HTMLDivElement>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
@@ -285,23 +241,38 @@ export function IOSGridLayout({
     <div ref={gridRef} className="grid grid-cols-2 gap-4 p-2 max-w-2xl mx-auto">
       {orderedDays.map((day, index) => {
         const mealPlanForDay = dayMealPlans[day.day] || normalizeDayMealPlan();
-
         return (
           <DropZoneWrapper
             key={`ios-card-${day.day}`}
             index={index}
             isDraggedOver={dragOverIndex === index}
           >
-            <IOSSquareCard
-              day={day}
-              displayOrder={index + 1}
-              dailyWorkouts={dailyWorkouts}
-              setDailyWorkout={setDailyWorkout}
-              mealPlan={mealPlanForDay}
-              foodLibrary={foodLibrary}
-              onUpdateMealSlot={onMealSlotChange}
-              onAddCustomFood={onAddCustomFood}
-            />
+            <div className="flex flex-col gap-3">
+              {showMealSlots && (
+                <MealSlotPlanner
+                  dayNumber={day.day}
+                  dayMealPlan={mealPlanForDay}
+                  foodLibrary={foodLibrary}
+                  onUpdateSlot={(slotId, portions) =>
+                    onMealSlotChange(day.day, slotId, portions)
+                  }
+                  onAddCustomFood={onAddCustomFood}
+                  targetMacros={{
+                    carbs: day.carbs,
+                    protein: day.protein,
+                    fat: day.fat,
+                    calories: day.calories,
+                  }}
+                  className="flex-1"
+                />
+              )}
+              <IOSSquareCard
+                day={day}
+                displayOrder={index + 1}
+                dailyWorkouts={dailyWorkouts}
+                setDailyWorkout={setDailyWorkout}
+              />
+            </div>
           </DropZoneWrapper>
         );
       })}
