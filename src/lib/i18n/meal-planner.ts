@@ -41,8 +41,8 @@ export const mealPlannerZhCN = {
     per_half_piece: '半份数',
   },
   servingInputSuffix: {
-    per_100g: '克',
-    per_100ml: '毫升',
+    per_100g: 'g',
+    per_100ml: 'ml',
   },
   addFoodErrorTitle: '请完善食材信息',
   addFoodErrorDescription: '名称、份量与宏量营养需要填写完整。',
@@ -116,10 +116,9 @@ export const mealPlannerZhCN = {
     },
   },
   servingUnits: {
-    per_100g: '每 100 克',
-    per_100ml: '每 100 毫升',
-    per_piece: '每 1 份',
-    per_half_piece: '每半份',
+    per_100g: '100 克',
+    per_100ml: '100 毫升',
+    per_piece: '1 份',
   },
   slots: {
     breakfast: '早餐',
@@ -258,10 +257,9 @@ export const mealPlannerEnUS = {
     },
   },
   servingUnits: {
-    per_100g: 'Per 100 g',
-    per_100ml: 'Per 100 ml',
-    per_piece: 'Per piece',
-    per_half_piece: 'Per half piece',
+    per_100g: '100 g',
+    per_100ml: '100 ml',
+    per_piece: '1 piece',
   },
   slots: {
     breakfast: 'Breakfast',

@@ -22,17 +22,12 @@ export interface MacroProfile {
   calories: number;
 }
 
-export type ServingUnit =
-  | 'per_100g'
-  | 'per_100ml'
-  | 'per_piece'
-  | 'per_half_piece';
+export type ServingUnit = 'per_100g' | 'per_100ml' | 'per_piece';
 
 export const SERVING_UNIT_OPTIONS: ServingUnit[] = [
   'per_100g',
   'per_100ml',
   'per_piece',
-  'per_half_piece',
 ];
 
 /**
