@@ -428,19 +428,20 @@ export function SlotSection({
                 }}
               >
                 <SelectTrigger className="h-8 w-full text-xs">
-                  <SelectValue
-                    placeholder={t('mealPlanner.searchPlaceholder')}
-                  >
-                    {selectedFoodId && selectedFoodId !== '__add_new_food__' && (
-                      <div className="flex items-center gap-1 truncate">
-                        <span>{foodLookup[selectedFoodId]?.emoji || '🍽️'}</span>
-                        <span className="truncate">
-                          {foodLookup[selectedFoodId]?.nameKey
-                            ? t(foodLookup[selectedFoodId].nameKey)
-                            : foodLookup[selectedFoodId]?.name}
-                        </span>
-                      </div>
-                    )}
+                  <SelectValue placeholder={t('mealPlanner.searchPlaceholder')}>
+                    {selectedFoodId &&
+                      selectedFoodId !== '__add_new_food__' && (
+                        <div className="flex items-center gap-1 truncate">
+                          <span>
+                            {foodLookup[selectedFoodId]?.emoji || '🍽️'}
+                          </span>
+                          <span className="truncate">
+                            {foodLookup[selectedFoodId]?.nameKey
+                              ? t(foodLookup[selectedFoodId].nameKey)
+                              : foodLookup[selectedFoodId]?.name}
+                          </span>
+                        </div>
+                      )}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="max-h-60">

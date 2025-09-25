@@ -18,6 +18,10 @@ export interface FoodLibraryPanelProps {
   onAddCustomFood: (
     food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
   ) => FoodItem;
+  onUpdateFood: (
+    id: string,
+    food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
+  ) => void;
   onRemoveFood: (id: string) => void;
 }
 
@@ -36,5 +40,9 @@ export interface FoodAddFormProps {
 
 export interface FoodGridProps {
   filteredFoods: LocalizedFood[];
+  onUpdateFood: (
+    id: string,
+    food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
+  ) => void;
   onRemoveFood: (id: string) => void;
 }

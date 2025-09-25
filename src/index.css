@@ -114,3 +114,27 @@
     scrollbar-width: none; /* Firefox */
   }
 }
+
+@layer utilities {
+  .animate-scroll-horizontal {
+    animation: scrollHorizontal 10s linear infinite !important;
+  }
+}
+
+@keyframes scrollHorizontal {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-60%);
+  }
+  50% {
+    transform: translateX(-60%);
+  }
+  75% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}

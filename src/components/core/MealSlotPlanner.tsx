@@ -19,6 +19,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
 import { SlotSection } from '@/components/core/meal-slot';
@@ -50,6 +56,7 @@ export function MealSlotPlanner({
   const { t } = useTranslation();
   const foodLookup = useMemo(() => buildFoodLookup(foodLibrary), [foodLibrary]);
   const previousDayRef = useRef(dayNumber);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const visibleSlots = useMemo(() => {
     if (previousDayRef.current !== dayNumber) {
@@ -96,97 +103,123 @@ export function MealSlotPlanner({
   return (
     <div className="mt-3 space-y-3">
       <div className="rounded-lg bg-slate-100/70 dark:bg-slate-800/70 px-3 py-2">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="text-xs font-medium text-slate-600 dark:text-slate-300">
-            {t('mealPlanner.daySummary', { day: dayNumber })}
+        <div className="flex items-center gap-2">
+          <div ref={scrollContainerRef} className="flex-1 overflow-hidden">
+            <div
+              className={cn(
+                'flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 min-w-max',
+                'animate-scroll-horizontal hover:animate-none' // 临时强制启用动画测试
+              )}
+            >
+              <span
+                className={cn(
+                  'px-2 py-0.5 rounded-full border flex items-center gap-1 whitespace-nowrap',
+                  diff.carbs === 0
+                    ? 'border-slate-300'
+                    : diff.carbs > 0
+                      ? 'border-green-500 text-green-600 dark:text-green-400'
+                      : 'border-amber-500 text-amber-600 dark:text-amber-400'
+                )}
+              >
+                <span>🍚</span>
+                <span>{renderDiff(diff.carbs, 'g')}</span>
+              </span>
+              <span
+                className={cn(
+                  'px-2 py-0.5 rounded-full border flex items-center gap-1 whitespace-nowrap',
+                  diff.protein === 0
+                    ? 'border-slate-300'
+                    : diff.protein > 0
+                      ? 'border-green-500 text-green-600 dark:text-green-400'
+                      : 'border-amber-500 text-amber-600 dark:text-amber-400'
+                )}
+              >
+                <span>🍖</span>
+                <span>{renderDiff(diff.protein, 'g')}</span>
+              </span>
+              <span
+                className={cn(
+                  'px-2 py-0.5 rounded-full border flex items-center gap-1 whitespace-nowrap',
+                  diff.fat === 0
+                    ? 'border-slate-300'
+                    : diff.fat > 0
+                      ? 'border-green-500 text-green-600 dark:text-green-400'
+                      : 'border-amber-500 text-amber-600 dark:text-amber-400'
+                )}
+              >
+                <span>🥜</span>
+                <span>{renderDiff(diff.fat, 'g')}</span>
+              </span>
+              <span
+                className={cn(
+                  'px-2 py-0.5 rounded-full border flex items-center gap-1 whitespace-nowrap',
+                  diff.calories === 0
+                    ? 'border-slate-300'
+                    : diff.calories > 0
+                      ? 'border-green-500 text-green-600 dark:text-green-400'
+                      : 'border-amber-500 text-amber-600 dark:text-amber-400'
+                )}
+              >
+                <span>🔥</span>
+                <span>{renderDiff(diff.calories, 'kcal')}</span>
+              </span>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2 text-[11px] text-slate-500 dark:text-slate-400">
-            <span
-              className={cn(
-                'px-2 py-0.5 rounded-full border',
-                diff.carbs === 0
-                  ? 'border-slate-300'
-                  : diff.carbs > 0
-                    ? 'border-green-500 text-green-600 dark:text-green-400'
-                    : 'border-amber-500 text-amber-600 dark:text-amber-400'
-              )}
-            >
-              {t('mealPlanner.carbsDiff', {
-                value: renderDiff(diff.carbs, 'g'),
-              })}
-            </span>
-            <span
-              className={cn(
-                'px-2 py-0.5 rounded-full border',
-                diff.protein === 0
-                  ? 'border-slate-300'
-                  : diff.protein > 0
-                    ? 'border-green-500 text-green-600 dark:text-green-400'
-                    : 'border-amber-500 text-amber-600 dark:text-amber-400'
-              )}
-            >
-              {t('mealPlanner.proteinDiff', {
-                value: renderDiff(diff.protein, 'g'),
-              })}
-            </span>
-            <span
-              className={cn(
-                'px-2 py-0.5 rounded-full border',
-                diff.fat === 0
-                  ? 'border-slate-300'
-                  : diff.fat > 0
-                    ? 'border-green-500 text-green-600 dark:text-green-400'
-                    : 'border-amber-500 text-amber-600 dark:text-amber-400'
-              )}
-            >
-              {t('mealPlanner.fatDiff', { value: renderDiff(diff.fat, 'g') })}
-            </span>
-            <span
-              className={cn(
-                'px-2 py-0.5 rounded-full border',
-                diff.calories === 0
-                  ? 'border-slate-300'
-                  : diff.calories > 0
-                    ? 'border-green-500 text-green-600 dark:text-green-400'
-                    : 'border-amber-500 text-amber-600 dark:text-amber-400'
-              )}
-            >
-              {t('mealPlanner.calorieDiff', {
-                value: renderDiff(diff.calories, 'kcal'),
-              })}
-            </span>
+          <div className="flex-shrink-0">
+            {availableSlots.length > 0 ? (
+              <TooltipProvider>
+                <Tooltip>
+                  <DropdownMenu>
+                    <TooltipTrigger asChild>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                    </TooltipTrigger>
+                    <DropdownMenuContent align="end" sideOffset={8}>
+                      {availableSlots.map((slot) => (
+                        <DropdownMenuItem
+                          key={slot.id}
+                          onSelect={() => {
+                            handleAddSlot();
+                          }}
+                        >
+                          {t(slot.translationKey)}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <TooltipContent>
+                    <p>{t('mealPlanner.addMealSlot')}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      disabled
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t('mealPlanner.addMealSlot')}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
         </div>
-      </div>
-
-      <div className="flex justify-end">
-        {availableSlots.length > 0 ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Plus className="mr-1 h-4 w-4" />
-                {t('mealPlanner.addMealSlot')}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" sideOffset={8}>
-              {availableSlots.map((slot) => (
-                <DropdownMenuItem
-                  key={slot.id}
-                  onSelect={() => {
-                    handleAddSlot();
-                  }}
-                >
-                  {t(slot.translationKey)}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <Button variant="outline" size="sm" disabled>
-            <Plus className="mr-1 h-4 w-4" />
-            {t('mealPlanner.addMealSlot')}
-          </Button>
-        )}
       </div>
 
       <div className="space-y-2">

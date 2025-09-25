@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { DraggableCard } from './DraggableCard';
 import { MealSlotPlanner } from '../MealSlotPlanner';
@@ -45,6 +47,7 @@ export function DayColumn({
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [isDraggedOver, setIsDraggedOver] = useState(false);
+  const [showMealSlots, setShowMealSlots] = useState(false);
 
   useEffect(() => {
     const element = ref.current;
@@ -72,13 +75,33 @@ export function DayColumn({
     >
       {/* Fixed column header - not draggable */}
       <div className="mb-3 p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800">
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-between">
           <h3 className="font-semibold text-sm">
             {t('results.dayNumber').replace(
               '{{day}}',
               (columnIndex + 1).toString()
             )}
           </h3>
+          {day && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs"
+              onClick={() => setShowMealSlots(!showMealSlots)}
+            >
+              {showMealSlots ? (
+                <>
+                  <ChevronUp className="mr-1 h-3 w-3" />
+                  {t('mealPlanner.hideMealSlots')}
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="mr-1 h-3 w-3" />
+                  {t('mealPlanner.showMealSlots')}
+                </>
+              )}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -108,7 +131,7 @@ export function DayColumn({
         )}
       </div>
 
-      {day && (
+      {day && showMealSlots && (
         <MealSlotPlanner
           dayNumber={day.day}
           dayMealPlan={mealPlan}
