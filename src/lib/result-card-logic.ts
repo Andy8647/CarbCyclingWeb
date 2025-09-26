@@ -5,6 +5,9 @@ import {
   WORKOUT_TYPES,
 } from '@/lib/calculator';
 
+export type NutritionPlan = ReturnType<typeof calculateNutritionPlan>;
+export type MetabolicData = ReturnType<typeof calculateMetabolicData>;
+
 export interface DayData {
   day: number;
   type: string;

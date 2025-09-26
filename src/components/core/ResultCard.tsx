@@ -1,18 +1,10 @@
-import { useMemo, useEffect, useRef, useCallback, useState } from 'react';
+import { useMemo, useEffect, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from '@/lib/form-context';
-import { Button } from '@/components/ui/button';
 import { GlassCard } from '@/components/ui/glass-card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { ChevronDown } from 'lucide-react';
 import { IOSGridLayout } from './IOSGridLayout';
 import { useToast } from '@/lib/use-toast';
-import { exportNodeToPNG } from '@/lib/export-to-png';
+import { useExportActions } from '@/lib/hooks/use-export-actions';
 import type {
   DayMealPlan,
   MealPortion,
@@ -20,15 +12,17 @@ import type {
 } from '@/lib/persistence-types';
 import { normalizeDayMealPlan } from '@/lib/meal-planner';
 import { FoodLibraryPanel } from './FoodLibraryPanel';
-import { DayColumn } from '@/components/core/result-card';
+import {
+  DayColumn,
+  MacroSummaryCards,
+  ResultsHeader,
+} from '@/components/core/result-card';
 import { MealSlotPlanner } from './MealSlotPlanner';
 import { useScreenSize } from '@/lib/hooks/use-screen-size';
 import {
   calculateNutritionData,
   calculateMetabolicInfo,
   reorderDays,
-  generateMarkdown,
-  generateCSV,
   type DragData,
 } from '@/lib/result-card-logic';
 
@@ -50,7 +44,6 @@ export function ResultCard() {
     resetMealPlan,
   } = useFormContext();
 
-  const exportRef = useRef<HTMLDivElement>(null);
   const isLargeScreen = useScreenSize();
   const [showFoodLibrary, setShowFoodLibrary] = useState(false);
   const [showMealSlots, setShowMealSlots] = useState(false);
@@ -86,6 +79,30 @@ export function ResultCard() {
     return plans;
   }, [mealPlan]);
 
+  const nutritionPlan = useMemo(
+    () => calculateNutritionData(formData, isValid ?? false),
+    [formData, isValid]
+  );
+
+  const metabolicData = useMemo(
+    () => calculateMetabolicInfo(formData, isValid ?? false),
+    [formData, isValid]
+  );
+
+  const orderedDays = useMemo(
+    () => reorderDays(nutritionPlan, dayOrder),
+    [nutritionPlan, dayOrder]
+  );
+
+  const { exportRef, handleCopyAsMarkdown, handleCopyAsCSV, handleExportPNG } =
+    useExportActions({
+      nutritionPlan,
+      orderedDays,
+      dailyWorkouts,
+      metabolicData,
+      macroIcons,
+    });
+
   const handleMealSlotUpdate = useCallback(
     (dayNumber: number, slotId: MealSlotId, portions: MealPortion[]) => {
       if (!cycleDays) return;
@@ -102,16 +119,6 @@ export function ResultCard() {
       title: t('mealPlanner.resetSuccess'),
     });
   }, [cycleDays, resetMealPlan, toast, t]);
-
-  const nutritionPlan = useMemo(
-    () => calculateNutritionData(formData, isValid ?? false),
-    [formData, isValid]
-  );
-
-  const metabolicData = useMemo(
-    () => calculateMetabolicInfo(formData, isValid ?? false),
-    [formData, isValid]
-  );
 
   // Initialize dayOrder when nutritionPlan changes
   useEffect(() => {
@@ -131,11 +138,6 @@ export function ResultCard() {
       }
     }
   }, [nutritionPlan, dayOrder, setDayOrder]);
-
-  const orderedDays = useMemo(
-    () => reorderDays(nutritionPlan, dayOrder),
-    [nutritionPlan, dayOrder]
-  );
 
   const handleColumnHeightChange = useCallback(
     (dayId: number, height: number) => {
@@ -159,7 +161,7 @@ export function ResultCard() {
       if (!day) return maxHeight;
 
       const height = columnHeights[day.day];
-      if (typeof height !== 'number') {
+      if (height === undefined) {
         return maxHeight;
       }
 
@@ -167,270 +169,64 @@ export function ResultCard() {
     }, 0);
   }, [columnHeights, orderedDays]);
 
-  const handleDrop = (dragData: DragData, targetColumnIndex: number) => {
-    if (dragData.type !== 'card') return;
+  const handleDrop = useCallback(
+    (dragData: DragData, targetColumnIndex: number) => {
+      if (dragData.type !== 'card') return;
 
-    const activeDayNum = dragData.day;
-    const currentIndex = dayOrder.indexOf(activeDayNum);
+      const activeDayNum = dragData.day;
+      const currentIndex = dayOrder.indexOf(activeDayNum);
 
-    if (currentIndex !== -1 && currentIndex !== targetColumnIndex) {
-      const newDayOrder = [...dayOrder];
-      newDayOrder.splice(currentIndex, 1);
-      newDayOrder.splice(targetColumnIndex, 0, activeDayNum);
-      setDayOrder(newDayOrder);
-    }
-  };
+      if (currentIndex !== -1 && currentIndex !== targetColumnIndex) {
+        const newDayOrder = [...dayOrder];
+        newDayOrder.splice(currentIndex, 1);
+        newDayOrder.splice(targetColumnIndex, 0, activeDayNum);
+        setDayOrder(newDayOrder);
+      }
+    },
+    [dayOrder, setDayOrder]
+  );
 
-  const handleGridDrop = (dragData: DragData, targetIndex: number) => {
-    if (dragData.type !== 'card') return;
+  const handleGridDrop = useCallback(
+    (dragData: DragData, targetIndex: number) => {
+      if (dragData.type !== 'card') return;
 
-    const activeDayNum = dragData.day;
-    const currentIndex = dayOrder.indexOf(activeDayNum);
+      const activeDayNum = dragData.day;
+      const currentIndex = dayOrder.indexOf(activeDayNum);
 
-    if (currentIndex !== -1 && currentIndex !== targetIndex) {
-      const newDayOrder = [...dayOrder];
-      newDayOrder.splice(currentIndex, 1);
-      newDayOrder.splice(targetIndex, 0, activeDayNum);
-      setDayOrder(newDayOrder);
-    }
-  };
+      if (currentIndex !== -1 && currentIndex !== targetIndex) {
+        const newDayOrder = [...dayOrder];
+        newDayOrder.splice(currentIndex, 1);
+        newDayOrder.splice(targetIndex, 0, activeDayNum);
+        setDayOrder(newDayOrder);
+      }
+    },
+    [dayOrder, setDayOrder]
+  );
 
   if (!form) return null;
 
-  const handleCopyAsMarkdown = () => {
-    if (!nutritionPlan) return;
-
-    const markdownText = generateMarkdown(
-      nutritionPlan,
-      orderedDays,
-      dailyWorkouts,
-      metabolicData,
-      macroIcons,
-      t
-    );
-
-    navigator.clipboard
-      .writeText(markdownText)
-      .then(() => {
-        toast({
-          variant: 'success',
-          title: '📝 ' + t('results.copyAsMarkdown'),
-          description: t('results.copySuccess'),
-        });
-      })
-      .catch((err) => {
-        console.error(t('results.copyError'), err);
-        toast({
-          variant: 'destructive',
-          title: t('results.copyError'),
-          description: 'Failed to copy to clipboard',
-        });
-      });
-  };
-
-  const handleCopyAsCSV = () => {
-    if (!nutritionPlan) return;
-
-    const csvText = generateCSV(
-      nutritionPlan,
-      orderedDays,
-      dailyWorkouts,
-      metabolicData,
-      t
-    );
-
-    navigator.clipboard
-      .writeText(csvText)
-      .then(() => {
-        toast({
-          variant: 'success',
-          title: '📊 ' + t('results.copyAsCSV'),
-          description: t('results.copySuccess'),
-        });
-      })
-      .catch((err) => {
-        console.error(t('results.copyError'), err);
-        toast({
-          variant: 'destructive',
-          title: t('results.copyError'),
-          description: 'Failed to copy to clipboard',
-        });
-      });
-  };
-
-  const handleExportPNG = async () => {
-    try {
-      if (!nutritionPlan) {
-        toast({
-          variant: 'destructive',
-          title: t('results.exportError'),
-          description: 'No results to export',
-        });
-        return;
-      }
-      const node = exportRef.current;
-      if (!node) return;
-
-      const prevPadding = node.style.padding;
-      node.style.padding = '24px';
-      try {
-        await exportNodeToPNG(node, {
-          fileName: 'carb-cycling-plan.png',
-          pixelRatio: 3,
-          filter: (n) =>
-            !(
-              n instanceof HTMLElement && n.hasAttribute('data-export-exclude')
-            ),
-        });
-      } finally {
-        node.style.padding = prevPadding;
-      }
-
-      toast({
-        variant: 'success',
-        title: '🖼️ ' + t('results.exportPNG'),
-        description: t('results.exportSuccess'),
-      });
-    } catch (err) {
-      console.error('Export PNG failed', err);
-      toast({
-        variant: 'destructive',
-        title: t('results.exportError'),
-        description: 'Failed to export PNG',
-      });
-    }
-  };
-
   return (
     <GlassCard>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">🍽️</span>
-          <h2 className="text-lg font-bold text-foreground">
-            {t('results.title')}
-          </h2>
-        </div>
-        <div
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full"
-          data-export-exclude
-        >
-          <div className="flex flex-wrap gap-3">
-            <Button
-              variant={showMealSlots ? 'default' : 'outline'}
-              className="rounded-xl"
-              onClick={() => setShowMealSlots((prev) => !prev)}
-            >
-              <span>🥗</span>
-              <span className="hidden sm:inline ml-1">
-                {showMealSlots
-                  ? t('mealPlanner.hideMealSlots')
-                  : t('mealPlanner.showMealSlots')}
-              </span>
-            </Button>
-            <Button
-              variant={showFoodLibrary ? 'default' : 'outline'}
-              className="rounded-xl"
-              onClick={() => setShowFoodLibrary((prev) => !prev)}
-            >
-              <span>🍱</span>
-              <span className="hidden sm:inline ml-1">
-                {showFoodLibrary
-                  ? t('mealPlanner.hideLibrary')
-                  : t('mealPlanner.showLibrary')}
-              </span>
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="rounded-xl">
-                  <span>📋</span>
-                  <span className="hidden sm:inline ml-1">
-                    {t('results.copyResults')}
-                  </span>
-                  <ChevronDown className="ml-1 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={handleCopyAsMarkdown}>
-                  <span className="mr-2">📝</span>
-                  {t('results.copyAsMarkdown')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleCopyAsCSV}>
-                  <span className="mr-2">📊</span>
-                  {t('results.copyAsCSV')}
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleResetMealPlan}
-                  disabled={!cycleDays}
-                >
-                  <span className="mr-2">♻️</span>
-                  {t('mealPlanner.resetPlanAction')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button
-              variant="outline"
-              className="rounded-xl"
-              onClick={handleExportPNG}
-            >
-              <span>🖼️</span>
-              <span className="hidden sm:inline ml-1">
-                {t('results.exportPNG')}
-              </span>
-            </Button>
-          </div>
-        </div>
-      </div>
+      <ResultsHeader
+        showMealSlots={showMealSlots}
+        setShowMealSlots={setShowMealSlots}
+        showFoodLibrary={showFoodLibrary}
+        setShowFoodLibrary={setShowFoodLibrary}
+        onCopyAsMarkdown={handleCopyAsMarkdown}
+        onCopyAsCSV={handleCopyAsCSV}
+        onExportPNG={handleExportPNG}
+        onResetMealPlan={handleResetMealPlan}
+        cycleDays={cycleDays}
+      />
 
       <div ref={exportRef}>
         {nutritionPlan ? (
           <div className="space-y-4">
-            {/* Weekly summary cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-              <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1 whitespace-nowrap">
-                  <span className="text-sm">{macroIcons.protein}</span>
-                  <span>{t('results.dailyProtein')}</span>
-                </div>
-                <div className="text-sm sm:text-lg font-semibold">
-                  {nutritionPlan.summary.dailyProtein} g
-                </div>
-              </div>
-              <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1 whitespace-nowrap">
-                  <span className="text-sm">{macroIcons.carbs}</span>
-                  <span>{t('results.weeklyCarbs')}</span>
-                </div>
-                <div className="text-sm sm:text-lg font-semibold">
-                  {nutritionPlan.summary.totalCarbs} g
-                </div>
-              </div>
-              <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1 whitespace-nowrap">
-                  <span className="text-sm">{macroIcons.fat}</span>
-                  <span>{t('results.weeklyFat')}</span>
-                </div>
-                <div className="text-sm sm:text-lg font-semibold">
-                  {nutritionPlan.summary.totalFat} g
-                </div>
-              </div>
-              <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1 whitespace-nowrap">
-                  <span className="text-sm">🔥</span>
-                  <span>{t('results.calorieInfo')}</span>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-xs sm:text-sm font-semibold">
-                    {t('results.weeklyCalories')}:{' '}
-                    {nutritionPlan.summary.totalCalories}
-                  </div>
-                  {metabolicData && (
-                    <div className="text-xs sm:text-sm font-semibold">
-                      {t('results.dailyTDEE')}: {metabolicData.tdee}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            <MacroSummaryCards
+              nutritionPlan={nutritionPlan}
+              metabolicData={metabolicData}
+              macroIcons={macroIcons}
+            />
 
             {showFoodLibrary && (
               <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/40 p-4">

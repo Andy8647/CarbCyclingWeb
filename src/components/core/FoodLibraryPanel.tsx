@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '@/lib/use-toast';
 import { useFoodLibraryFilters } from '@/lib/hooks/use-food-library-filters';
@@ -50,11 +50,14 @@ export function FoodLibraryPanel({
 
   const { search, setSearch, filteredFoods } = useFoodLibraryFilters(foods);
 
-  const updateFormField = (field: string, value: string | ServingUnit) => {
-    setFormState((prev) => ({ ...prev, [field]: value }));
-  };
+  const updateFormField = useCallback(
+    (field: string, value: string | ServingUnit) => {
+      setFormState((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = useCallback(() => {
     const carbs = parseFloat(formState.carbs);
     const protein = parseFloat(formState.protein);
     const fat = parseFloat(formState.fat);
@@ -101,7 +104,7 @@ export function FoodLibraryPanel({
 
     setFormState(emptyForm);
     setShowForm(false);
-  };
+  }, [formState, onAddCustomFood, t, toast]);
 
   return (
     <div className="space-y-3">

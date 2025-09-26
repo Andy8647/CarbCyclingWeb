@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Select,
@@ -50,9 +50,13 @@ function IOSSquareCard({
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const macroEmojis = t('results.macroEmojis', {
-    returnObjects: true,
-  }) as Record<string, string>;
+  const macroEmojis = useMemo(
+    () =>
+      t('results.macroEmojis', {
+        returnObjects: true,
+      }) as Record<string, string>,
+    [t]
+  );
 
   useEffect(() => {
     const element = ref.current;
@@ -98,7 +102,10 @@ function IOSSquareCard({
         <div onPointerDown={(e) => e.stopPropagation()}>
           <Select
             value={dailyWorkouts[day.day] || ''}
-            onValueChange={(value) => setDailyWorkout(day.day, value)}
+            onValueChange={useCallback(
+              (value: string) => setDailyWorkout(day.day, value),
+              [day.day, setDailyWorkout]
+            )}
           >
             <SelectTrigger className="h-7 text-xs w-full border-slate-200 dark:border-slate-700">
               <SelectValue placeholder={t('results.selectWorkout')} />

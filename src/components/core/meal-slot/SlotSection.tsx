@@ -1,36 +1,22 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { NumberInput } from '@/components/ui/number-input';
 import { ChevronDown, ChevronUp, MinusCircle, Plus, X } from 'lucide-react';
-import { useToast } from '@/lib/use-toast';
+import { useSlotManagement } from '@/lib/hooks/use-slot-management';
+import { useQuickForm } from '@/lib/hooks/use-quick-form';
 import {
   buildFoodLookup,
   calculateSlotTotals,
-  createMealPortion,
   getMealSlotDefinition,
-  convertInputToServings,
   formatBadgeValue,
   getDefaultInputValue,
   getInputStep,
-  roundToTwo,
 } from '@/lib/meal-planner';
 import { CreateOrUpdateFoodModal } from '@/components/core/food-library';
 import { PortionCard } from './PortionCard';
 import { FoodSelect, type LocalizedFoodOption } from './FoodSelect';
-import type { SlotSectionProps, QuickAddFormState } from './types';
-
-const QUICK_FORM_DEFAULTS: QuickAddFormState = {
-  name: '',
-  category: 'other',
-  defaultServing: '',
-  servingUnit: 'per_100g',
-  carbs: '',
-  protein: '',
-  fat: '',
-  preparation: 'raw',
-  emoji: '',
-};
+import type { SlotSectionProps } from './types';
 
 export function SlotSection({
   slotId,
@@ -42,7 +28,6 @@ export function SlotSection({
   onRemoveSlot,
 }: SlotSectionProps) {
   const { t } = useTranslation();
-  const { toast } = useToast();
   const slotDefinition = getMealSlotDefinition(slotId);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -50,28 +35,21 @@ export function SlotSection({
   const [servings, setServings] = useState<number>(1);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [pendingFoodId, setPendingFoodId] = useState<string | null>(null);
-  const [quickForm, setQuickForm] =
-    useState<QuickAddFormState>(QUICK_FORM_DEFAULTS);
-  const [expandedPortions, setExpandedPortions] = useState<
-    Record<string, boolean>
-  >({});
 
-  const resetQuickForm = useCallback(
-    () => setQuickForm({ ...QUICK_FORM_DEFAULTS }),
-    []
-  );
-
-  const handleQuickFormFieldChange = useCallback(
-    <Key extends keyof QuickAddFormState>(
-      field: Key,
-      value: QuickAddFormState[Key]
-    ) => {
-      setQuickForm((prev) => ({ ...prev, [field]: value }));
-    },
-    [setQuickForm]
-  );
+  const { quickForm, resetQuickForm, handleQuickFormFieldChange } =
+    useQuickForm();
 
   const foodLookup = useMemo(() => buildFoodLookup(foodLibrary), [foodLibrary]);
+
+  const {
+    expandedPortions,
+    setExpandedPortions,
+    toggleExpandedPortion,
+    handleAddPortion: addPortion,
+    handlePortionInputChange,
+    handleRemovePortion,
+    handleQuickAddFood,
+  } = useSlotManagement({ portions, onUpdate, foodLookup });
 
   const localizedFoodLibrary = useMemo<LocalizedFoodOption[]>(() => {
     const mapped = foodLibrary.map((food) => ({
@@ -122,13 +100,6 @@ export function SlotSection({
     }
   };
 
-  const toggleExpandedPortion = useCallback((portionId: string) => {
-    setExpandedPortions((prev) => ({
-      ...prev,
-      [portionId]: !prev[portionId],
-    }));
-  }, []);
-
   useEffect(() => {
     setExpandedPortions((prev) => {
       const next: Record<string, boolean> = {};
@@ -137,7 +108,7 @@ export function SlotSection({
       });
       return next;
     });
-  }, [portions]);
+  }, [portions, setExpandedPortions]);
 
   useEffect(() => {
     if (pendingFoodId && foodLookup[pendingFoodId]) {
@@ -195,60 +166,13 @@ export function SlotSection({
   };
 
   const handleAddPortion = () => {
-    if (!selectedFoodId) return;
-    const food = foodLookup[selectedFoodId];
-    if (!food) return;
-    const normalizedInput = Math.max(Number(servings) || 0, 0);
-    if (!normalizedInput) return;
-
-    const normalizedServings = convertInputToServings(
-      normalizedInput,
-      food.servingUnit
-    );
-    if (normalizedServings <= 0) return;
-
-    const newPortion = createMealPortion(
-      selectedFoodId,
-      roundToTwo(normalizedServings)
-    );
-    onUpdate([...portions, newPortion]);
-    setShowQuickAdd(false);
-    setServings(getDefaultInputValue(food.servingUnit));
-    setIsAdding(false);
-    setExpandedPortions((prev) => ({ ...prev, [newPortion.id]: true }));
-  };
-
-  const handlePortionInputChange = (portionId: string, value: string) => {
-    const food =
-      foodLookup[portions.find((p) => p.id === portionId)?.foodId ?? ''];
-
-    if (value === '') return;
-    const parsed = parseFloat(value);
-    if (Number.isNaN(parsed)) return;
-
-    const normalized = convertInputToServings(parsed, food?.servingUnit);
-
-    if (normalized <= 0) {
-      onUpdate(portions.filter((portion) => portion.id !== portionId));
-      setExpandedPortions((prev) => {
-        if (!prev[portionId]) return prev;
-        const next = { ...prev };
-        delete next[portionId];
-        return next;
-      });
-      return;
+    const newPortion = addPortion(selectedFoodId, servings);
+    if (newPortion) {
+      const food = foodLookup[selectedFoodId];
+      setShowQuickAdd(false);
+      setServings(getDefaultInputValue(food?.servingUnit));
+      setIsAdding(false);
     }
-
-    onUpdate(
-      portions.map((portion) =>
-        portion.id === portionId
-          ? {
-              ...portion,
-              servings: roundToTwo(normalized),
-            }
-          : portion
-      )
-    );
   };
 
   const handleToggleAdding = () => {
@@ -275,63 +199,14 @@ export function SlotSection({
   };
 
   const handleQuickAddSubmit = () => {
-    const carbs = parseFloat(quickForm.carbs);
-    const protein = parseFloat(quickForm.protein);
-    const fat = parseFloat(quickForm.fat);
-
-    if (
-      !quickForm.name.trim() ||
-      !quickForm.defaultServing.trim() ||
-      Number.isNaN(carbs) ||
-      Number.isNaN(protein) ||
-      Number.isNaN(fat)
-    ) {
-      toast({
-        variant: 'destructive',
-        title: t('mealPlanner.addFoodErrorTitle'),
-        description: t('mealPlanner.addFoodErrorDescription'),
-      });
-      return;
+    const newFood = handleQuickAddFood(quickForm, onAddCustomFood);
+    if (newFood) {
+      setPendingFoodId(newFood.id);
+      setShowQuickAdd(false);
+      resetQuickForm();
     }
-
-    const calories = Math.round(carbs * 4 + protein * 4 + fat * 9);
-
-    const newFood = onAddCustomFood({
-      name: quickForm.name.trim(),
-      category: quickForm.category,
-      defaultServing: quickForm.defaultServing.trim(),
-      servingUnit: quickForm.servingUnit,
-      macros: {
-        carbs: Math.round(carbs * 10) / 10,
-        protein: Math.round(protein * 10) / 10,
-        fat: Math.round(fat * 10) / 10,
-        calories,
-      },
-      preparation: quickForm.preparation,
-      emoji:
-        quickForm.emoji.trim() ||
-        (quickForm.preparation === 'raw' ? '🥕' : '🍽️'),
-      isBuiltin: false,
-    });
-
-    setPendingFoodId(newFood.id);
-    setShowQuickAdd(false);
-    resetQuickForm();
-    toast({
-      variant: 'success',
-      title: t('mealPlanner.customFoodAdded'),
-    });
   };
 
-  const handleRemove = (portionId: string) => {
-    onUpdate(portions.filter((portion) => portion.id !== portionId));
-    setExpandedPortions((prev) => {
-      if (!prev[portionId]) return prev;
-      const next = { ...prev };
-      delete next[portionId];
-      return next;
-    });
-  };
   getInputLabel(selectedFood?.servingUnit);
   const addInputSuffix = getInputSuffix(selectedFood?.servingUnit);
   const addInputStep = getInputStep(selectedFood?.servingUnit);
@@ -432,7 +307,7 @@ export function SlotSection({
               food={foodLookup[portion.foodId]}
               isExpanded={expandedPortions[portion.id] ?? false}
               onToggleExpanded={() => toggleExpandedPortion(portion.id)}
-              onRemove={() => handleRemove(portion.id)}
+              onRemove={() => handleRemovePortion(portion.id)}
               onPortionInputChange={(value) =>
                 handlePortionInputChange(portion.id, value)
               }

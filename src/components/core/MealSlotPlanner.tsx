@@ -84,18 +84,21 @@ export function MealSlotPlanner({
     [dayMealPlan, foodLookup]
   );
 
-  const diff = {
-    carbs: Math.round((dayTotals.carbs - targetMacros.carbs) * 10) / 10,
-    protein: Math.round((dayTotals.protein - targetMacros.protein) * 10) / 10,
-    fat: Math.round((dayTotals.fat - targetMacros.fat) * 10) / 10,
-  };
+  const diff = useMemo(
+    () => ({
+      carbs: Math.round((dayTotals.carbs - targetMacros.carbs) * 10) / 10,
+      protein: Math.round((dayTotals.protein - targetMacros.protein) * 10) / 10,
+      fat: Math.round((dayTotals.fat - targetMacros.fat) * 10) / 10,
+    }),
+    [dayTotals, targetMacros]
+  );
 
-  const getDiffTextClass = (value: number) => {
+  const getDiffTextClass = useCallback((value: number) => {
     if (value === 0) return 'text-slate-500 dark:text-slate-400';
     return value > 0
       ? 'text-green-600 dark:text-green-400'
       : 'text-red-600 dark:text-red-400';
-  };
+  }, []);
 
   return (
     <div className={cn('flex h-full flex-col space-y-3', className)}>
