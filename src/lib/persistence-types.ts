@@ -1,4 +1,4 @@
-import type { FormData } from './form-context';
+import type { FormData } from './form-schema';
 
 /**
  * Meal planner slot identifiers
@@ -31,6 +31,28 @@ export const SERVING_UNIT_OPTIONS: ServingUnit[] = [
 ];
 
 /**
+ * Food category types for food categorization
+ */
+export type CategoryType =
+  | 'protein'
+  | 'carb'
+  | 'fat'
+  | 'vegetable'
+  | 'fruit'
+  | 'supplement'
+  | 'other';
+
+export const CATEGORY_TYPE_OPTIONS: CategoryType[] = [
+  'protein',
+  'carb',
+  'fat',
+  'vegetable',
+  'fruit',
+  'supplement',
+  'other',
+];
+
+/**
  * Food or ingredient definition used by the meal planner
  */
 export interface FoodItem {
@@ -48,7 +70,8 @@ export interface FoodItem {
   macros: MacroProfile;
   preparation?: 'raw' | 'cooked';
   emoji?: string;
-  isCustom?: boolean;
+  isBuiltin?: boolean;
+  isDeleted?: boolean;
   createdAt?: number;
   updatedAt?: number;
 }

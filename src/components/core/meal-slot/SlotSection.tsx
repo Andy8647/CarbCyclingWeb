@@ -22,7 +22,7 @@ import type { SlotSectionProps, QuickAddFormState } from './types';
 
 const QUICK_FORM_DEFAULTS: QuickAddFormState = {
   name: '',
-  category: '',
+  category: 'other',
   defaultServing: '',
   servingUnit: 'per_100g',
   carbs: '',
@@ -298,7 +298,7 @@ export function SlotSection({
 
     const newFood = onAddCustomFood({
       name: quickForm.name.trim(),
-      category: quickForm.category.trim() || t('mealPlanner.customCategory'),
+      category: quickForm.category,
       defaultServing: quickForm.defaultServing.trim(),
       servingUnit: quickForm.servingUnit,
       macros: {
@@ -311,6 +311,7 @@ export function SlotSection({
       emoji:
         quickForm.emoji.trim() ||
         (quickForm.preparation === 'raw' ? '🥕' : '🍽️'),
+      isBuiltin: false,
     });
 
     setPendingFoodId(newFood.id);

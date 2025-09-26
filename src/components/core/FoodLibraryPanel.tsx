@@ -19,11 +19,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { type ServingUnit } from '@/lib/persistence-types';
+import {
+  type ServingUnit,
+  type CategoryType,
+  CATEGORY_TYPE_OPTIONS,
+} from '@/lib/persistence-types';
 
 const emptyForm: FoodFormState = {
   name: '',
-  category: '',
+  category: 'other',
   defaultServing: '100',
   servingUnit: 'per_100g',
   carbs: '',
@@ -76,7 +80,7 @@ export function FoodLibraryPanel({
 
     onAddCustomFood({
       name: formState.name.trim(),
-      category: formState.category.trim() || t('mealPlanner.customCategory'),
+      category: formState.category,
       defaultServing: formState.defaultServing.trim(),
       servingUnit: formState.servingUnit,
       macros: {
@@ -87,6 +91,7 @@ export function FoodLibraryPanel({
       },
       preparation,
       emoji: formState.emoji.trim() || (preparation === 'raw' ? '🥕' : '🍽️'),
+      isBuiltin: false,
     });
 
     toast({
@@ -135,6 +140,25 @@ export function FoodLibraryPanel({
               className="h-9 text-sm"
             />
           </div>
+
+          {/* 食材分类选择 */}
+          <Select
+            value={formState.category}
+            onValueChange={(value: CategoryType) =>
+              updateFormField('category', value)
+            }
+          >
+            <SelectTrigger className="h-9 text-sm">
+              <SelectValue placeholder={t('mealPlanner.categoryPlaceholder')} />
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORY_TYPE_OPTIONS.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {t(`mealPlanner.categories.${type}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           {/* 第二行：单位选择 + 份量输入 + 生熟重 */}
           <div className="flex gap-2">

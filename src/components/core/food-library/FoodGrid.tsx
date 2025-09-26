@@ -5,7 +5,7 @@ import { Modal } from '@/components/ui/modal';
 import { Edit3 } from 'lucide-react';
 import { CreateOrUpdateFoodModal } from './CreateOrUpdateFoodModal';
 import type { FoodGridProps, FoodFormState } from './types';
-import type { ServingUnit } from '@/lib/persistence-types';
+import type { ServingUnit, CategoryType } from '@/lib/persistence-types';
 
 export function FoodGrid({
   filteredFoods,
@@ -17,7 +17,7 @@ export function FoodGrid({
   const [deletingFood, setDeletingFood] = useState<string | null>(null);
   const [editFormState, setEditFormState] = useState<FoodFormState>({
     name: '',
-    category: '',
+    category: 'other',
     defaultServing: '',
     servingUnit: 'per_100g',
     carbs: '',
@@ -39,7 +39,7 @@ export function FoodGrid({
 
     setEditFormState({
       name: food.name,
-      category: food.category,
+      category: food.category as CategoryType,
       defaultServing: food.defaultServing,
       servingUnit: food.servingUnit ?? 'per_100g',
       carbs: food.macros.carbs.toString(),
@@ -72,8 +72,7 @@ export function FoodGrid({
 
     onUpdateFood(editingFood, {
       name: editFormState.name.trim(),
-      category:
-        editFormState.category.trim() || t('mealPlanner.customCategory'),
+      category: editFormState.category,
       defaultServing: editFormState.defaultServing.trim(),
       servingUnit: editFormState.servingUnit,
       macros: {

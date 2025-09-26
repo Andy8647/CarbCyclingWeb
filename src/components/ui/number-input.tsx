@@ -3,7 +3,8 @@ import { Input } from '@/components/ui/input';
 import { ChevronUp, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface NumberInputProps extends Omit<React.ComponentProps<'input'>, 'type'> {
+interface NumberInputProps
+  extends Omit<React.ComponentProps<'input'>, 'type' | 'onChange'> {
   value: string | number;
   onChange: (value: string) => void;
   step?: number;

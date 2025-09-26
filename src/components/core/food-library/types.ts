@@ -1,9 +1,13 @@
-import type { FoodItem, ServingUnit } from '@/lib/persistence-types';
+import type {
+  FoodItem,
+  ServingUnit,
+  CategoryType,
+} from '@/lib/persistence-types';
 import type { LocalizedFood } from '@/lib/hooks/use-food-library-filters';
 
 export interface FoodFormState {
   name: string;
-  category: string;
+  category: CategoryType;
   defaultServing: string;
   servingUnit: ServingUnit;
   carbs: string;
@@ -16,11 +20,11 @@ export interface FoodFormState {
 export interface FoodLibraryPanelProps {
   foods: FoodItem[];
   onAddCustomFood: (
-    food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
+    food: Omit<FoodItem, 'id' | 'createdAt' | 'updatedAt'>
   ) => FoodItem;
   onUpdateFood: (
     id: string,
-    food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
+    food: Omit<FoodItem, 'id' | 'createdAt' | 'updatedAt'>
   ) => void;
   onRemoveFood: (id: string) => void;
 }
@@ -62,7 +66,7 @@ export interface FoodGridProps {
   filteredFoods: LocalizedFood[];
   onUpdateFood: (
     id: string,
-    food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
+    food: Omit<FoodItem, 'id' | 'createdAt' | 'updatedAt'>
   ) => void;
   onRemoveFood: (id: string) => void;
 }

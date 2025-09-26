@@ -72,6 +72,7 @@ export const mealPlannerZhCN = {
   emojiPlaceholder: 'emoji',
   unitPlaceholder: '单位',
   preparationPlaceholder: '重',
+  categoryPlaceholder: '选择食材分类',
   carbsLabel: '碳水 (g)',
   proteinLabel: '蛋白 (g)',
   fatLabel: '脂肪 (g)',
@@ -82,9 +83,12 @@ export const mealPlannerZhCN = {
   },
   categories: {
     protein: '蛋白质',
-    carb: '碳水',
+    carb: '碳水化合物',
     fat: '脂肪',
+    vegetable: '蔬菜',
+    fruit: '水果',
     supplement: '补剂',
+    other: '其他',
   },
   foods: {
     chickenBreast: {
@@ -227,6 +231,7 @@ export const mealPlannerEnUS = {
   emojiPlaceholder: 'emoji',
   unitPlaceholder: 'Unit',
   preparationPlaceholder: 'State',
+  categoryPlaceholder: 'Select category',
   carbsLabel: 'Carbs (g)',
   proteinLabel: 'Protein (g)',
   fatLabel: 'Fat (g)',
@@ -237,9 +242,12 @@ export const mealPlannerEnUS = {
   },
   categories: {
     protein: 'Protein',
-    carb: 'Carb',
+    carb: 'Carbohydrate',
     fat: 'Fat',
+    vegetable: 'Vegetable',
+    fruit: 'Fruit',
     supplement: 'Supplement',
+    other: 'Other',
   },
   foods: {
     chickenBreast: {

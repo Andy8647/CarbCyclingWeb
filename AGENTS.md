@@ -45,6 +45,7 @@
 - Persistence uses `localStorage` helpers (`use-local-storage.ts`, `use-app-persistence.ts`).
 
 # Todo:
+
 - the add/edit/delete food is not working
 - modify the UI of MealSlotPlanner, so that it use divider to separate different meal slots
 - make the cards in FoodLibrary draggable into the MealSlotPlanner

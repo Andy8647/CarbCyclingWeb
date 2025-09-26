@@ -43,8 +43,8 @@ export function ResultCard() {
     setDayOrder,
     foodLibrary,
     addCustomFood,
-    updateCustomFood,
-    removeCustomFood,
+    updateFood,
+    removeFood,
     getMealPlan,
     setMealPortionsForSlot,
     resetMealPlan,
@@ -438,11 +438,11 @@ export function ResultCard() {
                   foods={foodLibrary}
                   onAddCustomFood={addCustomFood}
                   onUpdateFood={(id, food) => {
-                    updateCustomFood(id, {
+                    updateFood(id, {
                       ...food,
                     });
                   }}
-                  onRemoveFood={removeCustomFood}
+                  onRemoveFood={removeFood}
                 />
               </div>
             )}

@@ -20,13 +20,13 @@ interface FormContextType {
   foodLibrary: FoodItem[];
   customFoods: Record<string, FoodItem>;
   addCustomFood: (
-    food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
+    food: Omit<FoodItem, 'id' | 'createdAt' | 'updatedAt'>
   ) => FoodItem;
-  updateCustomFood: (
+  updateFood: (
     id: string,
-    updates: Partial<Omit<FoodItem, 'id' | 'isCustom'>>
+    updates: Partial<Omit<FoodItem, 'id'>>
   ) => FoodItem | null;
-  removeCustomFood: (id: string) => void;
+  removeFood: (id: string) => void;
   getMealPlan: (cycleDays: number) => CycleMealPlan;
   setMealPlanForDay: (
     cycleDays: number,
@@ -56,8 +56,8 @@ export function FormProvider({
   foodLibrary,
   customFoods,
   addCustomFood,
-  updateCustomFood,
-  removeCustomFood,
+  updateFood,
+  removeFood,
   getMealPlan,
   setMealPlanForDay,
   setMealPortionsForSlot,
@@ -74,13 +74,13 @@ export function FormProvider({
   foodLibrary: FoodItem[];
   customFoods: Record<string, FoodItem>;
   addCustomFood: (
-    food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
+    food: Omit<FoodItem, 'id' | 'createdAt' | 'updatedAt'>
   ) => FoodItem;
-  updateCustomFood: (
+  updateFood: (
     id: string,
-    updates: Partial<Omit<FoodItem, 'id' | 'isCustom'>>
+    updates: Partial<Omit<FoodItem, 'id'>>
   ) => FoodItem | null;
-  removeCustomFood: (id: string) => void;
+  removeFood: (id: string) => void;
   getMealPlan: (cycleDays: number) => CycleMealPlan;
   setMealPlanForDay: (
     cycleDays: number,
@@ -108,8 +108,8 @@ export function FormProvider({
         foodLibrary,
         customFoods,
         addCustomFood,
-        updateCustomFood,
-        removeCustomFood,
+        updateFood,
+        removeFood,
         getMealPlan,
         setMealPlanForDay,
         setMealPortionsForSlot,

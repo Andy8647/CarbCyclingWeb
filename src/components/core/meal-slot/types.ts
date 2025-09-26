@@ -13,7 +13,7 @@ export interface SlotSectionProps {
   foodLibrary: FoodItem[];
   onUpdate: (portions: MealPortion[]) => void;
   onAddCustomFood: (
-    food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
+    food: Omit<FoodItem, 'id' | 'createdAt' | 'updatedAt'>
   ) => FoodItem;
   allowRemove: boolean;
   onRemoveSlot: () => void;

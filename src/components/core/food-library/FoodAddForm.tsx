@@ -9,8 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { ServingUnit } from '@/lib/persistence-types';
-import { SERVING_UNIT_OPTIONS } from '@/lib/persistence-types';
+import type { ServingUnit, CategoryType } from '@/lib/persistence-types';
+import {
+  SERVING_UNIT_OPTIONS,
+  CATEGORY_TYPE_OPTIONS,
+} from '@/lib/persistence-types';
 import type { FoodAddFormProps } from './types';
 
 export function FoodAddForm({
@@ -39,13 +42,23 @@ export function FoodAddForm({
 
       <div className="space-y-1">
         <Label className="text-xs">{t('mealPlanner.fieldCategory')}</Label>
-        <Input
+        <Select
           value={formState.category}
-          onChange={(event) =>
-            onFormChange({ ...formState, category: event.target.value })
+          onValueChange={(value: CategoryType) =>
+            onFormChange({ ...formState, category: value })
           }
-          className="h-8 text-sm"
-        />
+        >
+          <SelectTrigger className="h-8 text-sm">
+            <SelectValue placeholder={t('mealPlanner.categoryPlaceholder')} />
+          </SelectTrigger>
+          <SelectContent>
+            {CATEGORY_TYPE_OPTIONS.map((type) => (
+              <SelectItem key={type} value={type}>
+                {t(`mealPlanner.categories.${type}`)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-1">

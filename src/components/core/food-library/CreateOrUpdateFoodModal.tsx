@@ -13,7 +13,9 @@ import {
 import { Modal } from '@/components/ui/modal';
 import {
   SERVING_UNIT_OPTIONS,
+  CATEGORY_TYPE_OPTIONS,
   type ServingUnit,
+  type CategoryType,
 } from '@/lib/persistence-types';
 import type { CreateOrUpdateFoodModalProps } from './types';
 
@@ -86,12 +88,23 @@ export function CreateOrUpdateFoodModal({
         </div>
 
         {shouldShowCategory && (
-          <Input
-            placeholder={t('mealPlanner.fieldCategory')}
+          <Select
             value={formState.category}
-            onChange={(event) => onFieldChange('category', event.target.value)}
-            className="h-9 text-sm"
-          />
+            onValueChange={(value: CategoryType) =>
+              onFieldChange('category', value)
+            }
+          >
+            <SelectTrigger className="h-9 text-sm">
+              <SelectValue placeholder={t('mealPlanner.categoryPlaceholder')} />
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORY_TYPE_OPTIONS.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {t(`mealPlanner.categories.${type}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
 
         <div className="flex flex-col gap-2 sm:flex-row">

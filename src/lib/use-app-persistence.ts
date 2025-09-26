@@ -23,7 +23,7 @@ import {
   normalizeDayMealPlan,
 } from './meal-planner';
 import { createId } from './utils';
-import type { FormData } from './form-context';
+import type { FormData } from './form-schema';
 
 /**
  * Main hook for managing all app persistence
@@ -171,15 +171,13 @@ export function useAppPersistence() {
   }, [appState.customFoods]);
 
   const addCustomFood = useCallback(
-    (
-      food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
-    ): FoodItem => {
+    (food: Omit<FoodItem, 'id' | 'createdAt' | 'updatedAt'>): FoodItem => {
       const timestamp = Date.now();
       const id = createId('food');
       const newFood: FoodItem = {
         ...food,
         id,
-        isCustom: true,
+        isBuiltin: false,
         createdAt: timestamp,
         updatedAt: timestamp,
       };
@@ -198,22 +196,21 @@ export function useAppPersistence() {
     [appState.customFoods, updateAppState]
   );
 
-  const updateCustomFood = useCallback(
-    (
-      id: string,
-      updates: Partial<Omit<FoodItem, 'id' | 'isCustom'>>
-    ): FoodItem | null => {
+  const updateFood = useCallback(
+    (id: string, updates: Partial<Omit<FoodItem, 'id'>>): FoodItem | null => {
       const currentFoods = appState.customFoods || {};
-      const existing = currentFoods[id];
+      const allFoods = mergeFoodLibrary(currentFoods);
+      const existing = allFoods.find((f) => f.id === id);
+
       if (!existing) return null;
 
       const updated: FoodItem = {
         ...existing,
         ...updates,
-        isCustom: true,
         updatedAt: Date.now(),
       };
 
+      // Store in customFoods regardless of whether it was originally builtin
       updateAppState({
         customFoods: {
           ...currentFoods,
@@ -226,13 +223,28 @@ export function useAppPersistence() {
     [appState.customFoods, updateAppState]
   );
 
-  const removeCustomFood = useCallback(
+  const removeFood = useCallback(
     (id: string) => {
       const currentFoods = appState.customFoods || {};
-      if (!currentFoods[id]) return;
+      const allFoods = mergeFoodLibrary(currentFoods);
+      const food = allFoods.find((f) => f.id === id);
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { [id]: _, ...rest } = currentFoods;
+      if (!food) return;
+
+      let updatedCustomFoods = currentFoods;
+
+      if (food.isBuiltin) {
+        // Mark builtin foods as deleted
+        updatedCustomFoods = {
+          ...currentFoods,
+          [id]: { ...food, isDeleted: true },
+        };
+      } else {
+        // Remove custom foods completely
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [id]: _, ...rest } = currentFoods;
+        updatedCustomFoods = rest;
+      }
 
       // Also remove any meal portions referencing the deleted food
       const updatedMealPlans: Record<number, CycleMealPlan> = {};
@@ -270,7 +282,7 @@ export function useAppPersistence() {
       }
 
       updateAppState({
-        customFoods: rest,
+        customFoods: updatedCustomFoods,
         mealPlans: {
           ...storedMealPlans,
           ...updatedMealPlans,
@@ -422,8 +434,8 @@ export function useAppPersistence() {
     getFoodLibrary,
     getCustomFoods,
     addCustomFood,
-    updateCustomFood,
-    removeCustomFood,
+    updateFood,
+    removeFood,
 
     // Meal plan methods
     getMealPlan,

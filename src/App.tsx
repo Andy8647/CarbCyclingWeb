@@ -51,8 +51,8 @@ function AppContent() {
     getFoodLibrary,
     getCustomFoods,
     addCustomFood,
-    updateCustomFood,
-    removeCustomFood,
+    updateFood,
+    removeFood,
     getMealPlan,
     setMealPlanForDay,
     setMealPortionsForSlot,
@@ -170,8 +170,8 @@ function AppContent() {
       foodLibrary={foodLibrary}
       customFoods={customFoods}
       addCustomFood={addCustomFood}
-      updateCustomFood={updateCustomFood}
-      removeCustomFood={removeCustomFood}
+      updateFood={updateFood}
+      removeFood={removeFood}
       getMealPlan={getMealPlan}
       setMealPlanForDay={setMealPlanForDay}
       setMealPortionsForSlot={setMealPortionsForSlot}
