@@ -46,6 +46,6 @@
 
 # Todo:
 
-- the add/edit/delete food is not working
-- modify the UI of MealSlotPlanner, so that it use divider to separate different meal slots
+- modify the UI of FoodLibrary, so that it's layout is like Jira's Kanban board, and we divide the food items by their NutritionType, and each vertical column is a NutritionType; within each column, the food items are sorted by their main nutrition value(e.g. in the carbs column, we sort by the food card's carb value, and this card should be draggable, but not drag accross the columns, later we will make it draggable to the MealSlotPlanner)
+- modify the UI of MealSlotPlanner, so that it use divider to separate different meal slots, like Jira's kanban board, the veritical divider is the days, the hoorizontal divider is the meal slots, and keep the title of the meal, the Chevron Icon, the add button, the x icon
 - make the cards in FoodLibrary draggable into the MealSlotPlanner

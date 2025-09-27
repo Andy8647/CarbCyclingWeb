@@ -3,17 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NumberInput } from '@/components/ui/number-input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Modal } from '@/components/ui/modal';
 import {
+  CategorySelect,
+  ServingUnitSelect,
+  PreparationSelect,
+} from '@/components/ui/select-field';
+import {
   SERVING_UNIT_OPTIONS,
-  CATEGORY_TYPE_OPTIONS,
   type ServingUnit,
   type CategoryType,
 } from '@/lib/persistence-types';
@@ -31,7 +28,6 @@ export function CreateOrUpdateFoodModal({
   onFieldChange,
   servingUnitOptions,
   onServingUnitChange,
-  showCategoryField,
   onDelete,
   deleteLabel,
 }: CreateOrUpdateFoodModalProps) {
@@ -66,12 +62,10 @@ export function CreateOrUpdateFoodModal({
     onFieldChange('servingUnit', unit);
   };
 
-  const shouldShowCategory = showCategoryField ?? mode === 'create';
-
   return (
     <Modal open={open} onClose={onClose} title={computedTitle}>
       <div className="space-y-3">
-        <div className="grid gap-2 sm:grid-cols-[2fr_1fr]">
+        <div className="grid gap-2 sm:grid-cols-[2fr_1fr_1fr]">
           <Input
             placeholder={t('mealPlanner.foodNamePlaceholder')}
             value={formState.name}
@@ -85,46 +79,22 @@ export function CreateOrUpdateFoodModal({
             onChange={(event) => onFieldChange('emoji', event.target.value)}
             className="h-9 text-sm"
           />
+          <CategorySelect
+            value={formState.category}
+            onValueChange={(value) =>
+              onFieldChange('category', value as CategoryType)
+            }
+          />
         </div>
 
-        {shouldShowCategory && (
-          <Select
-            value={formState.category}
-            onValueChange={(value: CategoryType) =>
-              onFieldChange('category', value)
-            }
-          >
-            <SelectTrigger className="h-9 text-sm">
-              <SelectValue placeholder={t('mealPlanner.categoryPlaceholder')} />
-            </SelectTrigger>
-            <SelectContent>
-              {CATEGORY_TYPE_OPTIONS.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {t(`mealPlanner.categories.${type}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Select
+          <ServingUnitSelect
             value={formState.servingUnit}
             onValueChange={(value) =>
               handleServingUnitChange(value as ServingUnit)
             }
-          >
-            <SelectTrigger className="h-9 text-sm">
-              <SelectValue placeholder={t('mealPlanner.unitPlaceholder')} />
-            </SelectTrigger>
-            <SelectContent>
-              {unitOptions.map((unit) => (
-                <SelectItem key={unit} value={unit}>
-                  {t(`mealPlanner.servingUnits.${unit}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            options={unitOptions}
+          />
           <Input
             value={formState.defaultServing}
             onChange={(event) =>
@@ -132,26 +102,12 @@ export function CreateOrUpdateFoodModal({
             }
             className="h-9 text-sm flex-1"
           />
-          <Select
+          <PreparationSelect
             value={formState.preparation}
-            onValueChange={(value: 'raw' | 'cooked') =>
-              onFieldChange('preparation', value)
+            onValueChange={(value) =>
+              onFieldChange('preparation', value as 'raw' | 'cooked')
             }
-          >
-            <SelectTrigger className="h-9 text-sm">
-              <SelectValue
-                placeholder={t('mealPlanner.preparationPlaceholder')}
-              />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="raw">
-                {t('mealPlanner.preparationRaw')}
-              </SelectItem>
-              <SelectItem value="cooked">
-                {t('mealPlanner.preparationCooked')}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          />
         </div>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">

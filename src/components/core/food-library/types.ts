@@ -44,7 +44,6 @@ export interface CreateOrUpdateFoodModalProps {
   cancelLabel?: string;
   servingUnitOptions?: ServingUnit[];
   onServingUnitChange?: (unit: ServingUnit) => void;
-  showCategoryField?: boolean;
   onDelete?: () => void;
   deleteLabel?: string;
 }

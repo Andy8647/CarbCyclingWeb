@@ -6,7 +6,11 @@ import {
   convertInputToServings,
   roundToTwo,
 } from '@/lib/meal-planner';
-import type { MealPortion, FoodItem, ServingUnit } from '@/lib/persistence-types';
+import type {
+  MealPortion,
+  FoodItem,
+  ServingUnit,
+} from '@/lib/persistence-types';
 
 interface QuickFormData {
   name: string;

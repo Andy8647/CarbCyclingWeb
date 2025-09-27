@@ -11,6 +11,7 @@ export const commonZhCN = {
   close: '关闭',
   metric: '公制',
   imperial: '英制',
+  sortedBy: '按排序',
 };
 
 export const commonEnUS = {
@@ -26,4 +27,5 @@ export const commonEnUS = {
   close: 'Close',
   metric: 'Metric',
   imperial: 'Imperial',
+  sortedBy: 'sorted by',
 };

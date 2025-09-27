@@ -4,7 +4,7 @@ import { useToast } from '@/lib/use-toast';
 import { useFoodLibraryFilters } from '@/lib/hooks/use-food-library-filters';
 import {
   FoodLibraryHeader,
-  FoodGrid,
+  FoodKanbanGrid,
   type FoodLibraryPanelProps,
   type FoodFormState,
 } from './food-library';
@@ -115,7 +115,7 @@ export function FoodLibraryPanel({
         onToggleForm={() => setShowForm((prev) => !prev)}
       />
 
-      <FoodGrid
+      <FoodKanbanGrid
         filteredFoods={filteredFoods}
         onUpdateFood={onUpdateFood}
         onRemoveFood={onRemoveFood}
