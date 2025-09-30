@@ -1,4 +1,11 @@
-import { useEffect, useState, useRef } from 'react';
+import {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  useLayoutEffect,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Select,
@@ -9,23 +16,20 @@ import {
 } from '@/components/ui/select';
 import { getWorkoutTypes } from '@/lib/calculator';
 import {
-  draggable,
-  dropTargetForElements,
-} from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-
-const getDayTypeDisplay = (type: string, t: (key: string) => string) => {
-  switch (type) {
-    case 'high':
-      return t('results.dayTypes.high');
-    case 'medium':
-      return t('results.dayTypes.medium');
-    case 'low':
-      return t('results.dayTypes.low');
-    default:
-      return type;
-  }
-};
+  getDayTypeDisplay,
+  createDraggableCard,
+  createGridDropTarget,
+  createCellDropTarget,
+  type DragData,
+} from '@/lib/grid-layout';
+import { normalizeDayMealPlan } from '@/lib/meal-planner';
+import { MealSlotPlanner } from './MealSlotPlanner';
+import type {
+  DayMealPlan,
+  FoodItem,
+  MealPortion,
+  MealSlotId,
+} from '@/lib/persistence-types';
 
 interface DayData {
   day: number;
@@ -39,35 +43,38 @@ interface DayData {
 
 interface IOSSquareCardProps {
   day: DayData;
+  displayOrder: number;
   dailyWorkouts: Record<number, string>;
   setDailyWorkout: (day: number, workout: string) => void;
 }
 
 function IOSSquareCard({
   day,
+  displayOrder,
   dailyWorkouts,
   setDailyWorkout,
 }: IOSSquareCardProps) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const macroEmojis = useMemo(
+    () =>
+      t('results.macroEmojis', {
+        returnObjects: true,
+      }) as Record<string, string>,
+    [t]
+  );
 
   useEffect(() => {
     const element = ref.current;
     if (!element) return;
 
-    return combine(
-      draggable({
-        element,
-        getInitialData: () => ({
-          type: 'card',
-          day: day.day,
-          dayData: day,
-        }),
-        onDragStart: () => setIsDragging(true),
-        onDrop: () => setIsDragging(false),
-      })
-    );
+    return createDraggableCard({
+      element,
+      dayData: day,
+      onDragStart: () => setIsDragging(true),
+      onDrop: () => setIsDragging(false),
+    });
   }, [day]);
 
   return (
@@ -82,7 +89,7 @@ function IOSSquareCard({
       {/* 头部：天数和类型 */}
       <div className="flex flex-col items-center mb-3">
         <div className="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-1">
-          {t('results.dayNumber', { day: day.day })}
+          {t('results.dayNumber', { day: displayOrder })}
         </div>
         <div className="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
           {getDayTypeDisplay(day.type, t)}
@@ -102,7 +109,10 @@ function IOSSquareCard({
         <div onPointerDown={(e) => e.stopPropagation()}>
           <Select
             value={dailyWorkouts[day.day] || ''}
-            onValueChange={(value) => setDailyWorkout(day.day, value)}
+            onValueChange={useCallback(
+              (value: string) => setDailyWorkout(day.day, value),
+              [day.day, setDailyWorkout]
+            )}
           >
             <SelectTrigger className="h-7 text-xs w-full border-slate-200 dark:border-slate-700">
               <SelectValue placeholder={t('results.selectWorkout')} />
@@ -126,7 +136,7 @@ function IOSSquareCard({
         <div className="space-y-2">
           <div className="flex justify-between items-center p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50">
             <div className="flex items-center gap-1">
-              <span className="text-xs">🍚</span>
+              <span className="text-xs">{macroEmojis.carbs ?? 'C'}</span>
               <span className="text-xs text-slate-600 dark:text-slate-300">
                 {t('results.carbs')}
               </span>
@@ -138,7 +148,7 @@ function IOSSquareCard({
 
           <div className="flex justify-between items-center p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50">
             <div className="flex items-center gap-1">
-              <span className="text-xs">🥜</span>
+              <span className="text-xs">{macroEmojis.fat ?? 'F'}</span>
               <span className="text-xs text-slate-600 dark:text-slate-300">
                 {t('results.fat')}
               </span>
@@ -150,7 +160,7 @@ function IOSSquareCard({
 
           <div className="flex justify-between items-center p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50">
             <div className="flex items-center gap-1">
-              <span className="text-xs">🥩</span>
+              <span className="text-xs">{macroEmojis.protein ?? 'P'}</span>
               <span className="text-xs text-slate-600 dark:text-slate-300">
                 {t('results.protein')}
               </span>
@@ -194,17 +204,22 @@ function IOSSquareCard({
   );
 }
 
-interface DragData {
-  type: string;
-  day: number;
-  dayData: DayData;
-}
-
 interface IOSGridLayoutProps {
   orderedDays: DayData[];
   dailyWorkouts: Record<number, string>;
   setDailyWorkout: (day: number, workout: string) => void;
   onDrop: (dragData: DragData, targetIndex: number) => void;
+  dayMealPlans: Record<number, DayMealPlan>;
+  foodLibrary: FoodItem[];
+  onMealSlotChange: (
+    dayNumber: number,
+    slotId: MealSlotId,
+    portions: MealPortion[]
+  ) => void;
+  onAddCustomFood: (
+    food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
+  ) => FoodItem;
+  showMealSlots: boolean;
 }
 
 export function IOSGridLayout({
@@ -212,50 +227,125 @@ export function IOSGridLayout({
   dailyWorkouts,
   setDailyWorkout,
   onDrop,
+  dayMealPlans,
+  foodLibrary,
+  onMealSlotChange,
+  onAddCustomFood,
+  showMealSlots,
 }: IOSGridLayoutProps) {
   const gridRef = useRef<HTMLDivElement>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const columnRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // 为网格容器添加拖放支持
   useEffect(() => {
     const element = gridRef.current;
     if (!element) return;
 
-    return dropTargetForElements({
+    return createGridDropTarget({
       element,
-      canDrop: ({ source }) => source.data.type === 'card',
-      onDragEnter: () => {},
-      onDragLeave: () => setDragOverIndex(null),
-      onDrop: ({ source, location }) => {
+      onDrop: (dragData, targetIndex) => {
         setDragOverIndex(null);
-
-        // 获取拖放的目标位置
-        const dropTargets = location.current.dropTargets;
-        if (dropTargets.length > 0) {
-          const targetIndex = dropTargets[0].data.gridIndex as number;
-          if (typeof targetIndex === 'number') {
-            onDrop(source.data as unknown as DragData, targetIndex);
-          }
-        }
+        onDrop(dragData, targetIndex);
       },
+      onDragLeave: () => setDragOverIndex(null),
     });
   }, [onDrop]);
 
+  // 当天数变化时重新初始化refs数组
+  useEffect(() => {
+    columnRefs.current = new Array(orderedDays.length).fill(null);
+  }, [orderedDays.length]);
+
+  // 动态同步所有列的高度
+  useLayoutEffect(() => {
+    const syncColumnHeights = () => {
+      const columns = columnRefs.current.filter(Boolean);
+      if (columns.length === 0) return;
+
+      // 先重置所有列的高度
+      columns.forEach((column) => {
+        if (column) column.style.height = 'auto';
+      });
+
+      // 强制重新计算布局
+      columns.forEach((column) => {
+        if (column) void column.offsetHeight;
+      });
+
+      // 获取最高列的高度
+      const maxHeight = Math.max(
+        ...columns.map((column) => column?.scrollHeight || 0)
+      );
+
+      // 设置所有列为最高高度
+      columns.forEach((column) => {
+        if (column) column.style.height = `${maxHeight}px`;
+      });
+    };
+
+    // 延迟同步，确保DOM已完全渲染
+    const timeoutId = setTimeout(syncColumnHeights, 0);
+
+    // 监听内容变化
+    const observer = new ResizeObserver(() => {
+      setTimeout(syncColumnHeights, 0);
+    });
+
+    columnRefs.current.filter(Boolean).forEach((column) => {
+      if (column) observer.observe(column);
+    });
+
+    return () => {
+      clearTimeout(timeoutId);
+      observer.disconnect();
+    };
+  }, [orderedDays.length, dayMealPlans, showMealSlots]);
+
   return (
     <div ref={gridRef} className="grid grid-cols-2 gap-4 p-2 max-w-2xl mx-auto">
-      {orderedDays.map((day, index) => (
-        <DropZoneWrapper
-          key={`ios-card-${day.day}`}
-          index={index}
-          isDraggedOver={dragOverIndex === index}
-        >
-          <IOSSquareCard
-            day={day}
-            dailyWorkouts={dailyWorkouts}
-            setDailyWorkout={setDailyWorkout}
-          />
-        </DropZoneWrapper>
-      ))}
+      {orderedDays.map((day, index) => {
+        const mealPlanForDay = dayMealPlans[day.day] || normalizeDayMealPlan();
+        return (
+          <DropZoneWrapper
+            key={`ios-card-${day.day}`}
+            index={index}
+            isDraggedOver={dragOverIndex === index}
+          >
+            <div
+              ref={(el) => {
+                columnRefs.current[index] = el;
+              }}
+              className="flex flex-col gap-3"
+            >
+              {showMealSlots && (
+                <MealSlotPlanner
+                  dayNumber={day.day}
+                  dayMealPlan={mealPlanForDay}
+                  foodLibrary={foodLibrary}
+                  onUpdateSlot={(slotId, portions) =>
+                    onMealSlotChange(day.day, slotId, portions)
+                  }
+                  onAddCustomFood={onAddCustomFood}
+                  targetMacros={{
+                    carbs: day.carbs,
+                    protein: day.protein,
+                    fat: day.fat,
+                    calories: day.calories,
+                  }}
+                  className="flex-1"
+                />
+              )}
+              <IOSSquareCard
+                day={day}
+                displayOrder={index + 1}
+                dailyWorkouts={dailyWorkouts}
+                setDailyWorkout={setDailyWorkout}
+              />
+            </div>
+          </DropZoneWrapper>
+        );
+      })}
     </div>
   );
 }
@@ -277,13 +367,7 @@ function DropZoneWrapper({
     const element = ref.current;
     if (!element) return;
 
-    return dropTargetForElements({
-      element,
-      getData: () => ({ gridIndex: index }),
-      canDrop: ({ source }) => source.data.type === 'card',
-      onDragEnter: () => {},
-      onDragLeave: () => {},
-    });
+    return createCellDropTarget({ element, index });
   }, [index]);
 
   return (

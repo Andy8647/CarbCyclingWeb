@@ -2,7 +2,6 @@
 
 import {
   calculateNutritionPlan,
-  calculateMetabolicData,
   type UserInput,
   type BodyType,
   type ProteinLevel,
@@ -142,7 +141,7 @@ function formatResults(plan: ReturnType<typeof calculateNutritionPlan>) {
   console.log(`🍚 Total Carbs:     ${plan.summary.totalCarbs}g`);
   console.log(`🧈 Total Fat:       ${plan.summary.totalFat}g`);
   console.log(`🥩 Daily Protein:   ${plan.summary.dailyProtein}g`);
-  console.log(`🔥 Total Calories:  ${plan.summary.totalCalories} kcal`);
+  console.log(`🔥 Total Calories:  ${plan.summary.totalCalories} kCal`);
 
   console.log('\n📅 DAILY BREAKDOWN:');
   console.log('─'.repeat(60));

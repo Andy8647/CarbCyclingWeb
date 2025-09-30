@@ -1,4 +1,4 @@
-import { useState, memo, useEffect } from 'react';
+import { useState, memo, useEffect, useMemo, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Header } from '@/components/layout/Header';
@@ -7,7 +7,8 @@ import { InputForm } from '@/components/core/InputForm';
 import { ResultCard } from '@/components/core/ResultCard';
 import { ParticleBackground } from '@/components/shared/ParticleBackground';
 import { ThemeProvider } from '@/lib/theme-context';
-import { FormProvider, formSchema, type FormData } from '@/lib/form-context';
+import { FormProvider } from '@/lib/form-context';
+import { formSchema, type FormData } from '@/lib/form-schema';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from '@/components/ui/toaster';
 import { useAppPersistence } from '@/lib/use-app-persistence';
@@ -47,6 +48,15 @@ function AppContent() {
     saveTrainingWorkouts,
     saveTrainingOrder,
     getTrainingConfig,
+    getFoodLibrary,
+    getCustomFoods,
+    addCustomFood,
+    updateFood,
+    removeFood,
+    getMealPlan,
+    setMealPlanForDay,
+    setMealPortionsForSlot,
+    resetMealPlan,
   } = useAppPersistence();
 
   // Get saved user settings or use defaults
@@ -86,6 +96,9 @@ function AppContent() {
     }
   };
 
+  const foodLibrary = useMemo(() => getFoodLibrary(), [getFoodLibrary]);
+  const customFoods = useMemo(() => getCustomFoods(), [getCustomFoods]);
+
   // Get saved form data and merge with defaults
   const savedFormData = getFormData();
   const formDefaults = {
@@ -119,25 +132,31 @@ function AppContent() {
     return () => subscription.unsubscribe();
   }, [form, saveFormData]);
 
+  // Memoized function to update training config
+  const updateTrainingConfig = useCallback(
+    (cycleDays: number) => {
+      const trainingConfig = getTrainingConfig(cycleDays);
+      setDailyWorkoutsState(trainingConfig.dailyWorkouts);
+      setDayOrderState(trainingConfig.dayOrder);
+    },
+    [getTrainingConfig]
+  );
+
   // Load training config when cycle days changes
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
       if (name === 'cycleDays' && value.cycleDays) {
-        const trainingConfig = getTrainingConfig(value.cycleDays);
-        setDailyWorkoutsState(trainingConfig.dailyWorkouts);
-        setDayOrderState(trainingConfig.dayOrder);
+        updateTrainingConfig(value.cycleDays);
       }
     });
     return () => subscription.unsubscribe();
-  }, [form, getTrainingConfig]);
+  }, [form, updateTrainingConfig]);
 
   // Load initial training config based on default cycle days (run once)
   useEffect(() => {
     const cycleDays = form.getValues('cycleDays') || 7;
-    const trainingConfig = getTrainingConfig(cycleDays);
-    setDailyWorkoutsState(trainingConfig.dailyWorkouts);
-    setDayOrderState(trainingConfig.dayOrder);
-  }, [form]);
+    updateTrainingConfig(cycleDays);
+  }, [form, updateTrainingConfig]);
 
   return (
     <FormProvider
@@ -148,6 +167,15 @@ function AppContent() {
       setDailyWorkout={setDailyWorkout}
       dayOrder={dayOrder}
       setDayOrder={setDayOrder}
+      foodLibrary={foodLibrary}
+      customFoods={customFoods}
+      addCustomFood={addCustomFood}
+      updateFood={updateFood}
+      removeFood={removeFood}
+      getMealPlan={getMealPlan}
+      setMealPlanForDay={setMealPlanForDay}
+      setMealPortionsForSlot={setMealPortionsForSlot}
+      resetMealPlan={resetMealPlan}
     >
       <div
         className="min-h-screen text-foreground relative flex flex-col select-none"

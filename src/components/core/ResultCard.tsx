@@ -1,420 +1,142 @@
-import { useMemo, useEffect, useState, useRef } from 'react';
+import { useMemo, useEffect, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useFormContext } from '@/lib/form-context';
-import {
-  calculateNutritionPlan,
-  calculateMetabolicData,
-  type UserInput,
-  getWorkoutTypes,
-  WORKOUT_TYPES,
-} from '@/lib/calculator';
-import { Button } from '@/components/ui/button';
 import { GlassCard } from '@/components/ui/glass-card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { ChevronDown } from 'lucide-react';
-import {
-  draggable,
-  dropTargetForElements,
-} from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-// Removed unused imports for cleaner code
 import { IOSGridLayout } from './IOSGridLayout';
 import { useToast } from '@/lib/use-toast';
-import { exportNodeToPNG } from '@/lib/export-to-png';
-
-const getDayTypeDisplay = (type: string, t: (key: string) => string) => {
-  switch (type) {
-    case 'high':
-      return t('results.dayTypes.high');
-    case 'medium':
-      return t('results.dayTypes.medium');
-    case 'low':
-      return t('results.dayTypes.low');
-    default:
-      return type;
-  }
-};
-
-const getWorkoutEmoji = (workoutType: string) => {
-  const workout = WORKOUT_TYPES.find((w) => w.value === workoutType);
-  return workout?.emoji || '🎯';
-};
-
-// 可拖拽的营养卡片
-interface DayData {
-  day: number;
-  type: string;
-  carbs: number;
-  fat: number;
-  protein: number;
-  calories: number;
-  caloriesDiff: number;
-}
-
-interface DragData {
-  type: string;
-  day: number;
-  dayData: DayData;
-}
-
-interface DraggableCardProps {
-  day: DayData;
-  dailyWorkouts: Record<number, string>;
-  setDailyWorkout: (day: number, workout: string) => void;
-  t: (key: string) => string;
-}
-
-function DraggableCard({
-  day,
-  dailyWorkouts,
-  setDailyWorkout,
-  t,
-}: DraggableCardProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    return combine(
-      draggable({
-        element,
-        getInitialData: () => ({
-          type: 'card',
-          day: day.day,
-          dayData: day,
-        }),
-        onDragStart: () => setIsDragging(true),
-        onDrop: () => setIsDragging(false),
-      })
-    );
-  }, [day]);
-
-  return (
-    <div
-      ref={ref}
-      className="rounded-xl border p-3 shadow-sm bg-white dark:bg-card border-slate-200 dark:border-slate-700 cursor-grab hover:shadow-md"
-      data-dragging={isDragging ? 'true' : 'false'}
-      style={{
-        opacity: isDragging ? 0.5 : 1,
-      }}
-    >
-      {/* 日型标签 */}
-      <div className="flex justify-center mb-3">
-        <div className="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 whitespace-nowrap">
-          {getDayTypeDisplay(day.type, t)}
-        </div>
-      </div>
-
-      {/* 训练项目选择 */}
-      <div
-        className="mb-3"
-        onPointerDown={(e) => e.stopPropagation()}
-        onMouseDown={(e) => e.stopPropagation()}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5 block whitespace-nowrap">
-          🏋️ {t('results.workout')}
-        </label>
-        <div onPointerDown={(e) => e.stopPropagation()}>
-          <Select
-            value={dailyWorkouts[day.day] || ''}
-            onValueChange={(value) => setDailyWorkout(day.day, value)}
-          >
-            <SelectTrigger className="h-8 text-xs w-full">
-              <SelectValue placeholder={t('results.selectWorkout')} />
-            </SelectTrigger>
-            <SelectContent sideOffset={4}>
-              {getWorkoutTypes(t).map((workout) => (
-                <SelectItem key={workout.value} value={workout.value}>
-                  <span className="flex items-center gap-1">
-                    <span>{workout.emoji}</span>
-                    <span>{workout.label}</span>
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* 营养数据 */}
-      <div className="space-y-2.5">
-        <div className="text-xs font-medium text-slate-600 dark:text-slate-400 whitespace-nowrap">
-          📊 {t('results.nutritionBreakdown')}
-        </div>
-
-        <div className="space-y-1.5">
-          <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
-            <div className="flex items-center gap-0.5">
-              <span className="text-xs">🍚</span>
-              <span className="text-xs">{t('results.carbs')}</span>
-            </div>
-            <div className="font-semibold text-xs">{day.carbs}g</div>
-          </div>
-
-          <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
-            <div className="flex items-center gap-0.5">
-              <span className="text-xs">🥜</span>
-              <span className="text-xs">{t('results.fat')}</span>
-            </div>
-            <div className="font-semibold text-xs">{day.fat}g</div>
-          </div>
-
-          <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
-            <div className="flex items-center gap-0.5">
-              <span className="text-xs">🥩</span>
-              <span className="text-xs">{t('results.protein')}</span>
-            </div>
-            <div className="font-semibold text-xs">{day.protein}g</div>
-          </div>
-        </div>
-
-        {/* 热量信息 */}
-        <div className="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
-          <div className="flex justify-between items-center">
-            <div className="text-xs text-slate-500 whitespace-nowrap">
-              🔥 {t('results.totalCalories')}
-            </div>
-            <div className="font-semibold text-xs">{day.calories}kcal</div>
-          </div>
-          <div className="flex justify-between items-center">
-            <div className="text-xs text-slate-500 whitespace-nowrap">
-              📈 {t('results.calorieDeficit')}
-            </div>
-            <div
-              className={`font-semibold text-xs ${
-                day.caloriesDiff > 0
-                  ? 'text-green-600 dark:text-green-400'
-                  : day.caloriesDiff < 0
-                    ? 'text-red-600 dark:text-red-400'
-                    : 'text-yellow-600 dark:text-yellow-400'
-              }`}
-            >
-              {day.caloriesDiff > 0 ? '+' : ''}
-              {day.caloriesDiff}kcal
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// 可放置的列容器
-interface DayColumnProps {
-  columnIndex: number;
-  day: DayData;
-  dailyWorkouts: Record<number, string>;
-  setDailyWorkout: (day: number, workout: string) => void;
-  onDrop: (dragData: DragData, columnIndex: number) => void;
-  t: (key: string) => string;
-}
-
-function DayColumn({
-  columnIndex,
-  day,
-  dailyWorkouts,
-  setDailyWorkout,
-  onDrop,
-  t,
-}: DayColumnProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isDraggedOver, setIsDraggedOver] = useState(false);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    return dropTargetForElements({
-      element,
-      getData: () => ({ columnIndex }),
-      canDrop: ({ source }) => source.data.type === 'card',
-      onDragEnter: () => setIsDraggedOver(true),
-      onDragLeave: () => setIsDraggedOver(false),
-      onDrop: ({ source }) => {
-        setIsDraggedOver(false);
-        onDrop(source.data as unknown as DragData, columnIndex);
-      },
-    });
-  }, [columnIndex, onDrop]);
-
-  return (
-    <div
-      ref={ref}
-      className={`flex-1 min-w-[120px] max-w-[280px] ${
-        isDraggedOver ? 'bg-blue-50/30 dark:bg-blue-900/20 rounded-lg' : ''
-      }`}
-    >
-      {/* 固定列头 - 不可拖拽 */}
-      <div className="mb-3 p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800">
-        <div className="flex items-center justify-center">
-          <h3 className="font-semibold text-sm">
-            {t('results.dayNumber').replace(
-              '{{day}}',
-              (columnIndex + 1).toString()
-            )}
-          </h3>
-        </div>
-      </div>
-
-      {/* 卡片容器区域 */}
-      <div
-        className={`min-h-[300px] rounded-xl border-2 border-dashed ${
-          isDraggedOver
-            ? 'border-blue-400 bg-blue-50/50 dark:bg-blue-900/30 border-solid'
-            : 'border-slate-300/50 dark:border-slate-600/50'
-        }`}
-      >
-        {day && (
-          <DraggableCard
-            day={day}
-            dailyWorkouts={dailyWorkouts}
-            setDailyWorkout={setDailyWorkout}
-            t={t}
-          />
-        )}
-        {!day && (
-          <div className="flex items-center justify-center h-full text-slate-400 dark:text-slate-600">
-            <div className="text-center">
-              <div className="text-2xl mb-2">📋</div>
-              <div className="text-sm">{t('results.dropCardHere')}</div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// Custom hook for screen size detection
-function useScreenSize() {
-  const [isLargeScreen, setIsLargeScreen] = useState(true);
-
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsLargeScreen(window.innerWidth >= 1024);
-    };
-
-    // Check initial size
-    checkScreenSize();
-
-    // Add event listener for window resize
-    window.addEventListener('resize', checkScreenSize);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
-
-  return isLargeScreen;
-}
+import { useExportActions } from '@/lib/hooks/use-export-actions';
+import type {
+  DayMealPlan,
+  MealPortion,
+  MealSlotId,
+} from '@/lib/persistence-types';
+import { normalizeDayMealPlan } from '@/lib/meal-planner';
+import { FoodLibraryPanel } from './FoodLibraryPanel';
+import {
+  DayColumn,
+  MacroSummaryCards,
+  ResultsHeader,
+} from '@/components/core/result-card';
+import { MealSlotPlanner } from './MealSlotPlanner';
+import { useScreenSize } from '@/lib/hooks/use-screen-size';
+import {
+  calculateNutritionData,
+  calculateMetabolicInfo,
+  reorderDays,
+  type DragData,
+} from '@/lib/result-card-logic';
 
 export function ResultCard() {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const { form, dailyWorkouts, setDailyWorkout, dayOrder, setDayOrder } =
-    useFormContext();
-
-  const exportRef = useRef<HTMLDivElement>(null);
+  const {
+    form,
+    dailyWorkouts,
+    setDailyWorkout,
+    dayOrder,
+    setDayOrder,
+    foodLibrary,
+    addCustomFood,
+    updateFood,
+    removeFood,
+    getMealPlan,
+    setMealPortionsForSlot,
+    resetMealPlan,
+  } = useFormContext();
 
   const isLargeScreen = useScreenSize();
+  const [showFoodLibrary, setShowFoodLibrary] = useState(false);
+  const [showMealSlots, setShowMealSlots] = useState(false);
+  const [columnHeights, setColumnHeights] = useState<Record<number, number>>(
+    {}
+  );
 
-  // 营养数据（克数和卡路里）在公制和英制中是相同的，不需转换
+  const resultsMacroEmojis = t('results.macroEmojis', {
+    returnObjects: true,
+  }) as Record<string, string>;
+  const macroIcons = {
+    carbs: resultsMacroEmojis?.carbs ?? 'C',
+    protein: resultsMacroEmojis?.protein ?? 'P',
+    fat: resultsMacroEmojis?.fat ?? 'F',
+  };
 
   const formData = form?.watch();
   const isValid = form?.formState.isValid;
+  const cycleDays = formData?.cycleDays ?? 0;
 
-  const nutritionPlan = useMemo(() => {
-    if (
-      !form ||
-      !isValid ||
-      !formData?.weight ||
-      !formData?.bodyType ||
-      !formData?.age ||
-      !formData?.gender ||
-      !formData?.height ||
-      !formData?.activityFactor ||
-      !formData?.carbCoeff ||
-      !formData?.proteinCoeff ||
-      !formData?.fatCoeff ||
-      !formData?.cycleDays
-    ) {
-      return null;
+  // 当循环天数变化时，清理旧的列高度信息
+  useEffect(() => {
+    setColumnHeights({});
+  }, [cycleDays]);
+
+  const mealPlan = useMemo(() => {
+    if (!cycleDays) return null;
+    return getMealPlan(cycleDays);
+  }, [getMealPlan, cycleDays]);
+
+  const dayMealPlans = useMemo(() => {
+    if (!mealPlan) return {} as Record<number, DayMealPlan>;
+    const plans: Record<number, DayMealPlan> = {};
+    for (const [key, plan] of Object.entries(mealPlan.dayMeals)) {
+      const dayNumber = Number(key);
+      plans[dayNumber] = normalizeDayMealPlan(plan);
     }
+    return plans;
+  }, [mealPlan]);
 
-    const input: UserInput = {
-      age: formData.age,
-      gender: formData.gender,
-      weight: formData.weight,
-      height: formData.height,
-      activityFactor: formData.activityFactor,
-      bodyType: formData.bodyType,
-      carbCoeff: formData.carbCoeff,
-      proteinCoeff: formData.proteinCoeff,
-      fatCoeff: formData.fatCoeff,
-      cycleDays: formData.cycleDays,
-    };
+  const nutritionPlan = useMemo(
+    () => calculateNutritionData(formData, isValid ?? false),
+    [formData, isValid]
+  );
 
-    return calculateNutritionPlan(input);
-  }, [form, formData, isValid]);
+  const metabolicData = useMemo(
+    () => calculateMetabolicInfo(formData, isValid ?? false),
+    [formData, isValid]
+  );
 
-  const metabolicData = useMemo(() => {
-    if (
-      !form ||
-      !isValid ||
-      !formData?.weight ||
-      !formData?.height ||
-      !formData?.age ||
-      !formData?.gender ||
-      !formData?.activityFactor
-    ) {
-      return null;
-    }
+  const orderedDays = useMemo(
+    () => reorderDays(nutritionPlan, dayOrder),
+    [nutritionPlan, dayOrder]
+  );
 
-    const input: UserInput = {
-      age: formData.age,
-      gender: formData.gender,
-      weight: formData.weight,
-      height: formData.height,
-      activityFactor: formData.activityFactor,
-      bodyType: formData.bodyType,
-      carbCoeff: formData.carbCoeff,
-      proteinCoeff: formData.proteinCoeff,
-      fatCoeff: formData.fatCoeff,
-      cycleDays: formData.cycleDays,
-    };
+  const { exportRef, handleCopyAsMarkdown, handleCopyAsCSV, handleExportPNG } =
+    useExportActions({
+      nutritionPlan,
+      orderedDays,
+      dailyWorkouts,
+      metabolicData,
+      macroIcons,
+    });
 
-    return calculateMetabolicData(input);
-  }, [form, formData, isValid]);
+  const handleMealSlotUpdate = useCallback(
+    (dayNumber: number, slotId: MealSlotId, portions: MealPortion[]) => {
+      if (!cycleDays) return;
+      setMealPortionsForSlot(cycleDays, dayNumber, slotId, portions);
+    },
+    [cycleDays, setMealPortionsForSlot]
+  );
 
-  // Initialize dayOrder when nutritionPlan changes (only if dayOrder is empty or different cycle length)
+  const handleResetMealPlan = useCallback(() => {
+    if (!cycleDays) return;
+    resetMealPlan(cycleDays);
+    toast({
+      variant: 'success',
+      title: t('mealPlanner.resetSuccess'),
+    });
+  }, [cycleDays, resetMealPlan, toast, t]);
+
+  // Initialize dayOrder when nutritionPlan changes
   useEffect(() => {
     if (nutritionPlan && nutritionPlan.dailyPlans.length > 0) {
-      // Only reset dayOrder if it's completely empty or the cycle length changed
       if (
         dayOrder.length === 0 ||
         dayOrder.length !== nutritionPlan.dailyPlans.length
       ) {
-        // Check if the current dayOrder contains the right day numbers for this cycle
         const expectedDays = nutritionPlan.dailyPlans.map((day) => day.day);
         const hasValidOrder =
           dayOrder.length === expectedDays.length &&
           dayOrder.every((day) => expectedDays.includes(day));
 
-        // Only set default order if we don't have a valid saved order
         if (!hasValidOrder) {
           setDayOrder(expectedDays);
         }
@@ -422,303 +144,113 @@ export function ResultCard() {
     }
   }, [nutritionPlan, dayOrder, setDayOrder]);
 
-  // Reorder days based on dayOrder
-  const orderedDays = useMemo(() => {
-    if (!nutritionPlan || dayOrder.length === 0)
-      return nutritionPlan?.dailyPlans || [];
+  const handleColumnHeightChange = useCallback(
+    (dayId: number, height: number) => {
+      setColumnHeights((previous) => {
+        const roundedHeight = Math.round(height);
+        if (previous[dayId] === roundedHeight) {
+          return previous;
+        }
 
-    return dayOrder
-      .map((dayNum) =>
-        nutritionPlan.dailyPlans.find((day) => day.day === dayNum)
-      )
-      .filter(Boolean) as typeof nutritionPlan.dailyPlans;
-  }, [nutritionPlan, dayOrder]);
+        return {
+          ...previous,
+          [dayId]: roundedHeight,
+        };
+      });
+    },
+    []
+  );
 
-  const handleDrop = (dragData: DragData, targetColumnIndex: number) => {
-    if (dragData.type !== 'card') return;
+  const maxColumnHeight = useMemo(() => {
+    return orderedDays.reduce((maxHeight, day) => {
+      if (!day) return maxHeight;
 
-    const activeDayNum = dragData.day;
-    const currentIndex = dayOrder.indexOf(activeDayNum);
+      const height = columnHeights[day.day];
+      if (height === undefined) {
+        return maxHeight;
+      }
 
-    if (currentIndex !== -1 && currentIndex !== targetColumnIndex) {
-      const newDayOrder = [...dayOrder];
-      // Remove from current position
-      newDayOrder.splice(currentIndex, 1);
-      // Insert at target position
-      newDayOrder.splice(targetColumnIndex, 0, activeDayNum);
-      setDayOrder(newDayOrder);
-    }
-  };
+      return height > maxHeight ? height : maxHeight;
+    }, 0);
+  }, [columnHeights, orderedDays]);
 
-  // Handle drop for iOS grid layout (direct index-based reordering)
-  const handleGridDrop = (dragData: DragData, targetIndex: number) => {
-    if (dragData.type !== 'card') return;
+  const handleDrop = useCallback(
+    (dragData: DragData, targetColumnIndex: number) => {
+      if (dragData.type !== 'card') return;
 
-    const activeDayNum = dragData.day;
-    const currentIndex = dayOrder.indexOf(activeDayNum);
+      const activeDayNum = dragData.day;
+      const currentIndex = dayOrder.indexOf(activeDayNum);
 
-    if (currentIndex !== -1 && currentIndex !== targetIndex) {
-      const newDayOrder = [...dayOrder];
-      // Remove from current position
-      newDayOrder.splice(currentIndex, 1);
-      // Insert at target position
-      newDayOrder.splice(targetIndex, 0, activeDayNum);
-      setDayOrder(newDayOrder);
-    }
-  };
+      if (currentIndex !== -1 && currentIndex !== targetColumnIndex) {
+        const newDayOrder = [...dayOrder];
+        newDayOrder.splice(currentIndex, 1);
+        newDayOrder.splice(targetColumnIndex, 0, activeDayNum);
+        setDayOrder(newDayOrder);
+      }
+    },
+    [dayOrder, setDayOrder]
+  );
+
+  const handleGridDrop = useCallback(
+    (dragData: DragData, targetIndex: number) => {
+      if (dragData.type !== 'card') return;
+
+      const activeDayNum = dragData.day;
+      const currentIndex = dayOrder.indexOf(activeDayNum);
+
+      if (currentIndex !== -1 && currentIndex !== targetIndex) {
+        const newDayOrder = [...dayOrder];
+        newDayOrder.splice(currentIndex, 1);
+        newDayOrder.splice(targetIndex, 0, activeDayNum);
+        setDayOrder(newDayOrder);
+      }
+    },
+    [dayOrder, setDayOrder]
+  );
 
   if (!form) return null;
 
-  const handleCopyAsMarkdown = () => {
-    if (!nutritionPlan) return;
-
-    const { summary } = nutritionPlan;
-
-    let markdownText = `# ${t('results.carbCyclingPlan')}\n\n`;
-    markdownText += `## ${t('results.weeklySummary')}\n`;
-    markdownText += `- 🥩 ${t('results.dailyProtein')}: ${summary.dailyProtein}g\n`;
-    markdownText += `- 🍚 ${t('results.weeklyCarbs')}: ${summary.totalCarbs}g\n`;
-    markdownText += `- 🥜 ${t('results.weeklyFat')}: ${summary.totalFat}g\n`;
-    markdownText += `- 🔥 ${t('results.weeklyCalories')}: ${summary.totalCalories}kcal\n`;
-    if (metabolicData) {
-      markdownText += `- ⚡ ${t('results.dailyTDEE')}: ${metabolicData.tdee}kcal\n`;
-    }
-    markdownText += `\n## ${t('results.dailyDetails')}\n\n`;
-    markdownText += `| ${t('results.day')} | ${t('results.dayType')} | ${t('results.workout')} | ${t('results.carbs')}(g) | ${t('results.fat')}(g) | ${t('results.protein')}(g) | ${t('results.totalCaloriesFull')}(kcal) | ${t('results.calorieDeficitFull')}(kcal) |\n`;
-    markdownText += `|------|------|---------|---------|---------|---------|-------------|-------------|\n`;
-
-    // Use orderedDays to respect user's custom sorting
-    orderedDays.forEach((day, index) => {
-      const caloriesDiffStr =
-        day.caloriesDiff > 0 ? `+${day.caloriesDiff}` : `${day.caloriesDiff}`;
-      const workout = dailyWorkouts[day.day] || '-';
-      const workoutEmoji = getWorkoutEmoji(workout);
-      const workoutDisplay =
-        workout === '-' ? '-' : `${workoutEmoji} ${t(`workouts.${workout}`)}`;
-
-      markdownText += `| ${t('results.dayNumber').replace('{{day}}', (index + 1).toString())} | ${getDayTypeDisplay(day.type, t)} | ${workoutDisplay} | ${day.carbs} | ${day.fat} | ${day.protein} | ${day.calories} | ${caloriesDiffStr} |\n`;
-    });
-
-    navigator.clipboard
-      .writeText(markdownText)
-      .then(() => {
-        toast({
-          variant: 'success',
-          title: '📝 ' + t('results.copyAsMarkdown'),
-          description: t('results.copySuccess'),
-        });
-      })
-      .catch((err) => {
-        console.error(t('results.copyError'), err);
-        toast({
-          variant: 'destructive',
-          title: t('results.copyError'),
-          description: 'Failed to copy to clipboard',
-        });
-      });
-  };
-
-  const handleCopyAsCSV = () => {
-    if (!nutritionPlan) return;
-
-    const { summary } = nutritionPlan;
-
-    // CSV header - include workout column
-    let csvText = `${t('results.day')},${t('results.dayType')},${t('results.workout')},${t('results.carbs')}(g),${t('results.fat')}(g),${t('results.protein')}(g),${t('results.totalCaloriesFull')}(kcal),${t('results.calorieDeficitFull')}(kcal)\n`;
-
-    // Daily data - use orderedDays to respect user's custom sorting
-    orderedDays.forEach((day, index) => {
-      const caloriesDiffStr =
-        day.caloriesDiff > 0 ? `+${day.caloriesDiff}` : `${day.caloriesDiff}`;
-      const dayNumber = t('results.dayNumber').replace(
-        '{{day}}',
-        (index + 1).toString()
-      );
-      const dayTypeText = getDayTypeDisplay(day.type, t)
-        .replace(/🔥|⚖️|🌿/g, '')
-        .trim(); // Remove emojis for CSV
-
-      const workout = dailyWorkouts[day.day] || '-';
-      const workoutText = workout === '-' ? '-' : t(`workouts.${workout}`);
-
-      csvText += `"${dayNumber}","${dayTypeText}","${workoutText}",${day.carbs},${day.fat},${day.protein},${day.calories},"${caloriesDiffStr}"\n`;
-    });
-
-    // Add summary section
-    csvText += `\n${t('results.weeklySummary')}\n`;
-    csvText += `${t('results.dailyProtein')},${summary.dailyProtein}g\n`;
-    csvText += `${t('results.weeklyCarbs')},${summary.totalCarbs}g\n`;
-    csvText += `${t('results.weeklyFat')},${summary.totalFat}g\n`;
-    csvText += `${t('results.weeklyCalories')},${summary.totalCalories}kcal\n`;
-    if (metabolicData) {
-      csvText += `${t('results.dailyTDEE')},${metabolicData.tdee}kcal\n`;
-    }
-
-    navigator.clipboard
-      .writeText(csvText)
-      .then(() => {
-        toast({
-          variant: 'success',
-          title: '📊 ' + t('results.copyAsCSV'),
-          description: t('results.copySuccess'),
-        });
-      })
-      .catch((err) => {
-        console.error(t('results.copyError'), err);
-        toast({
-          variant: 'destructive',
-          title: t('results.copyError'),
-          description: 'Failed to copy to clipboard',
-        });
-      });
-  };
-
-  const handleExportPNG = async () => {
-    try {
-      if (!nutritionPlan) {
-        toast({
-          variant: 'destructive',
-          title: t('results.exportError'),
-          description: 'No results to export',
-        });
-        return;
-      }
-      const node = exportRef.current;
-      if (!node) return;
-
-      // Temporarily add padding for export only
-      const prevPadding = node.style.padding;
-      node.style.padding = '24px';
-      try {
-        await exportNodeToPNG(node, {
-          fileName: 'carb-cycling-plan.png',
-          pixelRatio: 3,
-          // Exclude any element tagged explicitly
-          filter: (n) =>
-            !(n instanceof HTMLElement && n.hasAttribute('data-export-exclude')),
-        });
-      } finally {
-        node.style.padding = prevPadding;
-      }
-
-      toast({
-        variant: 'success',
-        title: '🖼️ ' + t('results.exportPNG'),
-        description: t('results.exportSuccess'),
-      });
-    } catch (err) {
-      console.error('Export PNG failed', err);
-      toast({
-        variant: 'destructive',
-        title: t('results.exportError'),
-        description: 'Failed to export PNG',
-      });
-    }
-  };
-
   return (
     <GlassCard>
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">🍽️</span>
-          <h2 className="text-lg font-bold text-foreground">
-            {t('results.title')}
-          </h2>
-        </div>
-        <div
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full"
-          data-export-exclude
-        >
-          <div className="flex flex-wrap gap-3">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="rounded-xl">
-                  <span>📋</span>
-                  <span className="hidden sm:inline ml-1">
-                    {t('results.copyResults')}
-                  </span>
-                  <ChevronDown className="ml-1 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={handleCopyAsMarkdown}>
-                  <span className="mr-2">📝</span>
-                  {t('results.copyAsMarkdown')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleCopyAsCSV}>
-                  <span className="mr-2">📊</span>
-                  {t('results.copyAsCSV')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Button
-              variant="outline"
-              className="rounded-xl"
-              onClick={handleExportPNG}
-            >
-              <span>🖼️</span>
-              <span className="hidden sm:inline ml-1">
-                {t('results.exportPNG')}
-              </span>
-            </Button>
-          </div>
-        </div>
-      </div>
+      <ResultsHeader
+        showMealSlots={showMealSlots}
+        setShowMealSlots={setShowMealSlots}
+        showFoodLibrary={showFoodLibrary}
+        setShowFoodLibrary={setShowFoodLibrary}
+        onCopyAsMarkdown={handleCopyAsMarkdown}
+        onCopyAsCSV={handleCopyAsCSV}
+        onExportPNG={handleExportPNG}
+        onResetMealPlan={handleResetMealPlan}
+        cycleDays={cycleDays}
+      />
 
       <div ref={exportRef}>
         {nutritionPlan ? (
           <div className="space-y-4">
-            {/* 周度摘要卡片 - 单行布局 */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-              <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1 whitespace-nowrap">
-                  <span className="text-sm">🥩</span>
-                  <span>{t('results.dailyProtein')}</span>
-                </div>
-                <div className="text-sm sm:text-lg font-semibold">
-                  {nutritionPlan.summary.dailyProtein} g
-                </div>
+            <MacroSummaryCards
+              nutritionPlan={nutritionPlan}
+              metabolicData={metabolicData}
+              macroIcons={macroIcons}
+            />
+
+            {showFoodLibrary && (
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/40 p-4">
+                <FoodLibraryPanel
+                  foods={foodLibrary}
+                  onAddCustomFood={addCustomFood}
+                  onUpdateFood={(id, food) => {
+                    updateFood(id, {
+                      ...food,
+                    });
+                  }}
+                  onRemoveFood={removeFood}
+                />
               </div>
-              <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1 whitespace-nowrap">
-                  <span className="text-sm">🍚</span>
-                  <span>{t('results.weeklyCarbs')}</span>
-                </div>
-                <div className="text-sm sm:text-lg font-semibold">
-                  {nutritionPlan.summary.totalCarbs} g
-                </div>
-              </div>
-              <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1 whitespace-nowrap">
-                  <span className="text-sm">🥜</span>
-                  <span>{t('results.weeklyFat')}</span>
-                </div>
-                <div className="text-sm sm:text-lg font-semibold">
-                  {nutritionPlan.summary.totalFat} g
-                </div>
-              </div>
-              <div className="rounded-lg bg-slate-100 dark:bg-slate-800 p-2 sm:p-3">
-                <div className="text-xs text-slate-500 flex items-center gap-1 mb-1 whitespace-nowrap">
-                  <span className="text-sm">🔥</span>
-                  <span>{t('results.calorieInfo')}</span>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-xs sm:text-sm font-semibold">
-                    {t('results.weeklyCalories')}:{' '}
-                    {nutritionPlan.summary.totalCalories}
-                  </div>
-                  {metabolicData && (
-                    <div className="text-xs sm:text-sm font-semibold">
-                      {t('results.dailyTDEE')}: {metabolicData.tdee}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
+            )}
 
             {/* Layout conditional rendering based on screen size */}
             {isLargeScreen ? (
-              /* Kanban Board layout for large screens (>= 1024px) */
+              /* Kanban Board layout for large screens */
               <div className="w-full">
                 <div
                   className="flex gap-3 pb-4 mx-auto justify-around"
@@ -728,31 +260,71 @@ export function ResultCard() {
                     overflowX: orderedDays.length > 7 ? 'auto' : 'visible',
                   }}
                 >
-                  {Array.from({ length: orderedDays.length }, (_, index) => (
-                    <DayColumn
-                      key={`column-${index}`}
-                      columnIndex={index}
-                      day={orderedDays[index]}
-                      dailyWorkouts={dailyWorkouts}
-                      setDailyWorkout={setDailyWorkout}
-                      onDrop={handleDrop}
-                      t={t}
-                    />
-                  ))}
+                  {orderedDays.map((dayData, index) => {
+                    if (!dayData) return null;
+
+                    const mealPlanForDay =
+                      dayMealPlans[dayData.day] || normalizeDayMealPlan();
+
+                    return (
+                      <DayColumn
+                        key={`column-${dayData.day}`}
+                        columnIndex={index}
+                        day={dayData}
+                        dailyWorkouts={dailyWorkouts}
+                        setDailyWorkout={setDailyWorkout}
+                        onDrop={handleDrop}
+                        macroIcons={macroIcons}
+                        onHeightChange={handleColumnHeightChange}
+                        syncedHeight={
+                          maxColumnHeight > 0 ? maxColumnHeight : undefined
+                        }
+                        measuredHeight={columnHeights[dayData.day]}
+                      >
+                        {showMealSlots && (
+                          <MealSlotPlanner
+                            dayNumber={dayData.day}
+                            dayMealPlan={mealPlanForDay}
+                            foodLibrary={foodLibrary}
+                            onUpdateSlot={(slotId, portions) =>
+                              handleMealSlotUpdate(
+                                dayData.day,
+                                slotId,
+                                portions
+                              )
+                            }
+                            onAddCustomFood={addCustomFood}
+                            targetMacros={{
+                              carbs: dayData.carbs,
+                              protein: dayData.protein,
+                              fat: dayData.fat,
+                              calories: dayData.calories,
+                            }}
+                            className="flex-1"
+                          />
+                        )}
+                      </DayColumn>
+                    );
+                  })}
                 </div>
               </div>
             ) : (
-              /* iOS Grid Layout for small/medium screens (< 1024px) */
+              /* iOS Grid Layout for small/medium screens */
               <IOSGridLayout
                 orderedDays={orderedDays}
                 dailyWorkouts={dailyWorkouts}
                 setDailyWorkout={setDailyWorkout}
                 onDrop={handleGridDrop}
+                dayMealPlans={dayMealPlans}
+                foodLibrary={foodLibrary}
+                onMealSlotChange={handleMealSlotUpdate}
+                onAddCustomFood={addCustomFood}
+                showMealSlots={showMealSlots}
               />
             )}
           </div>
         ) : (
-          // 空态
+          // Empty state
           <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
             <div className="text-4xl">📝</div>
             <div className="text-base font-medium">

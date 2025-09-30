@@ -33,7 +33,7 @@ export interface DayPlan {
   carbs: number; // grams
   fat: number; // grams
   protein: number; // grams
-  calories: number; // kcal
+  calories: number; // kCal
   caloriesDiff: number; // calories - tdee
   workout?: string; // workout type
 }

@@ -27,7 +27,7 @@
   - 周度摘要卡片展示
   - Kanban风格的每日计划布局
   - 训练项目管理（dropdown选择器）
-  - 拖拽排序功能（@dnd-kit实现）
+  - 拖拽排序功能（Atlaskit pragmatic DnD实现）
   - 复制结果到剪贴板功能
 - **Footer 免责声明** - 页脚布局和免责信息
 
@@ -76,9 +76,8 @@
 
 #### 拖拽功能技术栈
 
-- **@dnd-kit/core**: 核心拖拽功能
-- **@dnd-kit/sortable**: 排序功能
-- **@dnd-kit/modifiers**: snapCenterToCursor修饰符
+- **@atlaskit/pragmatic-drag-and-drop**: 核心拖拽能力
+- **@atlaskit/pragmatic-drag-and-drop-hitbox**: 命中区域扩展
 
 #### 训练项目预设选项
 
@@ -110,7 +109,7 @@ interface UserSettings {
 
 - **表单管理**: react-hook-form + @hookform/resolvers
 - **校验**: zod
-- **拖拽功能**: @dnd-kit (core, sortable, modifiers)
+- **拖拽功能**: Atlaskit pragmatic DnD 生态
 - **动态背景**: react-tsparticles
 
 ### 待集成库
@@ -158,7 +157,7 @@ src/
 - 实时计算功能：移除"开始计算"按钮，表单变化时自动更新结果
 - Kanban风格结果展示：按天数分列，支持拖拽排序
 - 训练项目管理：每日可选择训练部位
-- 高级拖拽功能：@dnd-kit实现，支持卡片交换和位置移动
+- 高级拖拽功能：使用 Atlaskit pragmatic DnD 实现，支持卡片交换和位置移动
 - 响应式优化：多断点适配 (768px/1280px)
 - 复制功能：Markdown格式复制到剪贴板
 
