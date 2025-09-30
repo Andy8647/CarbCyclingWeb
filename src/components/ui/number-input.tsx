@@ -4,8 +4,8 @@ import { ChevronUp, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface NumberInputProps
-  extends Omit<React.ComponentProps<'input'>, 'type' | 'onChange'> {
-  value: string | number;
+  extends Omit<React.ComponentProps<'input'>, 'type' | 'onChange' | 'value'> {
+  value?: string | number | readonly string[];
   onChange: (value: string) => void;
   step?: number;
   min?: number;
@@ -30,8 +30,11 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       onChange(newValue.toString());
     };
 
+    const displayValue =
+      value === undefined || value === null || value === '' ? '' : value;
+
     return (
-      <div className="relative">
+      <div className="relative min-w-[3.75rem]">
         <Input
           ref={ref}
           type="number"
@@ -39,10 +42,10 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           step={step}
           min={min}
           max={max}
-          value={Number.isFinite(Number(value)) ? value : ''}
+          value={displayValue}
           onChange={(event) => onChange(event.target.value)}
           className={cn(
-            'text-center pr-8 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [appearance:textfield]',
+            'text-center pr-8 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [appearance:textfield] !block w-full',
             unit && 'pl-8',
             className
           )}

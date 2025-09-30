@@ -292,19 +292,19 @@ export function getMealSlotDefinition(slotId: MealSlotId): MealSlotDefinition {
 }
 
 // Meal slot visibility and UI helpers
-const BASE_MEAL_SLOTS: MealSlotId[] = ['breakfast', 'lunch', 'dinner'];
+export const BASE_MEAL_SLOTS: MealSlotId[] = ['breakfast', 'lunch', 'dinner'];
 const ALL_MEAL_SLOT_IDS: MealSlotId[] = MEAL_SLOT_DEFINITIONS.map(
   (slot) => slot.id
 );
 
 export const deriveVisibleSlots = (plan: DayMealPlan): MealSlotId[] => {
-  const base = new Set<MealSlotId>(BASE_MEAL_SLOTS);
+  const active = new Set<MealSlotId>();
   ALL_MEAL_SLOT_IDS.forEach((slotId) => {
     if ((plan[slotId]?.length ?? 0) > 0) {
-      base.add(slotId);
+      active.add(slotId);
     }
   });
-  return ALL_MEAL_SLOT_IDS.filter((slotId) => base.has(slotId));
+  return ALL_MEAL_SLOT_IDS.filter((slotId) => active.has(slotId));
 };
 
 // Serving unit helpers

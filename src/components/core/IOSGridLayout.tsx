@@ -313,7 +313,9 @@ export function IOSGridLayout({
             isDraggedOver={dragOverIndex === index}
           >
             <div
-              ref={(el) => (columnRefs.current[index] = el)}
+              ref={(el) => {
+                columnRefs.current[index] = el;
+              }}
               className="flex flex-col gap-3"
             >
               {showMealSlots && (
