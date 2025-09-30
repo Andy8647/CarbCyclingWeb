@@ -32,7 +32,6 @@ export function FoodKanbanGrid({
     protein: '',
     fat: '',
     preparation: 'raw',
-    emoji: '',
   });
 
   const editServingUnitOptions: ServingUnit[] = [
@@ -87,7 +86,6 @@ export function FoodKanbanGrid({
       protein: food.macros.protein.toString(),
       fat: food.macros.fat.toString(),
       preparation: food.preparation || 'raw',
-      emoji: food.emoji || '',
     });
     setEditingFood(foodId);
   };
@@ -123,7 +121,6 @@ export function FoodKanbanGrid({
         calories,
       },
       preparation: editFormState.preparation,
-      emoji: editFormState.emoji.trim() || '🍽️',
     });
 
     setEditingFood(null);

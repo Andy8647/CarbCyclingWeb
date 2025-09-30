@@ -86,7 +86,7 @@ export function NutritionSection({
           <CompactInput
             key={`carb-${watchedValues.bodyType}`}
             label={t('nutrition.carbCoeff')}
-            emoji={nutritionEmojis?.carbs ?? '🍞'}
+            emoji={nutritionEmojis?.carbs ?? 'C'}
             type="number"
             step="0.1"
             min="2.0"
@@ -107,7 +107,7 @@ export function NutritionSection({
           <CompactInput
             key={`protein-${watchedValues.bodyType}`}
             label={t('nutrition.proteinCoeff')}
-            emoji={nutritionEmojis?.protein ?? '🥩'}
+            emoji={nutritionEmojis?.protein ?? 'P'}
             type="number"
             step="0.1"
             min="0.8"
@@ -128,7 +128,7 @@ export function NutritionSection({
           <CompactInput
             key={`fat-${watchedValues.bodyType}`}
             label={t('nutrition.fatCoeff')}
-            emoji={nutritionEmojis?.fat ?? '🥑'}
+            emoji={nutritionEmojis?.fat ?? 'F'}
             type="number"
             step="0.1"
             min="0.5"

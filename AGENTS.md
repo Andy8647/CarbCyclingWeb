@@ -38,10 +38,9 @@
 - PRs include: clear description, linked issues, screenshots/GIFs for UI, and a checklist confirming `lint`, `test`, and `build` pass.
 
 ## Architecture Notes
-
 - State via lightweight React context/hooks in `src/lib/*-context.tsx`.
 - i18n with `i18next` (`src/lib/i18n.ts`).
-- Drag-and-drop via `@dnd-kit/*` and Atlaskit pragmatic DnD.
+- Drag-and-drop via Atlaskit pragmatic DnD.
 - Persistence uses `localStorage` helpers (`use-local-storage.ts`, `use-app-persistence.ts`).
 
 # Todo:

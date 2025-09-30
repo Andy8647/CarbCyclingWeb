@@ -169,19 +169,6 @@ export function FoodAddForm({
         />
       </div>
 
-      <div className="space-y-1">
-        <Label className="text-xs">{t('mealPlanner.fieldEmoji')}</Label>
-        <Input
-          value={formState.emoji}
-          maxLength={4}
-          onChange={(event) =>
-            onFormChange({ ...formState, emoji: event.target.value })
-          }
-          className="h-8 text-sm"
-          placeholder="🍚"
-        />
-      </div>
-
       <div className="md:col-span-3 flex justify-end">
         <Button type="submit" size="sm">
           {t('mealPlanner.submitNewFood')}

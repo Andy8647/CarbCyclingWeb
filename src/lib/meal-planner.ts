@@ -27,7 +27,6 @@ export const BUILTIN_FOODS: FoodItem[] = [
     servingUnit: 'per_100g',
     macros: { carbs: 0, protein: 31, fat: 3.6, calories: 165 },
     preparation: 'cooked',
-    emoji: '🍗',
   },
   {
     id: 'builtin_salmon',
@@ -40,7 +39,6 @@ export const BUILTIN_FOODS: FoodItem[] = [
     servingUnit: 'per_100g',
     macros: { carbs: 0, protein: 20, fat: 13, calories: 208 },
     preparation: 'cooked',
-    emoji: '🐟',
   },
   {
     id: 'builtin_whey',
@@ -53,7 +51,6 @@ export const BUILTIN_FOODS: FoodItem[] = [
     servingUnit: 'per_piece',
     macros: { carbs: 3, protein: 24, fat: 1, calories: 120 },
     preparation: 'raw',
-    emoji: '🥤',
   },
   {
     id: 'builtin_egg',
@@ -66,7 +63,6 @@ export const BUILTIN_FOODS: FoodItem[] = [
     servingUnit: 'per_piece',
     macros: { carbs: 0.6, protein: 6.3, fat: 5.3, calories: 78 },
     preparation: 'raw',
-    emoji: '🥚',
   },
   {
     id: 'builtin_brown_rice',
@@ -79,7 +75,6 @@ export const BUILTIN_FOODS: FoodItem[] = [
     servingUnit: 'per_100g',
     macros: { carbs: 23, protein: 2.7, fat: 1, calories: 112 },
     preparation: 'cooked',
-    emoji: '🍚',
   },
   {
     id: 'builtin_sweet_potato',
@@ -92,7 +87,6 @@ export const BUILTIN_FOODS: FoodItem[] = [
     servingUnit: 'per_100g',
     macros: { carbs: 20, protein: 1.6, fat: 0.1, calories: 90 },
     preparation: 'cooked',
-    emoji: '🍠',
   },
   {
     id: 'builtin_banana',
@@ -105,7 +99,6 @@ export const BUILTIN_FOODS: FoodItem[] = [
     servingUnit: 'per_piece',
     macros: { carbs: 27, protein: 1.3, fat: 0.3, calories: 105 },
     preparation: 'raw',
-    emoji: '🍌',
   },
   {
     id: 'builtin_avocado',
@@ -118,7 +111,6 @@ export const BUILTIN_FOODS: FoodItem[] = [
     servingUnit: 'per_piece',
     macros: { carbs: 9, protein: 2, fat: 15, calories: 160 },
     preparation: 'raw',
-    emoji: '🥑',
   },
   {
     id: 'builtin_almonds',
@@ -131,7 +123,6 @@ export const BUILTIN_FOODS: FoodItem[] = [
     servingUnit: 'per_100g',
     macros: { carbs: 22, protein: 21, fat: 49, calories: 579 },
     preparation: 'raw',
-    emoji: '🥜',
   },
   {
     id: 'builtin_greek_yogurt',
@@ -144,7 +135,6 @@ export const BUILTIN_FOODS: FoodItem[] = [
     servingUnit: 'per_100g',
     macros: { carbs: 5, protein: 10, fat: 0, calories: 59 },
     preparation: 'raw',
-    emoji: '🥛',
   },
 ];
 

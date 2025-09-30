@@ -93,6 +93,14 @@ export function MealSlotPlanner({
     [dayTotals, targetMacros]
   );
 
+  const macroEmojis = useMemo(
+    () =>
+      t('mealPlanner.macroEmojis', {
+        returnObjects: true,
+      }) as Record<'carbs' | 'protein' | 'fat', string>,
+    [t]
+  );
+
   const getDiffTextClass = useCallback((value: number) => {
     if (value === 0) return 'text-slate-500 dark:text-slate-400';
     return value > 0
@@ -107,19 +115,19 @@ export function MealSlotPlanner({
         <div className="flex items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-300">
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1">
-              <span>🍚</span>
+              <span>{macroEmojis.carbs ?? 'C'}</span>
               <span className={getDiffTextClass(diff.carbs)}>
                 {diff.carbs >= 0 ? `+${diff.carbs}` : diff.carbs}g
               </span>
             </span>
             <span className="inline-flex items-center gap-1">
-              <span>🍖</span>
+              <span>{macroEmojis.protein ?? 'P'}</span>
               <span className={getDiffTextClass(diff.protein)}>
                 {diff.protein >= 0 ? `+${diff.protein}` : diff.protein}g
               </span>
             </span>
             <span className="inline-flex items-center gap-1">
-              <span>🥜</span>
+              <span>{macroEmojis.fat ?? 'F'}</span>
               <span className={getDiffTextClass(diff.fat)}>
                 {diff.fat >= 0 ? `+${diff.fat}` : diff.fat}g
               </span>

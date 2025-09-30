@@ -136,7 +136,7 @@ function IOSSquareCard({
         <div className="space-y-2">
           <div className="flex justify-between items-center p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50">
             <div className="flex items-center gap-1">
-              <span className="text-xs">{macroEmojis.carbs ?? '🍞'}</span>
+              <span className="text-xs">{macroEmojis.carbs ?? 'C'}</span>
               <span className="text-xs text-slate-600 dark:text-slate-300">
                 {t('results.carbs')}
               </span>
@@ -148,7 +148,7 @@ function IOSSquareCard({
 
           <div className="flex justify-between items-center p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50">
             <div className="flex items-center gap-1">
-              <span className="text-xs">{macroEmojis.fat ?? '🥑'}</span>
+              <span className="text-xs">{macroEmojis.fat ?? 'F'}</span>
               <span className="text-xs text-slate-600 dark:text-slate-300">
                 {t('results.fat')}
               </span>
@@ -160,7 +160,7 @@ function IOSSquareCard({
 
           <div className="flex justify-between items-center p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50">
             <div className="flex items-center gap-1">
-              <span className="text-xs">{macroEmojis.protein ?? '🥩'}</span>
+              <span className="text-xs">{macroEmojis.protein ?? 'P'}</span>
               <span className="text-xs text-slate-600 dark:text-slate-300">
                 {t('results.protein')}
               </span>

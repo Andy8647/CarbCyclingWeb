@@ -55,9 +55,9 @@ export function ResultCard() {
     returnObjects: true,
   }) as Record<string, string>;
   const macroIcons = {
-    carbs: resultsMacroEmojis?.carbs ?? '🍞',
-    protein: resultsMacroEmojis?.protein ?? '🥩',
-    fat: resultsMacroEmojis?.fat ?? '🥑',
+    carbs: resultsMacroEmojis?.carbs ?? 'C',
+    protein: resultsMacroEmojis?.protein ?? 'P',
+    fat: resultsMacroEmojis?.fat ?? 'F',
   };
 
   const formData = form?.watch();

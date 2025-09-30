@@ -69,7 +69,6 @@ export interface FoodItem {
   defaultServingKey?: string;
   macros: MacroProfile;
   preparation?: 'raw' | 'cooked';
-  emoji?: string;
   isBuiltin?: boolean;
   isDeleted?: boolean;
   createdAt?: number;

@@ -91,7 +91,7 @@ Built with React, TypeScript, Vite, Tailwind CSS, and lightweight state via hook
 
 - State is managed with lightweight contexts/hooks in `src/lib/*-context.tsx`
 - i18n is initialized in `src/lib/i18n.ts`
-- Drag‑and‑drop uses `@atlaskit/pragmatic-drag-and-drop` and `@dnd-kit/*`
+- Drag‑and‑drop uses `@atlaskit/pragmatic-drag-and-drop`
 - Persistence is handled via `use-local-storage.ts` and `use-app-persistence.ts`
 
 **Deployment**

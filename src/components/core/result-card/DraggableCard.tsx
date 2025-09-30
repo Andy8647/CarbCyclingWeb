@@ -105,7 +105,7 @@ export function DraggableCard({
         <div className="space-y-1.5">
           <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
             <div className="flex items-center gap-0.5">
-              <span className="text-xs">{macroEmojis.carbs ?? '🍞'}</span>
+              <span className="text-xs">{macroEmojis.carbs ?? 'C'}</span>
               <span className="text-xs">{t('results.carbs')}</span>
             </div>
             <div className="font-semibold text-xs">{day.carbs}g</div>
@@ -113,7 +113,7 @@ export function DraggableCard({
 
           <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
             <div className="flex items-center gap-0.5">
-              <span className="text-xs">{macroEmojis.fat ?? '🥑'}</span>
+              <span className="text-xs">{macroEmojis.fat ?? 'F'}</span>
               <span className="text-xs">{t('results.fat')}</span>
             </div>
             <div className="font-semibold text-xs">{day.fat}g</div>
@@ -121,7 +121,7 @@ export function DraggableCard({
 
           <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
             <div className="flex items-center gap-0.5">
-              <span className="text-xs">{macroEmojis.protein ?? '🥩'}</span>
+              <span className="text-xs">{macroEmojis.protein ?? 'P'}</span>
               <span className="text-xs">{t('results.protein')}</span>
             </div>
             <div className="font-semibold text-xs">{day.protein}g</div>
@@ -134,7 +134,7 @@ export function DraggableCard({
             <div className="text-xs text-slate-500 whitespace-nowrap">
               🔥 {t('results.totalCalories')}
             </div>
-            <div className="font-semibold text-xs">{day.calories}kcal</div>
+            <div className="font-semibold text-xs">{day.calories}kCal</div>
           </div>
           <div className="flex justify-between items-center">
             <div className="text-xs text-slate-500 whitespace-nowrap">
@@ -150,7 +150,7 @@ export function DraggableCard({
               }`}
             >
               {day.caloriesDiff > 0 ? '+' : ''}
-              {day.caloriesDiff}kcal
+              {day.caloriesDiff}kCal
             </div>
           </div>
         </div>

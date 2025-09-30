@@ -41,9 +41,9 @@ export const resultsZhCN = {
   copySuccess: '结果已复制到剪贴板！',
   copyError: '复制失败',
   macroEmojis: {
-    carbs: '🍚',
-    protein: '🍖',
-    fat: '🥜',
+    carbs: '碳',
+    protein: '蛋',
+    fat: '脂',
   },
 };
 
@@ -90,8 +90,8 @@ export const resultsEnUS = {
   copySuccess: 'Copied to clipboard!',
   copyError: 'Copy failed',
   macroEmojis: {
-    carbs: '🍞',
-    protein: '🥩',
-    fat: '🥑',
+    carbs: 'C',
+    protein: 'P',
+    fat: 'F',
   },
 };

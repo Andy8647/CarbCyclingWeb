@@ -32,6 +32,7 @@ export function FoodCard({
     return draggable({
       element,
       getInitialData: () => ({
+        type: 'food-card',
         foodId: food.id,
         category: category,
       }),
@@ -47,6 +48,7 @@ export function FoodCard({
     return dropTargetForElements({
       element,
       getData: () => ({
+        type: 'food-card',
         foodId: food.id,
         category: category,
       }),
@@ -77,7 +79,6 @@ export function FoodCard({
         {/* Compact header */}
         <div className="flex items-center justify-between gap-1 mb-1">
           <div className="flex items-center gap-1 flex-1 min-w-0">
-            <span className="text-sm">{food.emoji || '🍽️'}</span>
             <span className="text-xs font-medium text-slate-700 dark:text-slate-200 truncate">
               {name}
             </span>
@@ -113,7 +114,9 @@ export function FoodCard({
               {food.macros.fat}
             </span>
           </div>
-          <span>🔥{food.macros.calories}</span>
+          <span>
+            {t('mealPlanner.caloriesShort', { value: food.macros.calories })}
+          </span>
         </div>
       </div>
     </div>

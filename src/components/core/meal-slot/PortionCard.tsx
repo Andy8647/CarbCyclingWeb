@@ -53,15 +53,15 @@ export function PortionCard({
 
   const collapsedMacroBadges = [
     {
-      icon: macroEmojis?.carbs ?? '🍚',
+      icon: macroEmojis?.carbs ?? 'C',
       value: formatBadgeValue(macros.carbs),
     },
     {
-      icon: macroEmojis?.protein ?? '🥩',
+      icon: macroEmojis?.protein ?? 'P',
       value: formatBadgeValue(macros.protein),
     },
     {
-      icon: macroEmojis?.fat ?? '🥜',
+      icon: macroEmojis?.fat ?? 'F',
       value: formatBadgeValue(macros.fat),
     },
   ];

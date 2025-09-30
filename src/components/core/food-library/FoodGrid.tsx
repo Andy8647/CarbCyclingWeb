@@ -24,7 +24,6 @@ export function FoodGrid({
     protein: '',
     fat: '',
     preparation: 'raw',
-    emoji: '',
   });
 
   const editServingUnitOptions: ServingUnit[] = [
@@ -46,7 +45,6 @@ export function FoodGrid({
       protein: food.macros.protein.toString(),
       fat: food.macros.fat.toString(),
       preparation: food.preparation || 'raw',
-      emoji: food.emoji || '',
     });
     setEditingFood(foodId);
   };
@@ -82,7 +80,6 @@ export function FoodGrid({
         calories,
       },
       preparation: editFormState.preparation,
-      emoji: editFormState.emoji.trim() || '🍽️',
     });
 
     setEditingFood(null);
@@ -128,7 +125,6 @@ export function FoodGrid({
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-base">{food.emoji || '🍽️'}</span>
                     <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate">
                       {name}
                     </span>

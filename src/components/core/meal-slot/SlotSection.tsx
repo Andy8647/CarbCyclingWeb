@@ -1,8 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { NumberInput } from '@/components/ui/number-input';
-import { ChevronDown, ChevronRight, MinusCircle, Plus, Trash2 } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronRight,
+  MinusCircle,
+  Plus,
+  Trash2,
+} from 'lucide-react';
 import { useSlotManagement } from '@/lib/hooks/use-slot-management';
 import { useQuickForm } from '@/lib/hooks/use-quick-form';
 import {
@@ -17,6 +23,8 @@ import { CreateOrUpdateFoodModal } from '@/components/core/food-library';
 import { PortionCard } from './PortionCard';
 import { FoodSelect, type LocalizedFoodOption } from './FoodSelect';
 import type { SlotSectionProps } from './types';
+import { dropTargetForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { cn } from '@/lib/utils';
 
 export function SlotSection({
   slotId,
@@ -35,6 +43,8 @@ export function SlotSection({
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [pendingFoodId, setPendingFoodId] = useState<string | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const slotRef = useRef<HTMLDivElement>(null);
 
   const { quickForm, resetQuickForm, handleQuickFormFieldChange } =
     useQuickForm();
@@ -129,15 +139,15 @@ export function SlotSection({
 
   const headerMacroBadges = [
     {
-      icon: macroEmojis?.carbs ?? '🍚',
+      icon: macroEmojis?.carbs ?? 'C',
       value: formatBadgeValue(totals.carbs),
     },
     {
-      icon: macroEmojis?.protein ?? '🍖',
+      icon: macroEmojis?.protein ?? 'P',
       value: formatBadgeValue(totals.protein),
     },
     {
-      icon: macroEmojis?.fat ?? '🥜',
+      icon: macroEmojis?.fat ?? 'F',
       value: formatBadgeValue(totals.fat),
     },
   ];
@@ -198,8 +208,50 @@ export function SlotSection({
   const addInputStep = getInputStep(selectedFood?.servingUnit);
   const addInputValue = Number.isFinite(servings) ? servings : '';
 
+  useEffect(() => {
+    const element = slotRef.current;
+    if (!element) return;
+
+    return dropTargetForElements({
+      element,
+      canDrop: ({ source }) => source.data.type === 'food-card',
+      onDragEnter: ({ source }) => {
+        if (source.data.type !== 'food-card') return;
+        setIsDragOver(true);
+      },
+      onDragLeave: () => {
+        setIsDragOver(false);
+      },
+      onDrop: ({ source }) => {
+        setIsDragOver(false);
+        const data = source.data as { type?: string; foodId?: string };
+        if (data.type !== 'food-card' || !data.foodId) {
+          return;
+        }
+
+        const droppedFood = foodLookup[data.foodId];
+        if (!droppedFood) {
+          return;
+        }
+
+        const defaultServings = getDefaultInputValue(droppedFood.servingUnit);
+        addPortion(data.foodId, defaultServings);
+        setIsCollapsed(false);
+        setIsAdding(false);
+        setShowQuickAdd(false);
+      },
+    });
+  }, [foodLookup, addPortion]);
+
   return (
-    <div className="h-fit flex flex-col border-b border-slate-200 dark:border-slate-700">
+    <div
+      ref={slotRef}
+      className={cn(
+        'h-fit flex flex-col border-b border-slate-200 dark:border-slate-700 transition-all',
+        isDragOver &&
+          'ring-2 ring-blue-300 dark:ring-blue-500 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 bg-blue-50/40 dark:bg-blue-900/20'
+      )}
+    >
       {/* Header with meal title and controls */}
       <div className="flex items-center justify-between px-3 py-2">
         <div className="flex items-center gap-2">
@@ -208,7 +260,11 @@ export function SlotSection({
             size="icon"
             className="h-6 w-6"
             onClick={() => setIsCollapsed(!isCollapsed)}
-            aria-label={isCollapsed ? t('mealPlanner.expandSlot') : t('mealPlanner.collapseSlot')}
+            aria-label={
+              isCollapsed
+                ? t('mealPlanner.expandSlot')
+                : t('mealPlanner.collapseSlot')
+            }
           >
             {isCollapsed ? (
               <ChevronRight className="h-4 w-4" />
@@ -291,7 +347,9 @@ export function SlotSection({
           )}
 
           {isAdding && (
-            <div className={`p-3 space-y-2 ${portions.length > 0 ? 'mt-3' : ''}`}>
+            <div
+              className={`p-3 space-y-2 ${portions.length > 0 ? 'mt-3' : ''}`}
+            >
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
                 {t('mealPlanner.chooseFood')}
               </label>

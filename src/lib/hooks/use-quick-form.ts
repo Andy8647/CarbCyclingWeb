@@ -10,7 +10,6 @@ const QUICK_FORM_DEFAULTS: QuickAddFormState = {
   protein: '',
   fat: '',
   preparation: 'raw',
-  emoji: '',
 };
 
 export function useQuickForm() {

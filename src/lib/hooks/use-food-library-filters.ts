@@ -60,7 +60,6 @@ export function useFoodLibraryFilters(foods: FoodItem[]) {
           food.name,
           food.category,
           food.defaultServing,
-          food.emoji,
         ]
           .join(' ')
           .toLowerCase()

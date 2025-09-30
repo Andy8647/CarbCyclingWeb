@@ -138,12 +138,12 @@ export const generateMarkdown = (
   markdownText += `- ${macroIcons.protein} ${t('results.dailyProtein')}: ${summary.dailyProtein}g\n`;
   markdownText += `- ${macroIcons.carbs} ${t('results.weeklyCarbs')}: ${summary.totalCarbs}g\n`;
   markdownText += `- ${macroIcons.fat} ${t('results.weeklyFat')}: ${summary.totalFat}g\n`;
-  markdownText += `- 🔥 ${t('results.weeklyCalories')}: ${summary.totalCalories}kcal\n`;
+  markdownText += `- 🔥 ${t('results.weeklyCalories')}: ${summary.totalCalories}kCal\n`;
   if (metabolicData) {
-    markdownText += `- ⚡ ${t('results.dailyTDEE')}: ${metabolicData.tdee}kcal\n`;
+    markdownText += `- ⚡ ${t('results.dailyTDEE')}: ${metabolicData.tdee}kCal\n`;
   }
   markdownText += `\n## ${t('results.dailyDetails')}\n\n`;
-  markdownText += `| ${t('results.day')} | ${t('results.dayType')} | ${t('results.workout')} | ${t('results.carbs')}(g) | ${t('results.fat')}(g) | ${t('results.protein')}(g) | ${t('results.totalCaloriesFull')}(kcal) | ${t('results.calorieDeficitFull')}(kcal) |\n`;
+  markdownText += `| ${t('results.day')} | ${t('results.dayType')} | ${t('results.workout')} | ${t('results.carbs')}(g) | ${t('results.fat')}(g) | ${t('results.protein')}(g) | ${t('results.totalCaloriesFull')}(kCal) | ${t('results.calorieDeficitFull')}(kCal) |\n`;
   markdownText += `|------|------|---------|---------|---------|---------|-------------|-------------|\n`;
 
   orderedDays.forEach((day, index) => {
@@ -169,7 +169,7 @@ export const generateCSV = (
 ) => {
   const { summary } = nutritionPlan;
 
-  let csvText = `${t('results.day')},${t('results.dayType')},${t('results.workout')},${t('results.carbs')}(g),${t('results.fat')}(g),${t('results.protein')}(g),${t('results.totalCaloriesFull')}(kcal),${t('results.calorieDeficitFull')}(kcal)\n`;
+  let csvText = `${t('results.day')},${t('results.dayType')},${t('results.workout')},${t('results.carbs')}(g),${t('results.fat')}(g),${t('results.protein')}(g),${t('results.totalCaloriesFull')}(kCal),${t('results.calorieDeficitFull')}(kCal)\n`;
 
   orderedDays.forEach((day, index) => {
     const caloriesDiffStr =
@@ -192,9 +192,9 @@ export const generateCSV = (
   csvText += `${t('results.dailyProtein')},${summary.dailyProtein}g\n`;
   csvText += `${t('results.weeklyCarbs')},${summary.totalCarbs}g\n`;
   csvText += `${t('results.weeklyFat')},${summary.totalFat}g\n`;
-  csvText += `${t('results.weeklyCalories')},${summary.totalCalories}kcal\n`;
+  csvText += `${t('results.weeklyCalories')},${summary.totalCalories}kCal\n`;
   if (metabolicData) {
-    csvText += `${t('results.dailyTDEE')},${metabolicData.tdee}kcal\n`;
+    csvText += `${t('results.dailyTDEE')},${metabolicData.tdee}kCal\n`;
   }
 
   return csvText;

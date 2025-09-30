@@ -65,25 +65,19 @@ export function CreateOrUpdateFoodModal({
   return (
     <Modal open={open} onClose={onClose} title={computedTitle}>
       <div className="space-y-3">
-        <div className="grid gap-2 sm:grid-cols-[2fr_1fr_1fr]">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Input
             placeholder={t('mealPlanner.foodNamePlaceholder')}
             value={formState.name}
             onChange={(event) => onFieldChange('name', event.target.value)}
-            className="h-9 text-sm"
-          />
-          <Input
-            value={formState.emoji}
-            maxLength={4}
-            placeholder={t('mealPlanner.emojiPlaceholder')}
-            onChange={(event) => onFieldChange('emoji', event.target.value)}
-            className="h-9 text-sm"
+            className="h-9 text-sm flex-1"
           />
           <CategorySelect
             value={formState.category}
             onValueChange={(value) =>
               onFieldChange('category', value as CategoryType)
             }
+            triggerClassName="h-9 text-sm w-full sm:w-40"
           />
         </div>
 

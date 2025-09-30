@@ -14,7 +14,6 @@ export interface FoodFormState {
   protein: string;
   fat: string;
   preparation: 'raw' | 'cooked';
-  emoji: string;
 }
 
 export interface FoodLibraryPanelProps {

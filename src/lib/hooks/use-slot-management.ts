@@ -21,7 +21,6 @@ interface QuickFormData {
   protein: string;
   fat: string;
   preparation: 'raw' | 'cooked';
-  emoji: string;
 }
 
 type AddCustomFoodFunction = (
@@ -163,9 +162,6 @@ export function useSlotManagement({
           calories,
         },
         preparation: quickForm.preparation,
-        emoji:
-          quickForm.emoji.trim() ||
-          (quickForm.preparation === 'raw' ? '🥕' : '🍽️'),
         isBuiltin: false,
       });
 

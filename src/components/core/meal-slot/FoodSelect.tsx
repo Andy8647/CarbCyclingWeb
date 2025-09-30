@@ -48,7 +48,6 @@ export function FoodSelect({
         <SelectValue placeholder={placeholder}>
           {selectedFood && (
             <div className="flex items-center gap-1 truncate">
-              <span>{selectedFood.emoji || '🍽️'}</span>
               <span className="truncate">
                 {selectedFood.nameKey
                   ? t(selectedFood.nameKey)
@@ -62,9 +61,8 @@ export function FoodSelect({
         {options.map(({ food, name, serving, unitLabel }) => (
           <SelectItem key={food.id} value={food.id}>
             <div className="flex flex-col text-left whitespace-normal">
-              <span className="text-xs font-medium flex items-center gap-1">
-                <span>{food.emoji || '🍽️'}</span>
-                <span className="truncate">{name}</span>
+              <span className="text-xs font-medium flex items-center gap-1 truncate">
+                {name}
               </span>
               <span className="text-[11px] text-slate-500 flex items-center gap-1">
                 {unitLabel && <span>{unitLabel}</span>}
