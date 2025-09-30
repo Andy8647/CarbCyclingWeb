@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { NumberInput } from '@/components/ui/number-input';
-import { ChevronDown, ChevronUp, MinusCircle, Plus, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, MinusCircle, Plus, Trash2 } from 'lucide-react';
 import { useSlotManagement } from '@/lib/hooks/use-slot-management';
 import { useQuickForm } from '@/lib/hooks/use-quick-form';
 import {
@@ -29,12 +29,12 @@ export function SlotSection({
 }: SlotSectionProps) {
   const { t } = useTranslation();
   const slotDefinition = getMealSlotDefinition(slotId);
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [selectedFoodId, setSelectedFoodId] = useState('');
   const [servings, setServings] = useState<number>(1);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [pendingFoodId, setPendingFoodId] = useState<string | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const { quickForm, resetQuickForm, handleQuickFormFieldChange } =
     useQuickForm();
@@ -42,9 +42,6 @@ export function SlotSection({
   const foodLookup = useMemo(() => buildFoodLookup(foodLibrary), [foodLibrary]);
 
   const {
-    expandedPortions,
-    setExpandedPortions,
-    toggleExpandedPortion,
     handleAddPortion: addPortion,
     handlePortionInputChange,
     handleRemovePortion,
@@ -99,16 +96,6 @@ export function SlotSection({
         return '';
     }
   };
-
-  useEffect(() => {
-    setExpandedPortions((prev) => {
-      const next: Record<string, boolean> = {};
-      portions.forEach((portion) => {
-        next[portion.id] = prev[portion.id] ?? false;
-      });
-      return next;
-    });
-  }, [portions, setExpandedPortions]);
 
   useEffect(() => {
     if (pendingFoodId && foodLookup[pendingFoodId]) {
@@ -176,7 +163,6 @@ export function SlotSection({
   };
 
   const handleToggleAdding = () => {
-    setIsCollapsed(false);
     setIsAdding((prev) => {
       const next = !prev;
       if (!prev) {
@@ -213,9 +199,23 @@ export function SlotSection({
   const addInputValue = Number.isFinite(servings) ? servings : '';
 
   return (
-    <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-900/60">
-      <div className="flex items-center justify-between px-3 py-1">
+    <div className="h-fit flex flex-col border-b border-slate-200 dark:border-slate-700">
+      {/* Header with meal title and controls */}
+      <div className="flex items-center justify-between px-3 py-2">
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            aria-label={isCollapsed ? t('mealPlanner.expandSlot') : t('mealPlanner.collapseSlot')}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
           <span className="text-lg" aria-hidden>
             {slotDefinition.icon}
           </span>
@@ -224,32 +224,6 @@ export function SlotSection({
           </span>
         </div>
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7"
-            onClick={() => {
-              setIsCollapsed((prev) => {
-                const next = !prev;
-                if (next) {
-                  setIsAdding(false);
-                  setShowQuickAdd(false);
-                }
-                return next;
-              });
-            }}
-            aria-label={
-              isCollapsed
-                ? t('mealPlanner.showMealSlots')
-                : t('mealPlanner.hideMealSlots')
-            }
-          >
-            {isCollapsed ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronUp className="h-4 w-4" />
-            )}
-          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -269,53 +243,55 @@ export function SlotSection({
                 slot: t(slotDefinition.translationKey),
               })}
             >
-              <X className="h-4 w-4" />
+              <Trash2 className="h-4 w-4" />
             </Button>
           )}
         </div>
       </div>
 
-      {!isCollapsed && portions.length > 0 && (
-        <div className="px-3 pb-1">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-            {headerMacroBadges.map((badge) => (
-              <span
-                key={`${slotId}-${badge.icon}`}
-                className="inline-flex items-center gap-1"
-              >
-                <span>{badge.icon}</span>
-                <span>{badge.value}</span>
-              </span>
-            ))}
-          </div>
+      {/* Macro summary badges - always visible */}
+      <div className="px-3 py-1">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          {headerMacroBadges.map((badge) => (
+            <span
+              key={`${slotId}-${badge.icon}`}
+              className="inline-flex items-center gap-1"
+            >
+              <span>{badge.icon}</span>
+              <span>{badge.value}</span>
+            </span>
+          ))}
         </div>
-      )}
+      </div>
 
+      {/* Content area - only show when not collapsed */}
       {!isCollapsed && (
-        <div className="px-3 py-2 space-y-2">
+        <div className="p-1 flex-1">
           {portions.length === 0 && !isAdding && (
-            <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+            <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2 justify-center py-4">
               <MinusCircle className="h-3.5 w-3.5" />
               <span>{t('mealPlanner.emptySlotHint')}</span>
             </div>
           )}
 
-          {portions.map((portion) => (
-            <PortionCard
-              key={portion.id}
-              portion={portion}
-              food={foodLookup[portion.foodId]}
-              isExpanded={expandedPortions[portion.id] ?? false}
-              onToggleExpanded={() => toggleExpandedPortion(portion.id)}
-              onRemove={() => handleRemovePortion(portion.id)}
-              onPortionInputChange={(value) =>
-                handlePortionInputChange(portion.id, value)
-              }
-            />
-          ))}
+          {portions.length > 0 && (
+            <div className="divide-y divide-slate-200 dark:divide-slate-700">
+              {portions.map((portion) => (
+                <PortionCard
+                  key={portion.id}
+                  portion={portion}
+                  food={foodLookup[portion.foodId]}
+                  onRemove={() => handleRemovePortion(portion.id)}
+                  onPortionInputChange={(value) =>
+                    handlePortionInputChange(portion.id, value)
+                  }
+                />
+              ))}
+            </div>
+          )}
 
           {isAdding && (
-            <div className="rounded-md border border-dashed border-slate-300 dark:border-slate-700 p-2 space-y-2">
+            <div className={`p-3 space-y-2 ${portions.length > 0 ? 'mt-3' : ''}`}>
               <label className="text-xs font-medium text-slate-600 dark:text-slate-300">
                 {t('mealPlanner.chooseFood')}
               </label>
@@ -327,7 +303,6 @@ export function SlotSection({
                   placeholder={t('mealPlanner.searchPlaceholder')}
                   quickAddLabel={t('mealPlanner.quickAddLabel')}
                   onValueChange={(value) => {
-                    setIsCollapsed(false);
                     if (value === '__add_new_food__') {
                       resetQuickForm();
                       setShowQuickAdd(true);

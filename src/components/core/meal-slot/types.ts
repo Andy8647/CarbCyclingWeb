@@ -22,8 +22,6 @@ export interface SlotSectionProps {
 export interface PortionCardProps {
   portion: MealPortion;
   food?: FoodItem;
-  isExpanded: boolean;
-  onToggleExpanded: () => void;
   onRemove: () => void;
   onPortionInputChange: (value: string) => void;
 }

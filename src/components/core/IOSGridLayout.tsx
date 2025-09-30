@@ -1,4 +1,11 @@
-import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+  useLayoutEffect,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Select,
@@ -228,6 +235,7 @@ export function IOSGridLayout({
 }: IOSGridLayoutProps) {
   const gridRef = useRef<HTMLDivElement>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const columnRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // 为网格容器添加拖放支持
   useEffect(() => {
@@ -244,6 +252,56 @@ export function IOSGridLayout({
     });
   }, [onDrop]);
 
+  // 当天数变化时重新初始化refs数组
+  useEffect(() => {
+    columnRefs.current = new Array(orderedDays.length).fill(null);
+  }, [orderedDays.length]);
+
+  // 动态同步所有列的高度
+  useLayoutEffect(() => {
+    const syncColumnHeights = () => {
+      const columns = columnRefs.current.filter(Boolean);
+      if (columns.length === 0) return;
+
+      // 先重置所有列的高度
+      columns.forEach((column) => {
+        if (column) column.style.height = 'auto';
+      });
+
+      // 强制重新计算布局
+      columns.forEach((column) => {
+        if (column) void column.offsetHeight;
+      });
+
+      // 获取最高列的高度
+      const maxHeight = Math.max(
+        ...columns.map((column) => column?.scrollHeight || 0)
+      );
+
+      // 设置所有列为最高高度
+      columns.forEach((column) => {
+        if (column) column.style.height = `${maxHeight}px`;
+      });
+    };
+
+    // 延迟同步，确保DOM已完全渲染
+    const timeoutId = setTimeout(syncColumnHeights, 0);
+
+    // 监听内容变化
+    const observer = new ResizeObserver(() => {
+      setTimeout(syncColumnHeights, 0);
+    });
+
+    columnRefs.current.filter(Boolean).forEach((column) => {
+      if (column) observer.observe(column);
+    });
+
+    return () => {
+      clearTimeout(timeoutId);
+      observer.disconnect();
+    };
+  }, [orderedDays.length, dayMealPlans, showMealSlots]);
+
   return (
     <div ref={gridRef} className="grid grid-cols-2 gap-4 p-2 max-w-2xl mx-auto">
       {orderedDays.map((day, index) => {
@@ -254,7 +312,10 @@ export function IOSGridLayout({
             index={index}
             isDraggedOver={dragOverIndex === index}
           >
-            <div className="flex flex-col gap-3">
+            <div
+              ref={(el) => (columnRefs.current[index] = el)}
+              className="flex flex-col gap-3"
+            >
               {showMealSlots && (
                 <MealSlotPlanner
                   dayNumber={day.day}

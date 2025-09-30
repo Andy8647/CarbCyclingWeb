@@ -64,6 +64,11 @@ export function ResultCard() {
   const isValid = form?.formState.isValid;
   const cycleDays = formData?.cycleDays ?? 0;
 
+  // 当循环天数变化时，清理旧的列高度信息
+  useEffect(() => {
+    setColumnHeights({});
+  }, [cycleDays]);
+
   const mealPlan = useMemo(() => {
     if (!cycleDays) return null;
     return getMealPlan(cycleDays);

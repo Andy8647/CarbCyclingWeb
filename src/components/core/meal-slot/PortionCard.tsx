@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { NumberInput } from '@/components/ui/number-input';
-import { Trash2, ChevronDown } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import {
   calculatePortionMacros,
   convertServingsToInput,
@@ -13,8 +13,6 @@ import type { PortionCardProps } from './types';
 export function PortionCard({
   portion,
   food,
-  isExpanded,
-  onToggleExpanded,
   onRemove,
   onPortionInputChange,
 }: PortionCardProps) {
@@ -69,26 +67,24 @@ export function PortionCard({
   ];
 
   return (
-    <div className="rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40">
-      <button
-        type="button"
-        className="flex w-full items-center px-3 py-2"
-        onClick={onToggleExpanded}
-        aria-expanded={isExpanded}
-      >
-        <div className="flex flex-col items-start text-left flex-1 min-w-0">
-          <div className="flex items-center justify-between w-full gap-2">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
-              {displayName}
-            </span>
-            <ChevronDown
-              className={`h-4 w-4 text-slate-500 transition-transform flex-shrink-0 ${
-                isExpanded ? 'rotate-180' : 'rotate-0'
-              }`}
-              aria-hidden
-            />
-          </div>
-          <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 pt-0.5">
+    <div className="px-3 py-2">
+      <div className="flex flex-col items-start text-left flex-1 min-w-0">
+        <div className="flex items-center justify-between w-full gap-2">
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
+            {displayName}
+          </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-slate-500 hover:text-red-600 dark:text-slate-300"
+            onClick={onRemove}
+            aria-label={t('mealPlanner.removeFood')}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+        <div className="flex items-center justify-between w-full gap-2 text-xs text-slate-500 dark:text-slate-400 pt-0.5">
+          <div className="flex items-center gap-1">
             {collapsedMacroBadges.map((badge) => (
               <span
                 key={badge.icon}
@@ -99,32 +95,16 @@ export function PortionCard({
               </span>
             ))}
           </div>
+          <NumberInput
+            step={inputStep}
+            min={0}
+            value={Number.isFinite(inputValue) ? inputValue : ''}
+            onChange={onPortionInputChange}
+            unit={inputSuffix}
+            className="h-6 w-12 text-xs"
+          />
         </div>
-      </button>
-
-      {isExpanded && (
-        <div className="border-t border-slate-200 px-1 py-3 dark:border-slate-700">
-          <div className="flex items-center justify-between gap-2">
-            <NumberInput
-              step={inputStep}
-              min={0}
-              value={Number.isFinite(inputValue) ? inputValue : ''}
-              onChange={onPortionInputChange}
-              unit={inputSuffix}
-              className="h-8 w-20 text-xs"
-            />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 text-slate-500 hover:text-slate-700 dark:text-slate-300"
-              onClick={onRemove}
-              aria-label={t('mealPlanner.removeFood')}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

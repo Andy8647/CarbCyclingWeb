@@ -86,9 +86,9 @@ export function MealSlotPlanner({
 
   const diff = useMemo(
     () => ({
-      carbs: Math.round((dayTotals.carbs - targetMacros.carbs) * 10) / 10,
-      protein: Math.round((dayTotals.protein - targetMacros.protein) * 10) / 10,
-      fat: Math.round((dayTotals.fat - targetMacros.fat) * 10) / 10,
+      carbs: Math.round(dayTotals.carbs - targetMacros.carbs),
+      protein: Math.round(dayTotals.protein - targetMacros.protein),
+      fat: Math.round(dayTotals.fat - targetMacros.fat),
     }),
     [dayTotals, targetMacros]
   );
@@ -101,8 +101,9 @@ export function MealSlotPlanner({
   }, []);
 
   return (
-    <div className={cn('flex h-full flex-col space-y-3', className)}>
-      <div className="rounded-lg bg-slate-100/70 dark:bg-slate-800/70 px-3 py-2">
+    <div className={cn('flex h-full flex-col', className)}>
+      {/* Day Summary Header */}
+      <div className="rounded-t-lg bg-slate-100/70 dark:bg-slate-800/70 px-3 py-2 border-b border-slate-200 dark:border-slate-700">
         <div className="flex items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-300">
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1">
@@ -144,9 +145,7 @@ export function MealSlotPlanner({
                       {availableSlots.map((slot) => (
                         <DropdownMenuItem
                           key={slot.id}
-                          onSelect={() => {
-                            handleAddSlot();
-                          }}
+                          onSelect={handleAddSlot}
                         >
                           {t(slot.translationKey)}
                         </DropdownMenuItem>
@@ -181,7 +180,8 @@ export function MealSlotPlanner({
         </div>
       </div>
 
-      <div className="flex-1 space-y-2 pr-1">
+      {/* Grid Layout Meal Slots */}
+      <div className="flex-1 grid grid-cols-1 content-start bg-white dark:bg-slate-900 rounded-b-lg border border-t-0 border-slate-200 dark:border-slate-700 overflow-hidden">
         {visibleSlots.map((slotId) => (
           <SlotSection
             key={`${dayNumber}-${slotId}`}
