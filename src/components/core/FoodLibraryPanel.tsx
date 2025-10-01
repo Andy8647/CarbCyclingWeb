@@ -94,7 +94,6 @@ export function FoodLibraryPanel({
         calories,
       },
       preparation,
-      isBuiltin: false,
     });
 
     toast({

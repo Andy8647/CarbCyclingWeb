@@ -8,9 +8,9 @@ export const nutritionZhCN = {
   proteinCoeff: '蛋白质',
   fatCoeff: '脂肪',
   macroEmojis: {
-    carbs: '碳',
-    protein: '蛋',
-    fat: '脂',
+    carbs: '🍚',
+    protein: '🍖',
+    fat: '🥜',
   },
   descriptions: {
     endomorph:
@@ -34,9 +34,9 @@ export const nutritionEnUS = {
   proteinCoeff: 'Protein',
   fatCoeff: 'Fat',
   macroEmojis: {
-    carbs: 'C',
-    protein: 'P',
-    fat: 'F',
+    carbs: '🍞',
+    protein: '🥩',
+    fat: '🥑',
   },
   descriptions: {
     endomorph:

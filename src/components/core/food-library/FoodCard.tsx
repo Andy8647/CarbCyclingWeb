@@ -93,15 +93,15 @@ export function FoodCard({
       <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
         <div className="flex items-center gap-2">
           <span>
-            {t('mealPlanner.macroEmojis.carbs')}
+            {t('mealPlanner.macroLabels.carbs')}
             {food.macros.carbs}
           </span>
           <span>
-            {t('mealPlanner.macroEmojis.protein')}
+            {t('mealPlanner.macroLabels.protein')}
             {food.macros.protein}
           </span>
           <span>
-            {t('mealPlanner.macroEmojis.fat')}
+            {t('mealPlanner.macroLabels.fat')}
             {food.macros.fat}
           </span>
         </div>

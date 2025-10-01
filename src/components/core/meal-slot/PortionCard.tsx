@@ -46,21 +46,21 @@ export function PortionCard({
     ? String(computedInputValue)
     : '';
 
-  const macroEmojis = t('mealPlanner.macroEmojis', {
+  const macroLabels = t('mealPlanner.macroLabels', {
     returnObjects: true,
   }) as Record<string, string>;
 
   const collapsedMacroBadges = [
     {
-      icon: macroEmojis?.carbs ?? 'C',
+      icon: macroLabels?.carbs ?? 'C',
       value: formatBadgeValue(macros.carbs),
     },
     {
-      icon: macroEmojis?.protein ?? 'P',
+      icon: macroLabels?.protein ?? 'P',
       value: formatBadgeValue(macros.protein),
     },
     {
-      icon: macroEmojis?.fat ?? 'F',
+      icon: macroLabels?.fat ?? 'F',
       value: formatBadgeValue(macros.fat),
     },
   ];

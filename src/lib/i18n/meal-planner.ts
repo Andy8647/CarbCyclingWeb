@@ -76,6 +76,11 @@ export const mealPlannerZhCN = {
   proteinLabel: '蛋白 (g)',
   fatLabel: '脂肪 (g)',
   macroEmojis: {
+    carbs: '🍚',
+    protein: '🍖',
+    fat: '🥜',
+  },
+  macroLabels: {
     carbs: '碳',
     protein: '蛋',
     fat: '脂',
@@ -234,6 +239,11 @@ export const mealPlannerEnUS = {
   proteinLabel: 'Protein (g)',
   fatLabel: 'Fat (g)',
   macroEmojis: {
+    carbs: '🍞',
+    protein: '🥩',
+    fat: '🥑',
+  },
+  macroLabels: {
     carbs: 'C',
     protein: 'P',
     fat: 'F',

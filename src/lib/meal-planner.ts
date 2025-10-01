@@ -14,16 +14,14 @@ import { createId } from './utils';
 
 /**
  * Built-in food options with approximate nutrition per default serving
+ * All foods use English names only - no translation keys needed
  */
 export const BUILTIN_FOODS: FoodItem[] = [
   {
     id: 'builtin_chicken_breast',
     name: 'Chicken Breast',
-    nameKey: 'mealPlanner.foods.chickenBreast.name',
     category: 'protein',
-    isBuiltin: true,
     defaultServing: '100 g cooked',
-    defaultServingKey: 'mealPlanner.foods.chickenBreast.serving',
     servingUnit: 'per_100g',
     macros: { carbs: 0, protein: 31, fat: 3.6, calories: 165 },
     preparation: 'cooked',
@@ -31,11 +29,8 @@ export const BUILTIN_FOODS: FoodItem[] = [
   {
     id: 'builtin_salmon',
     name: 'Salmon Fillet',
-    nameKey: 'mealPlanner.foods.salmon.name',
     category: 'protein',
-    isBuiltin: true,
     defaultServing: '100 g cooked',
-    defaultServingKey: 'mealPlanner.foods.salmon.serving',
     servingUnit: 'per_100g',
     macros: { carbs: 0, protein: 20, fat: 13, calories: 208 },
     preparation: 'cooked',
@@ -43,11 +38,8 @@ export const BUILTIN_FOODS: FoodItem[] = [
   {
     id: 'builtin_whey',
     name: 'Whey Protein',
-    nameKey: 'mealPlanner.foods.whey.name',
     category: 'supplement',
-    isBuiltin: true,
     defaultServing: '1 scoop (30 g)',
-    defaultServingKey: 'mealPlanner.foods.whey.serving',
     servingUnit: 'per_piece',
     macros: { carbs: 3, protein: 24, fat: 1, calories: 120 },
     preparation: 'raw',
@@ -55,11 +47,8 @@ export const BUILTIN_FOODS: FoodItem[] = [
   {
     id: 'builtin_egg',
     name: 'Whole Eggs',
-    nameKey: 'mealPlanner.foods.egg.name',
     category: 'protein',
-    isBuiltin: true,
     defaultServing: '1 large egg',
-    defaultServingKey: 'mealPlanner.foods.egg.serving',
     servingUnit: 'per_piece',
     macros: { carbs: 0.6, protein: 6.3, fat: 5.3, calories: 78 },
     preparation: 'raw',
@@ -67,11 +56,8 @@ export const BUILTIN_FOODS: FoodItem[] = [
   {
     id: 'builtin_brown_rice',
     name: 'Brown Rice',
-    nameKey: 'mealPlanner.foods.brownRice.name',
     category: 'carb',
-    isBuiltin: true,
     defaultServing: '100 g cooked',
-    defaultServingKey: 'mealPlanner.foods.brownRice.serving',
     servingUnit: 'per_100g',
     macros: { carbs: 23, protein: 2.7, fat: 1, calories: 112 },
     preparation: 'cooked',
@@ -79,11 +65,8 @@ export const BUILTIN_FOODS: FoodItem[] = [
   {
     id: 'builtin_sweet_potato',
     name: 'Sweet Potato',
-    nameKey: 'mealPlanner.foods.sweetPotato.name',
     category: 'carb',
-    isBuiltin: true,
     defaultServing: '100 g baked',
-    defaultServingKey: 'mealPlanner.foods.sweetPotato.serving',
     servingUnit: 'per_100g',
     macros: { carbs: 20, protein: 1.6, fat: 0.1, calories: 90 },
     preparation: 'cooked',
@@ -91,11 +74,8 @@ export const BUILTIN_FOODS: FoodItem[] = [
   {
     id: 'builtin_banana',
     name: 'Banana',
-    nameKey: 'mealPlanner.foods.banana.name',
     category: 'fruit',
-    isBuiltin: true,
     defaultServing: '1 medium',
-    defaultServingKey: 'mealPlanner.foods.banana.serving',
     servingUnit: 'per_piece',
     macros: { carbs: 27, protein: 1.3, fat: 0.3, calories: 105 },
     preparation: 'raw',
@@ -103,11 +83,8 @@ export const BUILTIN_FOODS: FoodItem[] = [
   {
     id: 'builtin_avocado',
     name: 'Avocado',
-    nameKey: 'mealPlanner.foods.avocado.name',
     category: 'fat',
-    isBuiltin: true,
     defaultServing: '1/2 medium',
-    defaultServingKey: 'mealPlanner.foods.avocado.serving',
     servingUnit: 'per_piece',
     macros: { carbs: 9, protein: 2, fat: 15, calories: 160 },
     preparation: 'raw',
@@ -115,11 +92,8 @@ export const BUILTIN_FOODS: FoodItem[] = [
   {
     id: 'builtin_almonds',
     name: 'Almonds',
-    nameKey: 'mealPlanner.foods.almonds.name',
     category: 'fat',
-    isBuiltin: true,
     defaultServing: '100 g',
-    defaultServingKey: 'mealPlanner.foods.almonds.serving',
     servingUnit: 'per_100g',
     macros: { carbs: 22, protein: 21, fat: 49, calories: 579 },
     preparation: 'raw',
@@ -127,11 +101,8 @@ export const BUILTIN_FOODS: FoodItem[] = [
   {
     id: 'builtin_greek_yogurt',
     name: 'Greek Yogurt',
-    nameKey: 'mealPlanner.foods.greekYogurt.name',
     category: 'protein',
-    isBuiltin: true,
     defaultServing: '100 g',
-    defaultServingKey: 'mealPlanner.foods.greekYogurt.serving',
     servingUnit: 'per_100g',
     macros: { carbs: 5, protein: 10, fat: 0, calories: 59 },
     preparation: 'raw',
@@ -150,7 +121,7 @@ export function buildFoodLookup(foods: FoodItem[]): Record<string, FoodItem> {
 
 /**
  * Combine built-in foods with custom foods from persistence
- * Now all foods are treated equally and can be edited/deleted
+ * All foods are treated equally and can be edited/deleted
  * Filters out deleted foods
  */
 export function mergeFoodLibrary(
@@ -165,13 +136,13 @@ export function mergeFoodLibrary(
 
   // Add custom foods (user-created foods), excluding deleted ones
   const customList = Object.values(customFoodsMap).filter(
-    (food) => !food.isDeleted
+    (food) => !food.isDeleted && !BUILTIN_FOODS.some((b) => b.id === food.id)
   );
 
   // Merge builtin foods with their custom overrides
   const allFoods = availableBuiltinFoods
     .map((builtinFood) => customFoodsMap[builtinFood.id] || builtinFood)
-    .concat(customList.filter((food) => !food.isBuiltin));
+    .concat(customList);
 
   return allFoods.sort((a, b) => a.name.localeCompare(b.name));
 }

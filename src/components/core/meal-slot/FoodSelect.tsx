@@ -48,11 +48,7 @@ export function FoodSelect({
         <SelectValue placeholder={placeholder}>
           {selectedFood && (
             <div className="flex items-center gap-1 truncate">
-              <span className="truncate">
-                {selectedFood.nameKey
-                  ? t(selectedFood.nameKey)
-                  : selectedFood.name}
-              </span>
+              <span className="truncate">{selectedFood.name}</span>
             </div>
           )}
         </SelectValue>

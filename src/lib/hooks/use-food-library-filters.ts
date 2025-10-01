@@ -17,11 +17,9 @@ export function useFoodLibraryFilters(foods: FoodItem[]) {
 
   const localizedFoods = useMemo(() => {
     const mapped = foods.map((food) => {
-      const name = food.nameKey ? t(food.nameKey) : food.name;
-      const category = food.categoryKey ? t(food.categoryKey) : food.category;
-      const serving = food.defaultServingKey
-        ? t(food.defaultServingKey)
-        : food.defaultServing;
+      const name = food.name;
+      const category = food.category;
+      const serving = food.defaultServing;
       const unitLabel = food.servingUnit
         ? t(`mealPlanner.servingUnits.${food.servingUnit}`)
         : '';

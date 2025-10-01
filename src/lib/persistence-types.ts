@@ -58,18 +58,12 @@ export const CATEGORY_TYPE_OPTIONS: CategoryType[] = [
 export interface FoodItem {
   id: string;
   name: string;
-  /** Optional translation key for name */
-  nameKey?: string;
   category: string;
-  /** Optional translation key for category */
-  categoryKey?: string;
   defaultServing: string;
   servingUnit?: ServingUnit;
-  /** Optional translation key for serving description */
-  defaultServingKey?: string;
   macros: MacroProfile;
   preparation?: 'raw' | 'cooked';
-  isBuiltin?: boolean;
+  isCustom?: boolean;
   isDeleted?: boolean;
   createdAt?: number;
   updatedAt?: number;

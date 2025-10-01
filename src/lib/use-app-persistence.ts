@@ -177,7 +177,7 @@ export function useAppPersistence() {
       const newFood: FoodItem = {
         ...food,
         id,
-        isBuiltin: false,
+        isCustom: true,
         createdAt: timestamp,
         updatedAt: timestamp,
       };
@@ -233,7 +233,10 @@ export function useAppPersistence() {
 
       let updatedCustomFoods = currentFoods;
 
-      if (food.isBuiltin) {
+      // Check if it's a builtin food (starts with 'builtin_')
+      const isBuiltinFood = id.startsWith('builtin_');
+
+      if (isBuiltinFood) {
         // Mark builtin foods as deleted
         updatedCustomFoods = {
           ...currentFoods,

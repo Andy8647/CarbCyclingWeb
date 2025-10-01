@@ -47,31 +47,31 @@ interface MacroDiffRowProps {
     protein: number;
     fat: number;
   };
-  macroEmojis: Record<'carbs' | 'protein' | 'fat', string>;
+  macroLabels: Record<'carbs' | 'protein' | 'fat', string>;
   getDiffTextClass: (value: number) => string;
 }
 
 function MacroDiffRow({
   diff,
-  macroEmojis,
+  macroLabels,
   getDiffTextClass,
 }: MacroDiffRowProps) {
   return (
     <div className="flex items-center gap-3">
       <span className="inline-flex items-center gap-1">
-        <span>{macroEmojis.carbs ?? 'C'}</span>
+        <span>{macroLabels.carbs ?? 'C'}</span>
         <span className={getDiffTextClass(diff.carbs)}>
           {diff.carbs >= 0 ? `+${diff.carbs}` : diff.carbs}g
         </span>
       </span>
       <span className="inline-flex items-center gap-1">
-        <span>{macroEmojis.protein ?? 'P'}</span>
+        <span>{macroLabels.protein ?? 'P'}</span>
         <span className={getDiffTextClass(diff.protein)}>
           {diff.protein >= 0 ? `+${diff.protein}` : diff.protein}g
         </span>
       </span>
       <span className="inline-flex items-center gap-1">
-        <span>{macroEmojis.fat ?? 'F'}</span>
+        <span>{macroLabels.fat ?? 'F'}</span>
         <span className={getDiffTextClass(diff.fat)}>
           {diff.fat >= 0 ? `+${diff.fat}` : diff.fat}g
         </span>
@@ -197,9 +197,9 @@ export function MealSlotPlanner({
     [dayTotals, targetMacros]
   );
 
-  const macroEmojis = useMemo(
+  const macroLabels = useMemo(
     () =>
-      t('mealPlanner.macroEmojis', {
+      t('mealPlanner.macroLabels', {
         returnObjects: true,
       }) as Record<'carbs' | 'protein' | 'fat', string>,
     [t]
@@ -228,7 +228,7 @@ export function MealSlotPlanner({
         <div className="flex flex-col gap-2 text-xs text-slate-600 dark:text-slate-300">
           <MacroDiffRow
             diff={diff}
-            macroEmojis={macroEmojis}
+            macroLabels={macroLabels}
             getDiffTextClass={getDiffTextClass}
           />
           <AddMealSlotControl

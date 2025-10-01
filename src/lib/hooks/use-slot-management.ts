@@ -83,22 +83,25 @@ export function useSlotManagement({
       const food =
         foodLookup[portions.find((p) => p.id === portionId)?.foodId ?? ''];
 
-      if (value === '') return;
+      if (value === '') {
+        // Allow empty value - set servings to 0 but don't remove the portion
+        onUpdate(
+          portions.map((portion) =>
+            portion.id === portionId
+              ? {
+                  ...portion,
+                  servings: 0,
+                }
+              : portion
+          )
+        );
+        return;
+      }
+
       const parsed = parseFloat(value);
       if (Number.isNaN(parsed)) return;
 
       const normalized = convertInputToServings(parsed, food?.servingUnit);
-
-      if (normalized <= 0) {
-        onUpdate(portions.filter((portion) => portion.id !== portionId));
-        setExpandedPortions((prev) => {
-          if (!prev[portionId]) return prev;
-          const next = { ...prev };
-          delete next[portionId];
-          return next;
-        });
-        return;
-      }
 
       onUpdate(
         portions.map((portion) =>
@@ -162,7 +165,6 @@ export function useSlotManagement({
           calories,
         },
         preparation: quickForm.preparation,
-        isBuiltin: false,
       });
 
       toast({

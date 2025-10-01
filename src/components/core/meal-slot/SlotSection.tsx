@@ -61,10 +61,8 @@ export function SlotSection({
   const localizedFoodLibrary = useMemo<LocalizedFoodOption[]>(() => {
     const mapped = foodLibrary.map((food) => ({
       food,
-      name: food.nameKey ? t(food.nameKey) : food.name,
-      serving: food.defaultServingKey
-        ? t(food.defaultServingKey)
-        : food.defaultServing,
+      name: food.name,
+      serving: food.defaultServing,
       unitLabel: food.servingUnit
         ? t(`mealPlanner.servingUnits.${food.servingUnit}`)
         : '',
@@ -77,7 +75,7 @@ export function SlotSection({
 
   const selectedFood = selectedFoodId ? foodLookup[selectedFoodId] : undefined;
 
-  const macroEmojis = t('mealPlanner.macroEmojis', {
+  const macroLabels = t('mealPlanner.macroLabels', {
     returnObjects: true,
   }) as Record<string, string>;
 
@@ -139,15 +137,15 @@ export function SlotSection({
 
   const headerMacroBadges = [
     {
-      icon: macroEmojis?.carbs ?? 'C',
+      icon: macroLabels?.carbs ?? 'C',
       value: formatBadgeValue(totals.carbs),
     },
     {
-      icon: macroEmojis?.protein ?? 'P',
+      icon: macroLabels?.protein ?? 'P',
       value: formatBadgeValue(totals.protein),
     },
     {
-      icon: macroEmojis?.fat ?? 'F',
+      icon: macroLabels?.fat ?? 'F',
       value: formatBadgeValue(totals.fat),
     },
   ];
