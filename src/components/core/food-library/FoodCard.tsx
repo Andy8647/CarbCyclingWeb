@@ -61,7 +61,7 @@ export function FoodCard({
   return (
     <div
       ref={cardRef}
-      className={`group rounded border cursor-grab active:cursor-grabbing transition-all flex ${
+      className={`group rounded border cursor-grab active:cursor-grabbing transition-all p-2 ${
         isDragging
           ? 'opacity-50 border-blue-400 dark:border-blue-500 shadow-md'
           : isOver
@@ -69,55 +69,45 @@ export function FoodCard({
             : 'border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-500 hover:shadow-sm'
       }`}
     >
-      {/* Drag handle - left side, full height */}
-      <div className="flex items-center justify-center w-6 border-r border-slate-200 dark:border-slate-600 opacity-0 group-hover:opacity-50 transition-opacity">
-        <GripVertical className="h-4 w-4 text-slate-300 dark:text-slate-600" />
+      {/* Compact header */}
+      <div className="flex items-center gap-1.5 mb-1 relative">
+        {/* Drag handle - inline with name */}
+        <GripVertical className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 opacity-40 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+        <span className="text-xs font-medium text-slate-700 dark:text-slate-200 truncate flex-1 min-w-0 group-hover:pr-5">
+          {name}
+        </span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute right-0 top-1/2 -translate-y-1/2 h-4 w-4 p-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEditFood(food.id);
+          }}
+        >
+          <Edit3 className="h-2.5 w-2.5" />
+        </Button>
       </div>
 
-      {/* Card content */}
-      <div className="flex-1 p-2">
-        {/* Compact header */}
-        <div className="flex items-center justify-between gap-1 mb-1">
-          <div className="flex items-center gap-1 flex-1 min-w-0">
-            <span className="text-xs font-medium text-slate-700 dark:text-slate-200 truncate">
-              {name}
-            </span>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-4 w-4 p-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEditFood(food.id);
-              }}
-            >
-              <Edit3 className="h-2.5 w-2.5" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Compact nutrition info */}
-        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-          <div className="flex items-center gap-2">
-            <span>
-              {t('mealPlanner.macroEmojis.carbs')}
-              {food.macros.carbs}
-            </span>
-            <span>
-              {t('mealPlanner.macroEmojis.protein')}
-              {food.macros.protein}
-            </span>
-            <span>
-              {t('mealPlanner.macroEmojis.fat')}
-              {food.macros.fat}
-            </span>
-          </div>
+      {/* Compact nutrition info */}
+      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex items-center gap-2">
           <span>
-            {t('mealPlanner.caloriesShort', { value: food.macros.calories })}
+            {t('mealPlanner.macroEmojis.carbs')}
+            {food.macros.carbs}
+          </span>
+          <span>
+            {t('mealPlanner.macroEmojis.protein')}
+            {food.macros.protein}
+          </span>
+          <span>
+            {t('mealPlanner.macroEmojis.fat')}
+            {food.macros.fat}
           </span>
         </div>
+        <span>
+          {t('mealPlanner.caloriesShort', { value: food.macros.calories })}
+        </span>
       </div>
     </div>
   );
