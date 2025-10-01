@@ -22,11 +22,7 @@ export function PortionCard({
     ? calculatePortionMacros(food, portion.servings)
     : { carbs: 0, protein: 0, fat: 0, calories: 0 };
 
-  const displayName = food
-    ? food.nameKey
-      ? t(food.nameKey)
-      : food.name
-    : t('mealPlanner.unknownFood');
+  const displayName = food ? food.name : t('mealPlanner.unknownFood');
 
   const getInputSuffix = (unit?: string) => {
     switch (unit) {
@@ -71,24 +67,26 @@ export function PortionCard({
 
   return (
     <div className="px-2 py-2">
-      <div className="flex w-full items-center gap-3">
-        <div className="flex-1">
-          <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
+      <div className="flex w-full items-center gap-1.5">
+        <div className="flex-1 min-w-0">
+          <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate block">
             {displayName}
           </span>
         </div>
-        <NumberInput
-          step={inputStep}
-          min={0}
-          value={inputValue}
-          onChange={onPortionInputChange}
-          unit={inputSuffix}
-          className="flex-1 h-full text-xs"
-        />
+        <div className="w-[68px] flex-shrink-0">
+          <NumberInput
+            step={inputStep}
+            min={0}
+            value={inputValue}
+            onChange={onPortionInputChange}
+            unit={inputSuffix}
+            className="h-full text-xs"
+          />
+        </div>
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 text-slate-500 hover:text-red-600 dark:text-slate-300"
+          className="h-6 w-6 flex-shrink-0 text-slate-500 hover:text-red-600 dark:text-slate-300"
           onClick={onRemove}
           aria-label={t('mealPlanner.removeFood')}
         >

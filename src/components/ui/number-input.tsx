@@ -34,7 +34,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       value === undefined || value === null || value === '' ? '' : value;
 
     return (
-      <div className="relative min-w-[3.75rem]">
+      <div className="relative w-full">
         <Input
           ref={ref}
           type="number"
@@ -45,13 +45,13 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           value={displayValue}
           onChange={(event) => onChange(event.target.value)}
           className={cn(
-            'text-center pr-8 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [appearance:textfield] !block w-full',
-            unit && 'pl-8',
+            'text-center pr-6 w-full min-w-0 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [appearance:textfield]',
+            unit && 'pl-5',
             className
           )}
           {...props}
         />
-        <div className="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col">
+        <div className="absolute right-0.5 top-1/2 -translate-y-1/2 flex flex-col">
           <button
             type="button"
             onClick={handleIncrement}
@@ -68,7 +68,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
           </button>
         </div>
         {unit && (
-          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-slate-500 dark:text-slate-400 pointer-events-none">
+          <span className="absolute left-1 top-1/2 -translate-y-1/2 text-xs text-slate-500 dark:text-slate-400 pointer-events-none">
             {unit}
           </span>
         )}
