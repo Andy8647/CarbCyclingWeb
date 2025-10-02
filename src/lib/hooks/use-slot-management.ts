@@ -10,11 +10,12 @@ import type {
   MealPortion,
   FoodItem,
   ServingUnit,
+  CategoryType,
 } from '@/lib/persistence-types';
 
 interface QuickFormData {
   name: string;
-  category: string;
+  category: CategoryType;
   defaultServing: string;
   servingUnit: ServingUnit;
   carbs: string;

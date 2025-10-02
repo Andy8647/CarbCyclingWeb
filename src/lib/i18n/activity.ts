@@ -5,6 +5,8 @@ export const activityZhCN = {
   activityLevel: '活动系数',
   activityTooltip:
     '活动系数用于计算 TDEE（每日总能量消耗），不会影响碳循环计划的分配。若不确定，推荐选择"中度"。',
+  distribution: '营养分配',
+  resetToDefault: '恢复默认',
   sedentary: '久坐 – 几乎不运动（办公室）',
   light: '轻度 – 轻运动 1–3 次/周',
   moderate: '中度 – 规律训练 3–5 次/周',
@@ -19,6 +21,8 @@ export const activityEnUS = {
   activityLevel: 'Activity Factor',
   activityTooltip:
     'Activity factor is used to calculate TDEE (total daily energy expenditure). It does not affect carb cycling plan distribution. If unsure, choose "Moderate".',
+  distribution: 'Distribution',
+  resetToDefault: 'Reset to default',
   sedentary: 'Sedentary – Office job, little/no exercise',
   light: 'Lightly active – Exercise 1–3 times/week',
   moderate: 'Moderate – Exercise 3–5 times/week',

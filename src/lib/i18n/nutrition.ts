@@ -7,6 +7,11 @@ export const nutritionZhCN = {
   carbCoeff: '碳水',
   proteinCoeff: '蛋白质',
   fatCoeff: '脂肪',
+  distributionRing: {
+    high: '高',
+    mid: '中',
+    low: '低',
+  },
   macroEmojis: {
     carbs: '🍚',
     protein: '🍖',
@@ -33,6 +38,11 @@ export const nutritionEnUS = {
   carbCoeff: 'Carbs',
   proteinCoeff: 'Protein',
   fatCoeff: 'Fat',
+  distributionRing: {
+    high: 'High',
+    mid: 'Mid',
+    low: 'Low',
+  },
   macroEmojis: {
     carbs: '🍞',
     protein: '🥩',

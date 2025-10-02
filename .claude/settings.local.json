@@ -27,7 +27,12 @@
       "mcp__chrome-devtools__navigate_page",
       "mcp__chrome-devtools__take_snapshot",
       "mcp__chrome-devtools__take_screenshot",
-      "mcp__chrome-devtools__evaluate_script"
+      "mcp__chrome-devtools__evaluate_script",
+      "Bash(find:*)",
+      "mcp__chrome-devtools__list_console_messages",
+      "WebFetch(domain:react-round-slider.mzsoft.org)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "mcp__chrome-devtools__new_page"
     ]
   },
   "hooks": {

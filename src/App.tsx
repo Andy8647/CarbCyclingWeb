@@ -106,12 +106,18 @@ function AppContent() {
     gender: 'male' as const,
     weight: 70,
     height: 175,
-    activityFactor: 'moderate' as const,
     bodyType: 'mesomorph' as const,
     carbCoeff: 2.5,
     proteinCoeff: 1.2,
     fatCoeff: 0.9,
     cycleDays: 7,
+    // Default carb/fat distribution percentages
+    highCarbPercent: 50,
+    midCarbPercent: 35,
+    lowCarbPercent: 15,
+    highFatPercent: 15,
+    midFatPercent: 35,
+    lowFatPercent: 50,
     ...savedFormData, // Override defaults with saved data
   };
 

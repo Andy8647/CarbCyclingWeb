@@ -38,7 +38,7 @@ export const BUILTIN_FOODS: FoodItem[] = [
   {
     id: 'builtin_whey',
     name: 'Whey Protein',
-    category: 'supplement',
+    category: 'other',
     defaultServing: '1 scoop (30 g)',
     servingUnit: 'per_piece',
     macros: { carbs: 3, protein: 24, fat: 1, calories: 120 },
@@ -74,7 +74,7 @@ export const BUILTIN_FOODS: FoodItem[] = [
   {
     id: 'builtin_banana',
     name: 'Banana',
-    category: 'fruit',
+    category: 'other',
     defaultServing: '1 medium',
     servingUnit: 'per_piece',
     macros: { carbs: 27, protein: 1.3, fat: 0.3, calories: 105 },

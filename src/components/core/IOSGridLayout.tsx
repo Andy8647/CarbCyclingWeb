@@ -38,7 +38,6 @@ interface DayData {
   fat: number;
   protein: number;
   calories: number;
-  caloriesDiff: number;
 }
 
 interface IOSSquareCardProps {
@@ -179,23 +178,6 @@ function IOSSquareCard({
             </div>
             <div className="font-semibold text-xs text-slate-700 dark:text-slate-300">
               {day.calories}
-            </div>
-          </div>
-          <div className="flex justify-between items-center">
-            <div className="text-xs text-slate-500">
-              📈 {t('results.calorieDeficit')}
-            </div>
-            <div
-              className={`font-semibold text-xs ${
-                day.caloriesDiff > 0
-                  ? 'text-green-600 dark:text-green-400'
-                  : day.caloriesDiff < 0
-                    ? 'text-red-600 dark:text-red-400'
-                    : 'text-yellow-600 dark:text-yellow-400'
-              }`}
-            >
-              {day.caloriesDiff > 0 ? '+' : ''}
-              {day.caloriesDiff}
             </div>
           </div>
         </div>

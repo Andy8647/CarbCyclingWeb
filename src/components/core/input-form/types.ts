@@ -1,17 +1,5 @@
 import type { UseFormReturn } from 'react-hook-form';
-
-export interface FormData {
-  age: number;
-  gender: 'male' | 'female';
-  height: number;
-  weight: number;
-  bodyType: 'endomorph' | 'mesomorph' | 'ectomorph';
-  carbCoeff: number;
-  proteinCoeff: number;
-  fatCoeff: number;
-  cycleDays: number;
-  activityFactor: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
-}
+import type { FormData } from '@/lib/form-schema';
 
 export interface BasicInfoSectionProps {
   form: UseFormReturn<FormData>;

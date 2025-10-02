@@ -3,17 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { useToast } from '@/lib/use-toast';
 import { exportNodeToPNG } from '@/lib/export-to-png';
 import { generateMarkdown, generateCSV } from '@/lib/result-card-logic';
-import type {
-  NutritionPlan,
-  MetabolicData,
-  DayData,
-} from '@/lib/result-card-logic';
+import type { NutritionPlan, DayData } from '@/lib/result-card-logic';
 
 interface UseExportActionsProps {
   nutritionPlan: NutritionPlan | null;
   orderedDays: (DayData | null)[];
   dailyWorkouts: Record<number, string>;
-  metabolicData: MetabolicData | null;
   macroIcons: Record<string, string>;
 }
 
@@ -21,7 +16,6 @@ export function useExportActions({
   nutritionPlan,
   orderedDays,
   dailyWorkouts,
-  metabolicData,
   macroIcons,
 }: UseExportActionsProps) {
   const { t } = useTranslation();
@@ -35,7 +29,6 @@ export function useExportActions({
       nutritionPlan,
       orderedDays.filter((day): day is DayData => day !== null),
       dailyWorkouts,
-      metabolicData,
       macroIcons,
       t
     );
@@ -57,15 +50,7 @@ export function useExportActions({
           description: 'Failed to copy to clipboard',
         });
       });
-  }, [
-    nutritionPlan,
-    orderedDays,
-    dailyWorkouts,
-    metabolicData,
-    macroIcons,
-    t,
-    toast,
-  ]);
+  }, [nutritionPlan, orderedDays, dailyWorkouts, macroIcons, t, toast]);
 
   const handleCopyAsCSV = useCallback(() => {
     if (!nutritionPlan) return;
@@ -74,7 +59,6 @@ export function useExportActions({
       nutritionPlan,
       orderedDays.filter((day): day is DayData => day !== null),
       dailyWorkouts,
-      metabolicData,
       t
     );
 
@@ -95,7 +79,7 @@ export function useExportActions({
           description: 'Failed to copy to clipboard',
         });
       });
-  }, [nutritionPlan, orderedDays, dailyWorkouts, metabolicData, t, toast]);
+  }, [nutritionPlan, orderedDays, dailyWorkouts, t, toast]);
 
   const handleExportPNG = useCallback(async () => {
     try {

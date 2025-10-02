@@ -9,6 +9,7 @@ import type {
   MealSlotId,
   PersistentAppState,
   UserSettings,
+  CategoryType,
 } from './persistence-types';
 import {
   defaultPersistentAppState,
@@ -26,16 +27,61 @@ import { createId } from './utils';
 import type { FormData } from './form-schema';
 
 /**
+ * Normalize food category - map legacy categories to 'other'
+ */
+function normalizeFoodCategory(category: string): CategoryType {
+  const validCategories: CategoryType[] = ['protein', 'carb', 'fat', 'other'];
+  if (validCategories.includes(category as CategoryType)) {
+    return category as CategoryType;
+  }
+  // Map legacy categories (vegetable, fruit, supplement) to 'other'
+  return 'other';
+}
+
+/**
+ * Migrate app state to ensure all food categories are valid
+ */
+function migrateAppState(state: PersistentAppState): PersistentAppState {
+  if (!state.customFoods) return state;
+
+  const migratedFoods: Record<string, FoodItem> = {};
+  let hasChanges = false;
+
+  for (const [id, food] of Object.entries(state.customFoods)) {
+    const normalizedCategory = normalizeFoodCategory(food.category);
+    if (normalizedCategory !== food.category) {
+      migratedFoods[id] = { ...food, category: normalizedCategory };
+      hasChanges = true;
+    } else {
+      migratedFoods[id] = food;
+    }
+  }
+
+  if (hasChanges) {
+    return {
+      ...state,
+      customFoods: migratedFoods,
+      lastSaved: Date.now(),
+    };
+  }
+
+  return state;
+}
+
+/**
  * Main hook for managing all app persistence
  * Provides a clean interface for components to save/load data
  */
 export function useAppPersistence() {
-  // Main app state storage
-  const [appState, setAppState, removeAppState] =
+  // Main app state storage with migration
+  const [rawAppState, setAppState, removeAppState] =
     useLocalStorage<PersistentAppState>(
       STORAGE_KEYS.APP_STATE,
       defaultPersistentAppState
     );
+
+  // Apply migration to ensure all categories are valid
+  const appState = migrateAppState(rawAppState);
 
   // Helper function to update app state
   const updateAppState = useCallback(

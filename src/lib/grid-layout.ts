@@ -14,7 +14,6 @@ export interface DragData {
     fat: number;
     protein: number;
     calories: number;
-    caloriesDiff: number;
   };
 }
 

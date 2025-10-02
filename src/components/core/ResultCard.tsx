@@ -12,16 +12,11 @@ import type {
 } from '@/lib/persistence-types';
 import { normalizeDayMealPlan } from '@/lib/meal-planner';
 import { FoodLibraryPanel } from './FoodLibraryPanel';
-import {
-  DayColumn,
-  MacroSummaryCards,
-  ResultsHeader,
-} from '@/components/core/result-card';
+import { DayColumn, ResultsHeader } from '@/components/core/result-card';
 import { MealSlotPlanner } from './MealSlotPlanner';
 import { useScreenSize } from '@/lib/hooks/use-screen-size';
 import {
   calculateNutritionData,
-  calculateMetabolicInfo,
   reorderDays,
   type DragData,
 } from '@/lib/result-card-logic';
@@ -89,11 +84,6 @@ export function ResultCard() {
     [formData, isValid]
   );
 
-  const metabolicData = useMemo(
-    () => calculateMetabolicInfo(formData, isValid ?? false),
-    [formData, isValid]
-  );
-
   const orderedDays = useMemo(
     () => reorderDays(nutritionPlan, dayOrder),
     [nutritionPlan, dayOrder]
@@ -104,7 +94,6 @@ export function ResultCard() {
       nutritionPlan,
       orderedDays,
       dailyWorkouts,
-      metabolicData,
       macroIcons,
     });
 
@@ -227,12 +216,6 @@ export function ResultCard() {
       <div ref={exportRef}>
         {nutritionPlan ? (
           <div className="space-y-4">
-            <MacroSummaryCards
-              nutritionPlan={nutritionPlan}
-              metabolicData={metabolicData}
-              macroIcons={macroIcons}
-            />
-
             {showFoodLibrary && (
               <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/40 p-4">
                 <FoodLibraryPanel

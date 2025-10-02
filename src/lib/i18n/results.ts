@@ -10,7 +10,6 @@ export const resultsZhCN = {
   dailyProtein: '每日蛋白',
   weeklyCarbs: '周碳水',
   weeklyFat: '周脂肪',
-  weeklyCalories: '周热量',
   dailyTDEE: '每日TDEE',
   calorieInfo: '热量信息',
   dayTypes: {
@@ -59,7 +58,6 @@ export const resultsEnUS = {
   dailyProtein: 'Daily Protein',
   weeklyCarbs: 'Weekly Carbs',
   weeklyFat: 'Weekly Fat',
-  weeklyCalories: 'Weekly Calories',
   dailyTDEE: 'TDEE',
   calorieInfo: 'Calories',
   dayTypes: {

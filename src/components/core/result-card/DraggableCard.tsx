@@ -129,29 +129,12 @@ export function DraggableCard({
         </div>
 
         {/* Calorie information */}
-        <div className="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
+        <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
           <div className="flex justify-between items-center">
             <div className="text-xs text-slate-500 whitespace-nowrap">
               🔥 {t('results.totalCalories')}
             </div>
             <div className="font-semibold text-xs">{day.calories}kCal</div>
-          </div>
-          <div className="flex justify-between items-center">
-            <div className="text-xs text-slate-500 whitespace-nowrap">
-              📈 {t('results.calorieDeficit')}
-            </div>
-            <div
-              className={`font-semibold text-xs ${
-                day.caloriesDiff > 0
-                  ? 'text-green-600 dark:text-green-400'
-                  : day.caloriesDiff < 0
-                    ? 'text-red-600 dark:text-red-400'
-                    : 'text-yellow-600 dark:text-yellow-400'
-              }`}
-            >
-              {day.caloriesDiff > 0 ? '+' : ''}
-              {day.caloriesDiff}kCal
-            </div>
           </div>
         </div>
       </div>

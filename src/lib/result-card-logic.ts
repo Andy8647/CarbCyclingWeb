@@ -1,12 +1,7 @@
 import type { UserInput } from '@/lib/calculator';
-import {
-  calculateNutritionPlan,
-  calculateMetabolicData,
-  WORKOUT_TYPES,
-} from '@/lib/calculator';
+import { calculateNutritionPlan, WORKOUT_TYPES } from '@/lib/calculator';
 
 export type NutritionPlan = ReturnType<typeof calculateNutritionPlan>;
-export type MetabolicData = ReturnType<typeof calculateMetabolicData>;
 
 export interface DayData {
   day: number;
@@ -15,7 +10,6 @@ export interface DayData {
   fat: number;
   protein: number;
   calories: number;
-  caloriesDiff: number;
 }
 
 export interface DragData {
@@ -54,11 +48,16 @@ export const calculateNutritionData = (
     !formData?.age ||
     !formData?.gender ||
     !formData?.height ||
-    !formData?.activityFactor ||
     !formData?.carbCoeff ||
     !formData?.proteinCoeff ||
     !formData?.fatCoeff ||
-    !formData?.cycleDays
+    !formData?.cycleDays ||
+    !formData?.highCarbPercent ||
+    !formData?.midCarbPercent ||
+    !formData?.lowCarbPercent ||
+    !formData?.highFatPercent ||
+    !formData?.midFatPercent ||
+    !formData?.lowFatPercent
   ) {
     return null;
   }
@@ -68,48 +67,23 @@ export const calculateNutritionData = (
     gender: formData.gender as UserInput['gender'],
     weight: formData.weight as number,
     height: formData.height as number,
-    activityFactor: formData.activityFactor as UserInput['activityFactor'],
     bodyType: formData.bodyType as UserInput['bodyType'],
     carbCoeff: formData.carbCoeff as number,
     proteinCoeff: formData.proteinCoeff as number,
     fatCoeff: formData.fatCoeff as number,
     cycleDays: formData.cycleDays as number,
+    highCarbPercent: formData.highCarbPercent as number,
+    midCarbPercent: formData.midCarbPercent as number,
+    lowCarbPercent: formData.lowCarbPercent as number,
+    highFatPercent: formData.highFatPercent as number,
+    midFatPercent: formData.midFatPercent as number,
+    lowFatPercent: formData.lowFatPercent as number,
   };
 
   return calculateNutritionPlan(input);
 };
 
-export const calculateMetabolicInfo = (
-  formData: Record<string, unknown> | undefined,
-  isValid: boolean
-) => {
-  if (
-    !isValid ||
-    !formData ||
-    !formData?.weight ||
-    !formData?.height ||
-    !formData?.age ||
-    !formData?.gender ||
-    !formData?.activityFactor
-  ) {
-    return null;
-  }
-
-  const input: UserInput = {
-    age: formData.age as number,
-    gender: formData.gender as UserInput['gender'],
-    weight: formData.weight as number,
-    height: formData.height as number,
-    activityFactor: formData.activityFactor as UserInput['activityFactor'],
-    bodyType: formData.bodyType as UserInput['bodyType'],
-    carbCoeff: formData.carbCoeff as number,
-    proteinCoeff: formData.proteinCoeff as number,
-    fatCoeff: formData.fatCoeff as number,
-    cycleDays: formData.cycleDays as number,
-  };
-
-  return calculateMetabolicData(input);
-};
+// Removed calculateMetabolicInfo since we no longer calculate TDEE
 
 export const reorderDays = (
   nutritionPlan: ReturnType<typeof calculateNutritionPlan> | null,
@@ -127,7 +101,6 @@ export const generateMarkdown = (
   nutritionPlan: ReturnType<typeof calculateNutritionPlan>,
   orderedDays: DayData[],
   dailyWorkouts: Record<number, string>,
-  metabolicData: ReturnType<typeof calculateMetabolicData> | null,
   macroIcons: Record<string, string>,
   t: (key: string, options?: Record<string, unknown>) => string
 ) => {
@@ -138,23 +111,17 @@ export const generateMarkdown = (
   markdownText += `- ${macroIcons.protein} ${t('results.dailyProtein')}: ${summary.dailyProtein}g\n`;
   markdownText += `- ${macroIcons.carbs} ${t('results.weeklyCarbs')}: ${summary.totalCarbs}g\n`;
   markdownText += `- ${macroIcons.fat} ${t('results.weeklyFat')}: ${summary.totalFat}g\n`;
-  markdownText += `- 🔥 ${t('results.weeklyCalories')}: ${summary.totalCalories}kCal\n`;
-  if (metabolicData) {
-    markdownText += `- ⚡ ${t('results.dailyTDEE')}: ${metabolicData.tdee}kCal\n`;
-  }
   markdownText += `\n## ${t('results.dailyDetails')}\n\n`;
-  markdownText += `| ${t('results.day')} | ${t('results.dayType')} | ${t('results.workout')} | ${t('results.carbs')}(g) | ${t('results.fat')}(g) | ${t('results.protein')}(g) | ${t('results.totalCaloriesFull')}(kCal) | ${t('results.calorieDeficitFull')}(kCal) |\n`;
-  markdownText += `|------|------|---------|---------|---------|---------|-------------|-------------|\n`;
+  markdownText += `| ${t('results.day')} | ${t('results.dayType')} | ${t('results.workout')} | ${t('results.carbs')}(g) | ${t('results.fat')}(g) | ${t('results.protein')}(g) | ${t('results.totalCaloriesFull')}(kCal) |\n`;
+  markdownText += `|------|------|---------|---------|---------|---------|-------------|\n`;
 
   orderedDays.forEach((day, index) => {
-    const caloriesDiffStr =
-      day.caloriesDiff > 0 ? `+${day.caloriesDiff}` : `${day.caloriesDiff}`;
     const workout = dailyWorkouts[day.day] || '-';
     const workoutEmoji = getWorkoutEmoji(workout);
     const workoutDisplay =
       workout === '-' ? '-' : `${workoutEmoji} ${t(`workouts.${workout}`)}`;
 
-    markdownText += `| ${t('results.dayNumber').replace('{{day}}', (index + 1).toString())} | ${getDayTypeDisplay(day.type, t)} | ${workoutDisplay} | ${day.carbs} | ${day.fat} | ${day.protein} | ${day.calories} | ${caloriesDiffStr} |\n`;
+    markdownText += `| ${t('results.dayNumber').replace('{{day}}', (index + 1).toString())} | ${getDayTypeDisplay(day.type, t)} | ${workoutDisplay} | ${day.carbs} | ${day.fat} | ${day.protein} | ${day.calories} |\n`;
   });
 
   return markdownText;
@@ -164,16 +131,22 @@ export const generateCSV = (
   nutritionPlan: ReturnType<typeof calculateNutritionPlan>,
   orderedDays: DayData[],
   dailyWorkouts: Record<number, string>,
-  metabolicData: ReturnType<typeof calculateMetabolicData> | null,
   t: (key: string, options?: Record<string, unknown>) => string
 ) => {
   const { summary } = nutritionPlan;
 
-  let csvText = `${t('results.day')},${t('results.dayType')},${t('results.workout')},${t('results.carbs')}(g),${t('results.fat')}(g),${t('results.protein')}(g),${t('results.totalCaloriesFull')}(kCal),${t('results.calorieDeficitFull')}(kCal)\n`;
+  const header = [
+    t('results.day'),
+    t('results.dayType'),
+    t('results.workout'),
+    `${t('results.carbs')}(g)`,
+    `${t('results.fat')}(g)`,
+    `${t('results.protein')}(g)`,
+    `${t('results.totalCaloriesFull')}(kCal)`,
+  ];
+  let csvText = `${header.join(',')}\n`;
 
   orderedDays.forEach((day, index) => {
-    const caloriesDiffStr =
-      day.caloriesDiff > 0 ? `+${day.caloriesDiff}` : `${day.caloriesDiff}`;
     const dayNumber = t('results.dayNumber').replace(
       '{{day}}',
       (index + 1).toString()
@@ -185,17 +158,12 @@ export const generateCSV = (
     const workout = dailyWorkouts[day.day] || '-';
     const workoutText = workout === '-' ? '-' : t(`workouts.${workout}`);
 
-    csvText += `"${dayNumber}","${dayTypeText}","${workoutText}",${day.carbs},${day.fat},${day.protein},${day.calories},"${caloriesDiffStr}"\n`;
+    csvText += `"${dayNumber}","${dayTypeText}","${workoutText}",${day.carbs},${day.fat},${day.protein},${day.calories}\n`;
   });
 
   csvText += `\n${t('results.weeklySummary')}\n`;
   csvText += `${t('results.dailyProtein')},${summary.dailyProtein}g\n`;
   csvText += `${t('results.weeklyCarbs')},${summary.totalCarbs}g\n`;
   csvText += `${t('results.weeklyFat')},${summary.totalFat}g\n`;
-  csvText += `${t('results.weeklyCalories')},${summary.totalCalories}kCal\n`;
-  if (metabolicData) {
-    csvText += `${t('results.dailyTDEE')},${metabolicData.tdee}kCal\n`;
-  }
-
   return csvText;
 };

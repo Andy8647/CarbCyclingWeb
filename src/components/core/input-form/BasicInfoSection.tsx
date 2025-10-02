@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { SectionCard } from '@/components/ui/section-card';
+import { SliderSection } from '@/components/ui/slider-section';
 import type { BasicInfoSectionProps } from './types';
 
 export function BasicInfoSection({
@@ -154,6 +155,24 @@ export function BasicInfoSection({
             onChange={(e) => handleWeightChange(e.target.value)}
             placeholder="70"
             unit={unitSystem === 'metric' ? t('basicInfo.weightUnit') : 'lb'}
+          />
+        </div>
+
+        {/* Cycle Days */}
+        <div className="space-y-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+          <SliderSection
+            title={t('activity.cycleDays')}
+            emoji="📅"
+            value={watchedValues.cycleDays}
+            onValueChange={(value) =>
+              setValue('cycleDays', value, { shouldValidate: true })
+            }
+            min={3}
+            max={7}
+            step={1}
+            unit={t('activity.days')}
+            options={[3, 4, 5, 6, 7]}
+            getDescription={() => ''}
           />
         </div>
       </SectionCard>

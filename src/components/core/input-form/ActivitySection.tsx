@@ -1,20 +1,20 @@
 import { useTranslation } from 'react-i18next';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { SectionCard } from '@/components/ui/section-card';
-import { SliderSection } from '@/components/ui/slider-section';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
+import { DistributionRing } from '@/components/ui/distribution-ring';
+import { DEFAULT_DISTRIBUTION } from '@/lib/calculator';
 import type { ActivitySectionProps } from './types';
+
+const CARB_RING_COLORS = {
+  high: '#9a3412',
+  mid: '#fb923c',
+  low: '#fed7aa',
+};
+
+const FAT_RING_COLORS = {
+  high: '#0369a1',
+  mid: '#0ea5e9',
+  low: '#bae6fd',
+};
 
 export function ActivitySection({ form, watchedValues }: ActivitySectionProps) {
   const { t } = useTranslation();
@@ -23,87 +23,90 @@ export function ActivitySection({ form, watchedValues }: ActivitySectionProps) {
     formState: { errors },
   } = form;
 
-  return (
-    <div>
-      <SectionCard title={t('activity.title')} emoji="⚙️">
-        <div className="space-y-4">
-          {/* Cycle Days */}
-          <div className="space-y-2">
-            <Label className="text-xs font-light text-foreground flex items-center gap-1">
-              <span className="text-sm">📅</span>
-              <span>{t('activity.cycleDays')}</span>
-            </Label>
-            <SliderSection
-              title=""
-              emoji=""
-              value={watchedValues.cycleDays}
-              onValueChange={(value) =>
-                setValue('cycleDays', value, { shouldValidate: true })
-              }
-              min={3}
-              max={7}
-              step={1}
-              unit={t('activity.days')}
-              options={[3, 4, 5, 6, 7]}
-              getDescription={() => ''}
-            />
-          </div>
+  const handleResetDistribution = () => {
+    setValue('highCarbPercent', DEFAULT_DISTRIBUTION.high.carbs, {
+      shouldValidate: true,
+    });
+    setValue('midCarbPercent', DEFAULT_DISTRIBUTION.medium.carbs, {
+      shouldValidate: true,
+    });
+    setValue('lowCarbPercent', DEFAULT_DISTRIBUTION.low.carbs, {
+      shouldValidate: true,
+    });
+    setValue('highFatPercent', DEFAULT_DISTRIBUTION.high.fat, {
+      shouldValidate: true,
+    });
+    setValue('midFatPercent', DEFAULT_DISTRIBUTION.medium.fat, {
+      shouldValidate: true,
+    });
+    setValue('lowFatPercent', DEFAULT_DISTRIBUTION.low.fat, {
+      shouldValidate: true,
+    });
+  };
 
-          {/* Activity Factor */}
-          <div className="space-y-2">
-            <Label className="text-xs font-light text-foreground flex items-center gap-1">
-              <span className="text-sm">🏃</span>
-              <span>{t('activity.activityLevel')}</span>
-              <Tooltip>
-                <TooltipTrigger className="text-xs text-muted-foreground cursor-help ml-1 hover:text-foreground transition-colors">
-                  ?
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs">
-                  {t('activity.activityTooltip')}
-                </TooltipContent>
-              </Tooltip>
-            </Label>
-            <Select
-              value={watchedValues.activityFactor}
-              onValueChange={(value) =>
-                setValue(
-                  'activityFactor',
-                  value as
-                    | 'sedentary'
-                    | 'light'
-                    | 'moderate'
-                    | 'active'
-                    | 'very_active',
-                  { shouldValidate: true }
-                )
-              }
-            >
-              <SelectTrigger className="h-8 sm:h-9 text-xs sm:text-sm text-center w-full mt-2">
-                <SelectValue placeholder={t('activity.activityLevel')} />
-              </SelectTrigger>
-              <SelectContent sideOffset={4}>
-                <SelectItem value="sedentary">
-                  {t('activity.sedentary')}
-                </SelectItem>
-                <SelectItem value="light">{t('activity.light')}</SelectItem>
-                <SelectItem value="moderate">
-                  {t('activity.moderate')}
-                </SelectItem>
-                <SelectItem value="active">{t('activity.active')}</SelectItem>
-                <SelectItem value="very_active">
-                  {t('activity.very_active')}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+  return (
+    <div className="space-y-6">
+      {/* Distribution Header */}
+      <div className="flex items-center justify-between px-2">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">🔄</span>
+          <h3 className="text-base font-semibold text-foreground">
+            {t('activity.distribution')}
+          </h3>
         </div>
-        {errors.cycleDays && (
-          <p className="text-xs text-red-400/80 flex items-center gap-1 justify-center mt-2">
-            <span>⚠️</span>
-            {errors.cycleDays.message}
-          </p>
-        )}
-      </SectionCard>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleResetDistribution}
+          className="h-8 text-xs"
+        >
+          {t('activity.resetToDefault')}
+        </Button>
+      </div>
+
+      {/* Distribution Rings */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
+        <DistributionRing
+          highPercent={watchedValues.highCarbPercent}
+          midPercent={watchedValues.midCarbPercent}
+          lowPercent={watchedValues.lowCarbPercent}
+          onHighChange={(value, isDragging) =>
+            setValue('highCarbPercent', value, { shouldValidate: !isDragging })
+          }
+          onMidChange={(value, isDragging) =>
+            setValue('midCarbPercent', value, { shouldValidate: !isDragging })
+          }
+          onLowChange={(value, isDragging) =>
+            setValue('lowCarbPercent', value, { shouldValidate: !isDragging })
+          }
+          label={t('nutrition.carbCoeff')}
+          colors={CARB_RING_COLORS}
+        />
+        <DistributionRing
+          highPercent={watchedValues.highFatPercent}
+          midPercent={watchedValues.midFatPercent}
+          lowPercent={watchedValues.lowFatPercent}
+          onHighChange={(value, isDragging) =>
+            setValue('highFatPercent', value, { shouldValidate: !isDragging })
+          }
+          onMidChange={(value, isDragging) =>
+            setValue('midFatPercent', value, { shouldValidate: !isDragging })
+          }
+          onLowChange={(value, isDragging) =>
+            setValue('lowFatPercent', value, { shouldValidate: !isDragging })
+          }
+          label={t('nutrition.fatCoeff')}
+          colors={FAT_RING_COLORS}
+        />
+      </div>
+
+      {errors.cycleDays && (
+        <p className="text-xs text-red-400/80 flex items-center gap-1 justify-center">
+          <span>⚠️</span>
+          {errors.cycleDays.message}
+        </p>
+      )}
     </div>
   );
 }

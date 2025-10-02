@@ -31,24 +31,14 @@ export const SERVING_UNIT_OPTIONS: ServingUnit[] = [
 ];
 
 /**
- * Food category types for food categorization
+ * Food category types - only these 4 categories are supported
  */
-export type CategoryType =
-  | 'protein'
-  | 'carb'
-  | 'fat'
-  | 'vegetable'
-  | 'fruit'
-  | 'supplement'
-  | 'other';
+export type CategoryType = 'protein' | 'carb' | 'fat' | 'other';
 
 export const CATEGORY_TYPE_OPTIONS: CategoryType[] = [
   'protein',
   'carb',
   'fat',
-  'vegetable',
-  'fruit',
-  'supplement',
   'other',
 ];
 
@@ -58,7 +48,7 @@ export const CATEGORY_TYPE_OPTIONS: CategoryType[] = [
 export interface FoodItem {
   id: string;
   name: string;
-  category: string;
+  category: CategoryType;
   defaultServing: string;
   servingUnit?: ServingUnit;
   macros: MacroProfile;

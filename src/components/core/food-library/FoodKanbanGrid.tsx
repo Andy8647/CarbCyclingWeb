@@ -12,8 +12,7 @@ interface GroupedFoods {
   [key: string]: LocalizedFood[];
 }
 
-const NUTRITION_CATEGORIES = ['protein', 'carb', 'fat'] as const;
-const OTHER_CATEGORIES = ['vegetable', 'fruit', 'supplement', 'other'] as const;
+const DISPLAY_CATEGORIES = ['protein', 'carb', 'fat', 'other'] as const;
 
 export function FoodKanbanGrid({
   filteredFoods,
@@ -44,6 +43,7 @@ export function FoodKanbanGrid({
   const groupedFoods: GroupedFoods = filteredFoods.reduce(
     (acc, localizedFood) => {
       const category = localizedFood.food.category;
+
       if (!acc[category]) {
         acc[category] = [];
       }
@@ -154,15 +154,19 @@ export function FoodKanbanGrid({
     setEditingFood(null);
   };
 
+  const handleCategoryChange = (foodId: string, newCategory: string) => {
+    const food = filteredFoods.find((f) => f.food.id === foodId)?.food;
+    if (!food) return;
+
+    onUpdateFood(foodId, {
+      ...food,
+      category: newCategory as CategoryType,
+    });
+  };
+
   const getCategoryDisplayName = (category: string) => {
     return t(`mealPlanner.categories.${category}`);
   };
-
-  // Combine nutrition categories first, then other categories
-  const allCategories = [...NUTRITION_CATEGORIES, ...OTHER_CATEGORIES];
-  const displayCategories = allCategories.filter(
-    (category) => groupedFoods[category]?.length > 0
-  );
 
   if (filteredFoods.length === 0) {
     return (
@@ -175,9 +179,8 @@ export function FoodKanbanGrid({
   return (
     <>
       <div className="flex justify-center overflow-x-auto bg-slate-50 dark:bg-slate-900 rounded-md border border-slate-200 dark:border-slate-700">
-        {displayCategories.map((category) => {
+        {DISPLAY_CATEGORIES.map((category) => {
           const foods = groupedFoods[category] || [];
-          if (foods.length === 0) return null;
 
           return (
             <KanbanColumn
@@ -186,6 +189,7 @@ export function FoodKanbanGrid({
               title={getCategoryDisplayName(category)}
               foods={foods}
               onEditFood={handleEditFood}
+              onCategoryChange={handleCategoryChange}
             />
           );
         })}

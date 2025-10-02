@@ -2,29 +2,24 @@ export type BodyType = 'ectomorph' | 'mesomorph' | 'endomorph';
 export type DayType = 'high' | 'medium' | 'low';
 export type ProteinLevel = 'beginner' | 'experienced' | 'custom';
 export type Gender = 'male' | 'female';
-export type ActivityFactor =
-  | 'sedentary'
-  | 'light'
-  | 'moderate'
-  | 'active'
-  | 'very_active';
 
 export interface UserInput {
   age: number;
   gender: Gender;
   weight: number; // in kg
   height: number; // in cm
-  activityFactor: ActivityFactor;
   bodyType: BodyType;
   carbCoeff: number; // g/kg
   proteinCoeff: number; // g/kg
   fatCoeff: number; // g/kg
   cycleDays: number; // 3-7 days
-}
-
-export interface MetabolicData {
-  bmr: number; // Basal Metabolic Rate
-  tdee: number; // Total Daily Energy Expenditure
+  // Carb/Fat distribution percentages (0-100)
+  highCarbPercent: number;
+  midCarbPercent: number;
+  lowCarbPercent: number;
+  highFatPercent: number;
+  midFatPercent: number;
+  lowFatPercent: number;
 }
 
 export interface DayPlan {
@@ -34,7 +29,6 @@ export interface DayPlan {
   fat: number; // grams
   protein: number; // grams
   calories: number; // kCal
-  caloriesDiff: number; // calories - tdee
   workout?: string; // workout type
 }
 
@@ -42,7 +36,6 @@ export interface WeeklySummary {
   totalCarbs: number;
   totalFat: number;
   dailyProtein: number;
-  totalCalories: number;
 }
 
 export interface NutritionPlan {
@@ -50,20 +43,11 @@ export interface NutritionPlan {
   dailyPlans: DayPlan[];
 }
 
-// Activity factor multipliers for TDEE calculation
-const ACTIVITY_MULTIPLIERS: Record<ActivityFactor, number> = {
-  sedentary: 1.2,
-  light: 1.375,
-  moderate: 1.55,
-  active: 1.725,
-  very_active: 1.9,
-};
-
-// Cycle distribution percentages
-const CYCLE_DISTRIBUTION = {
-  high: { carbs: 0.5, fat: 0.15 },
-  medium: { carbs: 0.35, fat: 0.35 },
-  low: { carbs: 0.15, fat: 0.5 },
+// Default cycle distribution percentages (can be overridden by user)
+export const DEFAULT_DISTRIBUTION = {
+  high: { carbs: 50, fat: 15 },
+  medium: { carbs: 35, fat: 35 },
+  low: { carbs: 15, fat: 50 },
 };
 
 // Day allocation based on cycle length
@@ -85,44 +69,7 @@ const CALORIES_PER_GRAM = {
   protein: 4,
 };
 
-// Calculate BMR using Mifflin-St Jeor equation
-export function calculateBMR(
-  weight: number, // kg
-  height: number, // cm
-  age: number,
-  gender: Gender
-): number {
-  if (gender === 'male') {
-    return 88.362 + 13.397 * weight + 4.799 * height - 5.677 * age;
-  } else {
-    return 447.593 + 9.247 * weight + 3.098 * height - 4.33 * age;
-  }
-}
-
-// Calculate TDEE from BMR and activity factor
-export function calculateTDEE(
-  bmr: number,
-  activityFactor: ActivityFactor
-): number {
-  return bmr * ACTIVITY_MULTIPLIERS[activityFactor];
-}
-
-// Calculate metabolic data
-export function calculateMetabolicData(input: UserInput): MetabolicData {
-  const bmr = calculateBMR(input.weight, input.height, input.age, input.gender);
-  const tdee = calculateTDEE(bmr, input.activityFactor);
-
-  return {
-    bmr: Math.round(bmr),
-    tdee: Math.round(tdee),
-  };
-}
-
 export function calculateNutritionPlan(input: UserInput): NutritionPlan {
-  // Calculate TDEE for calorie difference
-  const metabolicData = calculateMetabolicData(input);
-  const tdee = metabolicData.tdee;
-
   // Calculate daily base amounts using user's coefficients
   const dailyBaseCarbs = input.weight * input.carbCoeff;
   const dailyBaseFat = input.weight * input.fatCoeff;
@@ -135,20 +82,22 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
   // Get day allocation for the cycle length
   const allocation = DAY_ALLOCATION[input.cycleDays];
 
-  // Calculate amounts per day type
-  const highCarbsPerDay =
-    (weeklyCarbs * CYCLE_DISTRIBUTION.high.carbs) / allocation.high;
-  const mediumCarbsPerDay =
-    (weeklyCarbs * CYCLE_DISTRIBUTION.medium.carbs) / allocation.medium;
-  const lowCarbsPerDay =
-    (weeklyCarbs * CYCLE_DISTRIBUTION.low.carbs) / allocation.low;
+  // Convert user percentages to decimals
+  const highCarbRatio = input.highCarbPercent / 100;
+  const midCarbRatio = input.midCarbPercent / 100;
+  const lowCarbRatio = input.lowCarbPercent / 100;
+  const highFatRatio = input.highFatPercent / 100;
+  const midFatRatio = input.midFatPercent / 100;
+  const lowFatRatio = input.lowFatPercent / 100;
 
-  const highFatPerDay =
-    (weeklyFat * CYCLE_DISTRIBUTION.high.fat) / allocation.high;
-  const mediumFatPerDay =
-    (weeklyFat * CYCLE_DISTRIBUTION.medium.fat) / allocation.medium;
-  const lowFatPerDay =
-    (weeklyFat * CYCLE_DISTRIBUTION.low.fat) / allocation.low;
+  // Calculate amounts per day type using user's distribution
+  const highCarbsPerDay = (weeklyCarbs * highCarbRatio) / allocation.high;
+  const mediumCarbsPerDay = (weeklyCarbs * midCarbRatio) / allocation.medium;
+  const lowCarbsPerDay = (weeklyCarbs * lowCarbRatio) / allocation.low;
+
+  const highFatPerDay = (weeklyFat * highFatRatio) / allocation.high;
+  const mediumFatPerDay = (weeklyFat * midFatRatio) / allocation.medium;
+  const lowFatPerDay = (weeklyFat * lowFatRatio) / allocation.low;
 
   // Create daily plans
   const dailyPlans: DayPlan[] = [];
@@ -164,7 +113,6 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
         fat * CALORIES_PER_GRAM.fat +
         protein * CALORIES_PER_GRAM.protein
     );
-    const caloriesDiff = calories - tdee;
 
     dailyPlans.push({
       day: dayCounter++,
@@ -173,7 +121,6 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
       fat,
       protein,
       calories,
-      caloriesDiff,
     });
   }
 
@@ -187,7 +134,6 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
         fat * CALORIES_PER_GRAM.fat +
         protein * CALORIES_PER_GRAM.protein
     );
-    const caloriesDiff = calories - tdee;
 
     dailyPlans.push({
       day: dayCounter++,
@@ -196,7 +142,6 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
       fat,
       protein,
       calories,
-      caloriesDiff,
     });
   }
 
@@ -210,7 +155,6 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
         fat * CALORIES_PER_GRAM.fat +
         protein * CALORIES_PER_GRAM.protein
     );
-    const caloriesDiff = calories - tdee;
 
     dailyPlans.push({
       day: dayCounter++,
@@ -219,21 +163,17 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
       fat,
       protein,
       calories,
-      caloriesDiff,
     });
   }
 
   // Calculate summary
   const totalCarbs = Math.round(weeklyCarbs);
   const totalFat = Math.round(weeklyFat);
-  const totalCalories = dailyPlans.reduce((sum, day) => sum + day.calories, 0);
-
   return {
     summary: {
       totalCarbs,
       totalFat,
       dailyProtein: Math.round(dailyProtein),
-      totalCalories,
     },
     dailyPlans,
   };
