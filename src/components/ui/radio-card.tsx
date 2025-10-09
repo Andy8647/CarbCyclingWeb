@@ -35,12 +35,16 @@ export function RadioCard({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1 sm:gap-2">
               <span className="text-base sm:text-lg leading-none">{emoji}</span>
-              <span className="font-medium text-xs sm:text-sm leading-none">{title}</span>
+              <span className="font-medium text-xs sm:text-sm leading-none">
+                {title}
+              </span>
             </div>
             {rightElement}
           </div>
           {description && (
-            <div className="text-xs text-muted-foreground mt-1">{description}</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {description}
+            </div>
           )}
         </Label>
       </div>

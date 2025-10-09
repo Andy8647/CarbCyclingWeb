@@ -50,18 +50,6 @@ export const DEFAULT_DISTRIBUTION = {
   low: { carbs: 15, fat: 50 },
 };
 
-// Day allocation based on cycle length
-const DAY_ALLOCATION: Record<
-  number,
-  { high: number; medium: number; low: number }
-> = {
-  3: { high: 1, medium: 1, low: 1 },
-  4: { high: 1, medium: 2, low: 1 },
-  5: { high: 1, medium: 2, low: 2 },
-  6: { high: 2, medium: 2, low: 2 },
-  7: { high: 2, medium: 3, low: 2 },
-};
-
 // Calories per gram
 const CALORIES_PER_GRAM = {
   carbs: 4,

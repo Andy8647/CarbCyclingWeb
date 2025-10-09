@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next';
 import { CompactInput } from '@/components/ui/compact-input';
 import { SectionCard } from '@/components/ui/section-card';
 import { SliderSection } from '@/components/ui/slider-section';
-import { Button } from '@/components/ui/button';
 import {
   Popover,
   PopoverContent,
@@ -76,7 +75,9 @@ export function CycleDaysSection({
             <PopoverTrigger asChild>
               <button className="flex items-center gap-1 text-xs font-medium text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180">
                 <span className="text-sm">🎯</span>
-                <span className="hidden sm:inline">{t('activity.distribution')}</span>
+                <span className="hidden sm:inline">
+                  {t('activity.distribution')}
+                </span>
                 <ChevronDownIcon className="size-[1em] shrink-0 transition-transform duration-200" />
               </button>
             </PopoverTrigger>

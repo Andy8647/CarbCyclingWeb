@@ -36,13 +36,7 @@ export function DayAllocationRing({
   };
 
   // Convert percentages back to days (with rounding and constraints)
-  const percentToDays = (
-    percent: number,
-    currentHigh: number,
-    currentMid: number,
-    currentLow: number,
-    type: 'high' | 'mid' | 'low'
-  ) => {
+  const percentToDays = (percent: number) => {
     const rawDays = Math.round((percent * cycleDays) / 100);
 
     // Ensure at least 1 day for each type
@@ -52,8 +46,8 @@ export function DayAllocationRing({
     return clampedDays;
   };
 
-  const handleHighChange = (percent: number, isDragging?: boolean) => {
-    const newHigh = percentToDays(percent, highDays, midDays, lowDays, 'high');
+  const handleHighChange = (percent: number) => {
+    const newHigh = percentToDays(percent);
     // Adjust mid to maintain total
     const remaining = cycleDays - newHigh - lowDays;
     if (remaining >= 1) {
@@ -62,13 +56,13 @@ export function DayAllocationRing({
     }
   };
 
-  const handleMidChange = (percent: number, isDragging?: boolean) => {
-    const newMid = percentToDays(percent, highDays, midDays, lowDays, 'mid');
+  const handleMidChange = (percent: number) => {
+    const newMid = percentToDays(percent);
     onMidChange(newMid);
   };
 
-  const handleLowChange = (percent: number, isDragging?: boolean) => {
-    const newLow = percentToDays(percent, highDays, midDays, lowDays, 'low');
+  const handleLowChange = (percent: number) => {
+    const newLow = percentToDays(percent);
     // Adjust mid to maintain total
     const remaining = cycleDays - highDays - newLow;
     if (remaining >= 1) {
