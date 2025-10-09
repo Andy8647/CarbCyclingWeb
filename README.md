@@ -1,109 +1,243 @@
-# Carb Cycling Planner
+# 🔄 Carb Cycling Planner | 碳循环饮食计算器
 
-An open-source carb cycling planner that generates a personalized 3–7 day macro plan with drag-and-drop, CSV/Markdown export, and PNG sharing. No login required.
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
-Built with React, TypeScript, Vite, Tailwind CSS, and lightweight state via hooks. SEO meta is applied at runtime from environment variables.
+A science-based carb cycling calculator that generates personalized macro plans. Built with modern web technologies for a smooth, privacy-first experience.
 
-**Live Usage**: Run locally with the quick start below, or deploy using the guide in `DEPLOYMENT.md`.
+[English](#english) | [中文](#中文)
 
-**Features**
+---
 
-- 3–7 day plan based on body type and macros (carb/protein/fat coefficients)
-- Metabolic math: Mifflin–St Jeor BMR and TDEE via activity factor
-- Drag-and-drop day arrangement; per‑day workout assignment
-- Export: copy results as Markdown or CSV; export PNG image
-- Persistence: saves form, settings, and training config in `localStorage`
-- i18n: Chinese and English, with language detector and a UI switcher
-- Units: metric/imperial toggle (kg ↔ lb, cm ↔ ft′in″)
-- Theming: light/dark/system with Tailwind v4 design tokens and particle background
-- SEO: canonical, Open Graph, and Twitter tags from env; default image at `/og.png`
+## English
 
-**Tech Stack**
+### ✨ Features
 
-- React 19, TypeScript 5, Vite 7
-- Tailwind CSS v4
-- Radix UI primitives and shadcn‑style components
-- Drag‑and‑drop: Atlaskit pragmatic DnD (desktop) + dnd-kit (mobile grid)
-- i18next + browser detector
-- posthog-js (optional, env‑gated)
-- zod + react-hook-form
-- html-to-image (for PNG export)
+- **🎯 Smart Macro Calculation** - Based on body weight, body type, and customizable coefficients
+- **📊 Flexible Cycle Length** - 3-7 day cycles with intelligent day allocation
+- **🎨 Interactive Distribution** - Drag-and-drop ring interface to adjust carb/fat distribution
+- **💪 Workout Planning** - Assign workout types to each day of your cycle
+- **📤 Multiple Export Formats** - Markdown, CSV, and PNG image export
+- **🌐 Bilingual Support** - Full Chinese (简体中文) and English localization
+- **⚖️ Unit Flexibility** - Switch between metric (kg) and imperial (lb) systems
+- **🎨 Theme Options** - Light, dark, and system-adaptive themes
+- **💾 Auto-Save** - All settings persist in browser localStorage
+- **🔒 Privacy-First** - No account required, all calculations happen locally
 
-**Quick Start**
+### 🚀 Quick Start
 
-- Prerequisites: Node.js 18+ and npm
-- Install: `npm install`
-- Dev server: `npm run dev` then open the printed URL
-- Build: `npm run build` (outputs to `dist/`)
-- Preview prod build: `npm run preview`
+```bash
+# Install dependencies
+npm install
 
-**Scripts**
+# Start development server
+npm run dev
 
-- `npm run dev` — start Vite dev server with HMR
-- `npm run build` — type-check and build to `dist/`
-- `npm run preview` — preview the production build
-- `npm run lint` — run ESLint
-- `npm run format` / `npm run format:check` — Prettier write/check
-- `npm run test` | `npm run test:run` | `npm run test:ui` — Vitest watch/CI/UI
-- `npm run cli` — run the CLI utility at `src/cli.ts`
+# Build for production
+npm run build
 
-**CLI Examples**
+# Preview production build
+npm run preview
+```
 
-- `npm run cli -- 70 mesomorph experienced 7`
-- `npm run cli -- 80 endomorph custom 1.8 5`
-- `npm run cli -- 60 ectomorph beginner 3`
+### 📦 Tech Stack
 
-**Environment Variables**
+- **Framework**: React 19 + TypeScript 5 + Vite 7
+- **Styling**: Tailwind CSS v4
+- **UI Components**: Radix UI + shadcn/ui patterns
+- **Form Handling**: react-hook-form + Zod validation
+- **Drag & Drop**: @atlaskit/pragmatic-drag-and-drop
+- **Internationalization**: i18next + react-i18next
+- **Export**: html-to-image for PNG generation
+- **Analytics**: PostHog (optional, env-gated)
 
-- Copy `.env.example` to `.env.local` and fill as needed.
-- Supported keys:
-  - `VITE_SITE_URL` — absolute site URL for canonical/og:url (e.g., `https://carb-cycling.pages.dev`)
-  - `VITE_SITE_NAME` — site title (default: `Carb Cycling Planner`)
-  - `VITE_META_DESCRIPTION` — default meta description
-  - `VITE_OG_IMAGE` — absolute URL or path to social image (default: `/og.png`)
-  - `VITE_TWITTER_HANDLE` — optional Twitter handle (e.g., `@yourhandle`)
-  - `VITE_PUBLIC_GITHUB_REPO` — override the repo link in the header
-  - PostHog (optional): `VITE_PUBLIC_POSTHOG_KEY` or `VITE_POSTHOG_KEY`, `VITE_PUBLIC_POSTHOG_HOST` or `VITE_POSTHOG_HOST`, `VITE_POSTHOG_ENABLE_DEV`
+### 📝 Available Scripts
 
-**SEO & Social Image**
+| Command            | Description                         |
+| ------------------ | ----------------------------------- |
+| `npm run dev`      | Start development server with HMR   |
+| `npm run build`    | Type-check and build for production |
+| `npm run preview`  | Preview production build locally    |
+| `npm run lint`     | Run ESLint checks                   |
+| `npm run format`   | Format code with Prettier           |
+| `npm test`         | Run tests in watch mode             |
+| `npm run test:run` | Run tests once (for CI)             |
 
-- Recommended: place a file at `public/og.png` (1200×630). The app falls back to `/og.png` when no env is set.
-- Alternatively set `VITE_OG_IMAGE` to an absolute URL in `.env.local` or your hosting provider’s env settings.
+### 🎮 CLI Mode
 
-**Project Structure**
+Calculate plans directly from command line:
 
-- `src/` — app code
-  - `components/{ui,core,layout,shared}` — UI components (PascalCase in core/layout/shared, kebab-case in `ui/`)
-  - `lib/` — domain logic and contexts (e.g., `calculator.ts`, persistence, i18n, SEO)
-  - `main.tsx` / `App.tsx` — entry and root component
-  - `index.css` — Tailwind v4 with theme tokens
-- `public/` — static assets (e.g., `og.png`)
-- `docs/` — product and technical docs (`prd.md`, plans, notes)
-- `dist/` — production build output
+```bash
+# Basic usage: weight bodyType proteinLevel cycleDays
+npm run cli -- 70 mesomorph experienced 7
 
-**Testing**
+# Custom protein coefficient
+npm run cli -- 80 endomorph custom 1.8 5
 
-- Frameworks: Vitest (+ jsdom) and Testing Library
-- Setup: `src/test/setup.ts`
-- Run tests: `npm run test` (watch) or `npm run test:run` (CI)
+# Minimal cycle
+npm run cli -- 60 ectomorph beginner 3
+```
 
-**Development Notes**
+### ⚙️ Configuration
 
-- State is managed with lightweight contexts/hooks in `src/lib/*-context.tsx`
-- i18n is initialized in `src/lib/i18n.ts`
-- Drag‑and‑drop uses `@atlaskit/pragmatic-drag-and-drop`
-- Persistence is handled via `use-local-storage.ts` and `use-app-persistence.ts`
+Copy `.env.example` to `.env.local` and configure as needed:
 
-**Deployment**
+```env
+# Site Configuration
+VITE_SITE_URL=https://your-domain.com
+VITE_SITE_NAME=Carb Cycling Planner
+VITE_META_DESCRIPTION=Your site description
+VITE_OG_IMAGE=/og.png
 
-- See `DEPLOYMENT.md` for Cloudflare Pages (recommended), Vercel, and Netlify instructions
+# Optional: PostHog Analytics
+VITE_PUBLIC_POSTHOG_KEY=your-key
+VITE_PUBLIC_POSTHOG_HOST=https://app.posthog.com
+```
 
-**Contributing**
+### 📁 Project Structure
 
-- Follow Conventional Commits (e.g., `feat: ...`, `fix: ...`)
-- Branch naming: `feat/<slug>` or `fix/<issue-id>`
-- Run `npm run lint`, `npm run test`, and `npm run build` before opening a PR
+```
+src/
+├── components/
+│   ├── ui/              # Base UI components (shadcn-style)
+│   ├── core/            # Domain components (InputForm, ResultCard)
+│   ├── layout/          # Layout components (Header, Footer)
+│   └── shared/          # Shared components (ParticleBackground)
+├── lib/
+│   ├── calculator.ts    # Core calculation logic
+│   ├── i18n.ts         # Internationalization setup
+│   └── *-context.tsx   # React contexts for state
+├── main.tsx            # Application entry point
+└── App.tsx             # Root component
+```
 
-—
+### 🤝 Contributing
 
-This repository is provided without an explicit license. If you plan to use or distribute it, please contact the repository owner.
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feat/amazing-feature`)
+3. Commit your changes using [Conventional Commits](https://www.conventionalcommits.org/)
+4. Run tests and linting (`npm run lint && npm test`)
+5. Push to your branch
+6. Open a Pull Request
+
+### 📄 License
+
+This project is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+- ✅ Free for personal, educational, and non-commercial use
+- ✅ Modify and share with same license
+- ❌ Commercial use prohibited
+- 📝 Attribution required
+
+---
+
+## 中文
+
+### ✨ 功能特性
+
+- **🎯 智能宏量计算** - 基于体重、体型和自定义系数
+- **📊 灵活周期长度** - 3-7 天循环，智能天数分配
+- **🎨 交互式分布调节** - 拖拽环形界面调整碳水/脂肪分配
+- **💪 训练规划** - 为每天分配训练类型
+- **📤 多格式导出** - 支持 Markdown、CSV 和 PNG 图片导出
+- **🌐 双语支持** - 完整的中英文本地化
+- **⚖️ 单位切换** - 公制（千克）和英制（磅）自由切换
+- **🎨 主题选项** - 亮色、暗色和跟随系统主题
+- **💾 自动保存** - 所有设置自动保存到浏览器本地存储
+- **🔒 隐私优先** - 无需登录，所有计算在本地完成
+
+### 🚀 快速开始
+
+```bash
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev
+
+# 构建生产版本
+npm run build
+
+# 预览生产构建
+npm run preview
+```
+
+### 📦 技术栈
+
+- **框架**: React 19 + TypeScript 5 + Vite 7
+- **样式**: Tailwind CSS v4
+- **UI 组件**: Radix UI + shadcn/ui 模式
+- **表单处理**: react-hook-form + Zod 验证
+- **拖拽**: @atlaskit/pragmatic-drag-and-drop
+- **国际化**: i18next + react-i18next
+- **导出**: html-to-image 生成 PNG
+- **分析**: PostHog（可选，环境变量控制）
+
+### 📝 可用命令
+
+| 命令               | 说明                         |
+| ------------------ | ---------------------------- |
+| `npm run dev`      | 启动开发服务器（支持热更新） |
+| `npm run build`    | 类型检查并构建生产版本       |
+| `npm run preview`  | 预览生产构建                 |
+| `npm run lint`     | 运行 ESLint 检查             |
+| `npm run format`   | 使用 Prettier 格式化代码     |
+| `npm test`         | 运行测试（监听模式）         |
+| `npm run test:run` | 运行测试一次（CI 模式）      |
+
+### 🎮 命令行模式
+
+直接通过命令行计算方案：
+
+```bash
+# 基本用法：体重 体型 蛋白质等级 周期天数
+npm run cli -- 70 mesomorph experienced 7
+
+# 自定义蛋白质系数
+npm run cli -- 80 endomorph custom 1.8 5
+
+# 最小周期
+npm run cli -- 60 ectomorph beginner 3
+```
+
+### 📁 项目结构
+
+```
+src/
+├── components/
+│   ├── ui/              # 基础 UI 组件（shadcn 风格）
+│   ├── core/            # 核心业务组件（输入表单、结果卡片）
+│   ├── layout/          # 布局组件（头部、尾部）
+│   └── shared/          # 共享组件（粒子背景等）
+├── lib/
+│   ├── calculator.ts    # 核心计算逻辑
+│   ├── i18n.ts         # 国际化配置
+│   └── *-context.tsx   # React 状态上下文
+├── main.tsx            # 应用入口
+└── App.tsx             # 根组件
+```
+
+### 🤝 参与贡献
+
+欢迎贡献代码！请遵循以下步骤：
+
+1. Fork 本仓库
+2. 创建功能分支（`git checkout -b feat/amazing-feature`）
+3. 使用 [约定式提交](https://www.conventionalcommits.org/zh-hans/) 提交更改
+4. 运行测试和代码检查（`npm run lint && npm test`）
+5. 推送到您的分支
+6. 提交 Pull Request
+
+### 📄 许可证
+
+本项目采用 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh) 许可证。
+
+- ✅ 允许个人、教育和非商业用途
+- ✅ 允许修改和分享（需保持相同许可）
+- ❌ 禁止商业用途
+- 📝 需要署名
+
+---
+
+Made with ❤️ for the fitness community
