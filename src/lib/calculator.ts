@@ -1,18 +1,18 @@
 export type BodyType = 'ectomorph' | 'mesomorph' | 'endomorph';
 export type DayType = 'high' | 'medium' | 'low';
 export type ProteinLevel = 'beginner' | 'experienced' | 'custom';
-export type Gender = 'male' | 'female';
 
 export interface UserInput {
-  age: number;
-  gender: Gender;
   weight: number; // in kg
-  height: number; // in cm
   bodyType: BodyType;
   carbCoeff: number; // g/kg
   proteinCoeff: number; // g/kg
   fatCoeff: number; // g/kg
   cycleDays: number; // 3-7 days
+  // Day allocation for each day type
+  highDays: number;
+  midDays: number;
+  lowDays: number;
   // Carb/Fat distribution percentages (0-100)
   highCarbPercent: number;
   midCarbPercent: number;
@@ -79,8 +79,12 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
   const weeklyCarbs = dailyBaseCarbs * input.cycleDays;
   const weeklyFat = dailyBaseFat * input.cycleDays;
 
-  // Get day allocation for the cycle length
-  const allocation = DAY_ALLOCATION[input.cycleDays];
+  // Use user's custom day allocation
+  const allocation = {
+    high: input.highDays,
+    medium: input.midDays,
+    low: input.lowDays,
+  };
 
   // Convert user percentages to decimals
   const highCarbRatio = input.highCarbPercent / 100;

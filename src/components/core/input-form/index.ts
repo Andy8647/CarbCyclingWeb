@@ -1,4 +1,6 @@
 export { BasicInfoSection } from './BasicInfoSection';
-export { NutritionSection } from './NutritionSection';
 export { ActivitySection } from './ActivitySection';
+export { WeightAndNutritionSection } from './WeightAndNutritionSection';
+export { CycleDaysSection } from './CycleDaysSection';
+export { DayAllocationSection } from './DayAllocationSection';
 export type * from './types';

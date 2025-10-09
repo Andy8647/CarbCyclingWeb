@@ -51,7 +51,7 @@ export function DraggableCard({
   return (
     <div
       ref={ref}
-      className="rounded-xl border p-3 shadow-sm bg-white dark:bg-card border-slate-200 dark:border-slate-700 cursor-grab hover:shadow-md"
+      className="p-3 bg-white dark:bg-card cursor-grab h-full"
       data-dragging={isDragging ? 'true' : 'false'}
       style={{
         opacity: isDragging ? 0.5 : 1,

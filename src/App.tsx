@@ -102,15 +102,16 @@ function AppContent() {
   // Get saved form data and merge with defaults
   const savedFormData = getFormData();
   const formDefaults = {
-    age: 25,
-    gender: 'male' as const,
     weight: 70,
-    height: 175,
     bodyType: 'mesomorph' as const,
     carbCoeff: 2.5,
     proteinCoeff: 1.2,
     fatCoeff: 0.9,
     cycleDays: 7,
+    // Default day allocation for 7-day cycle
+    highDays: 2,
+    midDays: 3,
+    lowDays: 2,
     // Default carb/fat distribution percentages
     highCarbPercent: 50,
     midCarbPercent: 35,

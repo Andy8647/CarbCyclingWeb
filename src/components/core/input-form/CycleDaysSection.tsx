@@ -2,7 +2,14 @@ import { useTranslation } from 'react-i18next';
 import { CompactInput } from '@/components/ui/compact-input';
 import { SectionCard } from '@/components/ui/section-card';
 import { SliderSection } from '@/components/ui/slider-section';
-import { DayAllocationRing } from '@/components/ui/day-allocation-ring';
+import { Button } from '@/components/ui/button';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { ChevronDownIcon } from 'lucide-react';
+import { ActivitySection } from './ActivitySection';
 import type { BasicInfoSectionProps } from './types';
 
 // Default day allocation based on cycle length
@@ -17,7 +24,7 @@ const DAY_ALLOCATION: Record<
   7: { high: 2, medium: 3, low: 2 },
 };
 
-export function BasicInfoSection({
+export function CycleDaysSection({
   form,
   unitSystem,
   watchedValues,
@@ -57,26 +64,30 @@ export function BasicInfoSection({
   };
 
   return (
-    <div>
-      <SectionCard title={t('basicInfo.title')} emoji="👤">
-        {/* Cycle Days Slider */}
-        <div className="space-y-2">
-          <SliderSection
-            title={t('activity.cycleDays')}
-            emoji="📅"
-            value={watchedValues.cycleDays}
-            onValueChange={handleCycleDaysChange}
-            min={3}
-            max={7}
-            step={1}
-            unit={t('activity.days')}
-            options={[3, 4, 5, 6, 7]}
-            getDescription={() => ''}
-          />
+    <div className="h-full flex flex-col">
+      <SectionCard
+        title={t('basicInfo.cycleSettings')}
+        emoji="🔄"
+        className="flex-1 flex flex-col"
+      >
+        {/* Popover trigger in header - positioned absolutely */}
+        <div className="absolute top-2 right-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="flex items-center gap-1 text-xs font-medium text-foreground transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&[data-state=open]>svg]:rotate-180">
+                <span className="text-sm">🎯</span>
+                <span className="hidden sm:inline">{t('activity.distribution')}</span>
+                <ChevronDownIcon className="size-[1em] shrink-0 transition-transform duration-200" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[600px] p-0" align="end" side="bottom">
+              <ActivitySection form={form} watchedValues={watchedValues} />
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Weight */}
-        <div className="mt-4">
+        <div className="mb-2">
           <CompactInput
             key={`weight-${unitSystem}`}
             label={t('common.weight')}
@@ -92,27 +103,19 @@ export function BasicInfoSection({
           />
         </div>
 
-        {/* Day Allocation Ring */}
-        <div className="space-y-3 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-2 px-2">
-            <span className="text-base font-semibold text-foreground">
-              {t('basicInfo.dayAllocation')}
-            </span>
-          </div>
-          <DayAllocationRing
-            cycleDays={watchedValues.cycleDays}
-            highDays={watchedValues.highDays || 1}
-            midDays={watchedValues.midDays || 1}
-            lowDays={watchedValues.lowDays || 1}
-            onHighChange={(value) =>
-              setValue('highDays', value, { shouldValidate: true })
-            }
-            onMidChange={(value) =>
-              setValue('midDays', value, { shouldValidate: true })
-            }
-            onLowChange={(value) =>
-              setValue('lowDays', value, { shouldValidate: true })
-            }
+        {/* Cycle Days Slider */}
+        <div className="space-y-1.5">
+          <SliderSection
+            title={t('activity.cycleDays')}
+            emoji="📅"
+            value={watchedValues.cycleDays}
+            onValueChange={handleCycleDaysChange}
+            min={3}
+            max={7}
+            step={1}
+            unit={t('activity.days')}
+            options={[3, 4, 5, 6, 7]}
+            getDescription={() => ''}
           />
         </div>
       </SectionCard>

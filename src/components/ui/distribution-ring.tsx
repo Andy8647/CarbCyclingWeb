@@ -15,6 +15,8 @@ interface DistributionRingProps {
     mid: string;
     low: string;
   };
+  hideLabels?: boolean;
+  size?: number;
 }
 
 export function DistributionRing({
@@ -30,6 +32,8 @@ export function DistributionRing({
     mid: '#f59e0b',
     low: '#10b981',
   },
+  hideLabels = false,
+  size = 200,
 }: DistributionRingProps) {
   const [isDragging, setIsDragging] = useState(false);
   const { t } = useTranslation();
@@ -43,11 +47,10 @@ export function DistributionRing({
     low: lowPercent,
   });
   const ringMaskId = useId();
-  const size = 200;
   const centerX = size / 2;
   const centerY = size / 2;
-  const outerRadius = 80;
-  const innerRadius = 55;
+  const outerRadius = size * 0.4;
+  const innerRadius = size * 0.275;
 
   // Convert percentage to angle (0% at top, clockwise)
   const percentToAngle = (percent: number) => {
@@ -308,35 +311,37 @@ export function DistributionRing({
         </text>
       </svg>
 
-      <div className="flex gap-3 text-xs text-slate-600 dark:text-slate-400">
-        <div className="flex items-center gap-1.5">
-          <div
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: colors.high }}
-          />
-          <span className="font-medium">
-            {t('nutrition.distributionRing.high')}: {Math.round(highPercent)}%
-          </span>
+      {!hideLabels && (
+        <div className="flex gap-3 text-xs text-slate-600 dark:text-slate-400">
+          <div className="flex items-center gap-1.5">
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: colors.high }}
+            />
+            <span className="font-medium">
+              {t('nutrition.distributionRing.high')}: {Math.round(highPercent)}%
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: colors.mid }}
+            />
+            <span className="font-medium">
+              {t('nutrition.distributionRing.mid')}: {Math.round(midPercent)}%
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: colors.low }}
+            />
+            <span className="font-medium">
+              {t('nutrition.distributionRing.low')}: {Math.round(lowPercent)}%
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <div
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: colors.mid }}
-          />
-          <span className="font-medium">
-            {t('nutrition.distributionRing.mid')}: {Math.round(midPercent)}%
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: colors.low }}
-          />
-          <span className="font-medium">
-            {t('nutrition.distributionRing.low')}: {Math.round(lowPercent)}%
-          </span>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

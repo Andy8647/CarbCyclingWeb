@@ -32,7 +32,8 @@
       "mcp__chrome-devtools__list_console_messages",
       "WebFetch(domain:react-round-slider.mzsoft.org)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "mcp__chrome-devtools__new_page"
+      "mcp__chrome-devtools__new_page",
+      "mcp__chrome-devtools__click"
     ]
   },
   "hooks": {

@@ -108,11 +108,11 @@ export function DayColumn({
 
           {/* Card container area */}
           <div
-            className={`min-h-[300px] rounded-xl border-2 border-dashed ${
+            className={`min-h-[300px] rounded-xl border-2 border-dashed p-0 ${
               isDraggedOver
                 ? 'border-blue-400 bg-blue-50/50 dark:bg-blue-900/30 border-solid'
                 : 'border-slate-300/50 dark:border-slate-600/50'
-            } mt-auto`}
+            } mt-auto overflow-hidden`}
           >
             {day && (
               <DraggableCard

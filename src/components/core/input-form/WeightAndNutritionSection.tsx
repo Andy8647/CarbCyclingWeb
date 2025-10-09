@@ -3,17 +3,14 @@ import { CompactInput } from '@/components/ui/compact-input';
 import { RadioGroup } from '@/components/ui/radio-group';
 import { SectionCard } from '@/components/ui/section-card';
 import { RadioCard } from '@/components/ui/radio-card';
-import type { NutritionSectionProps } from './types';
+import type { BasicInfoSectionProps } from './types';
 
-export function NutritionSection({
+export function WeightAndNutritionSection({
   form,
   watchedValues,
-}: NutritionSectionProps) {
+}: Omit<BasicInfoSectionProps, 'unitSystem'>) {
   const { t } = useTranslation();
-  const {
-    setValue,
-    formState: { errors },
-  } = form;
+  const { setValue } = form;
 
   const handleBodyTypeChange = (value: string) => {
     const bodyType = value as 'endomorph' | 'mesomorph' | 'ectomorph';
@@ -27,7 +24,6 @@ export function NutritionSection({
 
     const { carbCoeff, proteinCoeff, fatCoeff } = coefficients[bodyType];
 
-    // Use React's batching - no need for setTimeout, React will batch these updates
     setValue('bodyType', bodyType, { shouldValidate: true });
     setValue('carbCoeff', carbCoeff, { shouldValidate: true });
     setValue('proteinCoeff', proteinCoeff, { shouldValidate: true });
@@ -39,8 +35,9 @@ export function NutritionSection({
   }) as Record<string, string>;
 
   return (
-    <div className="lg:col-span-2">
+    <div className="h-full">
       <SectionCard
+        className="h-full flex flex-col"
         title={t('nutrition.title')}
         emoji="🏋️"
         description={(() => {
@@ -49,11 +46,11 @@ export function NutritionSection({
             : t('nutrition.descriptions.default');
         })()}
       >
-        {/* Body type selection - top row */}
+        {/* Body type selection */}
         <RadioGroup
           value={watchedValues.bodyType}
           onValueChange={handleBodyTypeChange}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-1 mb-3"
+          className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-1 mb-2"
         >
           <RadioCard
             value="endomorph"
@@ -66,7 +63,7 @@ export function NutritionSection({
           <RadioCard
             value="mesomorph"
             id="mesomorph"
-            emoji="⬜"
+            emoji="🀄️"
             title={t('nutrition.mesomorph')}
             description=""
             isSelected={watchedValues.bodyType === 'mesomorph'}
@@ -81,8 +78,8 @@ export function NutritionSection({
           />
         </RadioGroup>
 
-        {/* Nutrition coefficients - bottom section */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        {/* Nutrition coefficients - in one row */}
+        <div className="grid grid-cols-3 gap-1.5">
           <CompactInput
             key={`carb-${watchedValues.bodyType}`}
             label={t('nutrition.carbCoeff')}
@@ -147,13 +144,6 @@ export function NutritionSection({
             unit="g/kg"
           />
         </div>
-
-        {errors.bodyType && (
-          <p className="text-xs text-red-400/80 flex items-center gap-1 justify-center mt-2">
-            <span>⚠️</span>
-            {errors.bodyType.message}
-          </p>
-        )}
       </SectionCard>
     </div>
   );

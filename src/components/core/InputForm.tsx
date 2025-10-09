@@ -1,9 +1,9 @@
 import { GlassCard } from '@/components/ui/glass-card';
 import { useFormContext } from '@/lib/form-context';
 import {
-  BasicInfoSection,
-  NutritionSection,
-  ActivitySection,
+  WeightAndNutritionSection,
+  CycleDaysSection,
+  DayAllocationSection,
 } from './input-form';
 
 export function InputForm() {
@@ -15,22 +15,31 @@ export function InputForm() {
   const watchedValues = watch();
 
   return (
-    <GlassCard>
-      <div className="space-y-3">
-        {/* Responsive layout - stacked on mobile, single row on desktop */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          {/* Column 1: Basic Info - 1 unit */}
-          <BasicInfoSection
-            form={form}
-            unitSystem={unitSystem}
-            watchedValues={watchedValues}
-          />
+    <GlassCard className="py-1 sm:py-2">
+      <div className="space-y-1">
+        {/* Responsive layout - stacked on mobile, 3 columns on desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:items-start">
+          {/* Column 1: Nutrition Coefficients */}
+          <div className="flex flex-col h-full">
+            <WeightAndNutritionSection
+              form={form}
+              watchedValues={watchedValues}
+            />
+          </div>
 
-          {/* Column 2: Nutrition coefficients - 2 units */}
-          <NutritionSection form={form} watchedValues={watchedValues} />
+          {/* Column 2: Cycle Settings + Weight + Popover Distribution */}
+          <div className="flex flex-col h-full">
+            <CycleDaysSection
+              form={form}
+              unitSystem={unitSystem}
+              watchedValues={watchedValues}
+            />
+          </div>
 
-          {/* Column 3: Activity Settings - 1 unit */}
-          <ActivitySection form={form} watchedValues={watchedValues} />
+          {/* Column 3: Day Allocation */}
+          <div className="flex flex-col h-full">
+            <DayAllocationSection form={form} watchedValues={watchedValues} />
+          </div>
         </div>
       </div>
     </GlassCard>

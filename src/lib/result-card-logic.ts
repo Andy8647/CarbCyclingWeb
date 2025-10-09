@@ -45,13 +45,13 @@ export const calculateNutritionData = (
     !formData ||
     !formData?.weight ||
     !formData?.bodyType ||
-    !formData?.age ||
-    !formData?.gender ||
-    !formData?.height ||
     !formData?.carbCoeff ||
     !formData?.proteinCoeff ||
     !formData?.fatCoeff ||
     !formData?.cycleDays ||
+    !formData?.highDays ||
+    !formData?.midDays ||
+    !formData?.lowDays ||
     !formData?.highCarbPercent ||
     !formData?.midCarbPercent ||
     !formData?.lowCarbPercent ||
@@ -63,15 +63,15 @@ export const calculateNutritionData = (
   }
 
   const input: UserInput = {
-    age: formData.age as number,
-    gender: formData.gender as UserInput['gender'],
     weight: formData.weight as number,
-    height: formData.height as number,
     bodyType: formData.bodyType as UserInput['bodyType'],
     carbCoeff: formData.carbCoeff as number,
     proteinCoeff: formData.proteinCoeff as number,
     fatCoeff: formData.fatCoeff as number,
     cycleDays: formData.cycleDays as number,
+    highDays: formData.highDays as number,
+    midDays: formData.midDays as number,
+    lowDays: formData.lowDays as number,
     highCarbPercent: formData.highCarbPercent as number,
     midCarbPercent: formData.midCarbPercent as number,
     lowCarbPercent: formData.lowCarbPercent as number,

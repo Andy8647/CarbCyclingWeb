@@ -17,8 +17,8 @@ export function SectionCard({
   description,
 }: SectionCardProps) {
   return (
-    <div className={`p-3 sm:p-4 rounded-xl bg-white dark:bg-card ${className}`}>
-      <div className="space-y-2">
+    <div className={`relative p-1.5 sm:p-2 ${className}`}>
+      <div className="space-y-1.5">
         <div>
           <Label className="text-sm sm:text-base font-medium text-foreground flex items-center gap-2">
             <span className="text-lg sm:text-xl">{emoji}</span>
