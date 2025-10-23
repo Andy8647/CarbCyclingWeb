@@ -87,8 +87,10 @@ function AppContent() {
     });
   };
 
-  const setDayOrder = (order: number[]) => {
+  const setDayOrder = (order: number[], options?: { persist?: boolean }) => {
     setDayOrderState(order);
+    // Save to persistence unless explicitly disabled
+    if (options?.persist === false) return;
     // Save to persistence - we need to get current cycle days from form
     const formData = form.getValues();
     if (formData.cycleDays) {

@@ -16,7 +16,7 @@ interface FormContextType {
   dailyWorkouts: Record<number, string>;
   setDailyWorkout: (day: number, workout: string) => void;
   dayOrder: number[];
-  setDayOrder: (order: number[]) => void;
+  setDayOrder: (order: number[], options?: { persist?: boolean }) => void;
   foodLibrary: FoodItem[];
   customFoods: Record<string, FoodItem>;
   addCustomFood: (
@@ -70,7 +70,7 @@ export function FormProvider({
   dailyWorkouts: Record<number, string>;
   setDailyWorkout: (day: number, workout: string) => void;
   dayOrder: number[];
-  setDayOrder: (order: number[]) => void;
+  setDayOrder: (order: number[], options?: { persist?: boolean }) => void;
   foodLibrary: FoodItem[];
   customFoods: Record<string, FoodItem>;
   addCustomFood: (

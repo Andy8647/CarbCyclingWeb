@@ -127,7 +127,8 @@ export function ResultCard() {
           dayOrder.every((day) => expectedDays.includes(day));
 
         if (!hasValidOrder) {
-          setDayOrder(expectedDays);
+          // Initialize local order without persisting defaults
+          setDayOrder(expectedDays, { persist: false });
         }
       }
     }
