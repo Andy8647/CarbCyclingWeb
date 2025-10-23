@@ -131,7 +131,9 @@ export function DayAllocationRing({
           includeMid={includeMid}
           highPercent={daysToPercent(highDays)}
           midPercent={includeMid ? daysToPercent(midDays) : 0}
-          lowPercent={includeMid ? daysToPercent(lowDays) : daysToPercent(lowDays)}
+          lowPercent={
+            includeMid ? daysToPercent(lowDays) : daysToPercent(lowDays)
+          }
           onHighChange={handleHighChange}
           onMidChange={handleMidChange}
           onLowChange={handleLowChange}

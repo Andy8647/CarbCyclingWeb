@@ -51,13 +51,21 @@ export function DayAllocationSection({
 
                   // Macro rings: hide mid by setting it to 0 and adjust low to keep 100%
                   setValue('midCarbPercent', 0, { shouldValidate: true });
-                  setValue('lowCarbPercent', 100 - (watchedValues.highCarbPercent || 0), {
-                    shouldValidate: true,
-                  });
+                  setValue(
+                    'lowCarbPercent',
+                    100 - (watchedValues.highCarbPercent || 0),
+                    {
+                      shouldValidate: true,
+                    }
+                  );
                   setValue('midFatPercent', 0, { shouldValidate: true });
-                  setValue('lowFatPercent', 100 - (watchedValues.highFatPercent || 0), {
-                    shouldValidate: true,
-                  });
+                  setValue(
+                    'lowFatPercent',
+                    100 - (watchedValues.highFatPercent || 0),
+                    {
+                      shouldValidate: true,
+                    }
+                  );
                 } else {
                   // Enable mid: allocate 1 day to mid by taking from low (fallback to high)
                   if (low > 1) {
@@ -68,7 +76,10 @@ export function DayAllocationSection({
                   mid = 1;
                   // Recompute if totals off
                   const ensureHigh = Math.max(1, Math.min(total - 2, high));
-                  const ensureLow = Math.max(1, Math.min(total - ensureHigh - 1, low));
+                  const ensureLow = Math.max(
+                    1,
+                    Math.min(total - ensureHigh - 1, low)
+                  );
                   const ensureMid = total - ensureHigh - ensureLow;
                   setValue('highDays', ensureHigh, { shouldValidate: true });
                   setValue('midDays', ensureMid, { shouldValidate: true });
@@ -84,10 +95,18 @@ export function DayAllocationSection({
                     0,
                     100 - (watchedValues.highFatPercent || 0) - newMidPct
                   );
-                  setValue('midCarbPercent', newMidPct, { shouldValidate: true });
-                  setValue('lowCarbPercent', newLowCarb, { shouldValidate: true });
-                  setValue('midFatPercent', newMidPct, { shouldValidate: true });
-                  setValue('lowFatPercent', newLowFat, { shouldValidate: true });
+                  setValue('midCarbPercent', newMidPct, {
+                    shouldValidate: true,
+                  });
+                  setValue('lowCarbPercent', newLowCarb, {
+                    shouldValidate: true,
+                  });
+                  setValue('midFatPercent', newMidPct, {
+                    shouldValidate: true,
+                  });
+                  setValue('lowFatPercent', newLowFat, {
+                    shouldValidate: true,
+                  });
                 }
               }}
             />

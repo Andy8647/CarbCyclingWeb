@@ -1,5 +1,5 @@
 import { useState, memo, useEffect, useMemo, useCallback } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -144,7 +144,7 @@ function AppContent() {
   }
 
   const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as unknown as Resolver<FormData>,
     defaultValues: formDefaults,
     mode: 'onChange',
   });

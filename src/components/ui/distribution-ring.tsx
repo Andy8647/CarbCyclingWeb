@@ -394,9 +394,11 @@ export function DistributionRing({
               style={{ backgroundColor: colors.low }}
             />
             <span className="font-medium">
-              {t('nutrition.distributionRing.low')}: {Math.round(
+              {t('nutrition.distributionRing.low')}:{' '}
+              {Math.round(
                 includeMid ? lowPercent : 100 - Math.round(highPercent)
-              )}%
+              )}
+              %
             </span>
           </div>
         </div>

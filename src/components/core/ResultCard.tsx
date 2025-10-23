@@ -56,7 +56,7 @@ export function ResultCard() {
   };
 
   const formData = form?.watch();
-  const isValid = form?.formState.isValid;
+  // Do not rely on formState.isValid for computing results
   const cycleDays = formData?.cycleDays ?? 0;
 
   // 当循环天数变化时，清理旧的列高度信息
@@ -80,8 +80,8 @@ export function ResultCard() {
   }, [mealPlan]);
 
   const nutritionPlan = useMemo(
-    () => calculateNutritionData(formData, isValid ?? false),
-    [formData, isValid]
+    () => calculateNutritionData(formData),
+    [formData]
   );
 
   const orderedDays = useMemo(

@@ -37,8 +37,7 @@ export const getWorkoutEmoji = (workoutType: string) => {
 };
 
 export const calculateNutritionData = (
-  formData: Record<string, unknown> | undefined,
-  isValid: boolean
+  formData: Record<string, unknown> | undefined
 ) => {
   // Do not gate on form isValid; compute when required fields are present
   if (!formData) return null;
@@ -64,7 +63,10 @@ export const calculateNutritionData = (
   }
 
   for (const key of requiredKeys) {
-    if (formData[key as string] === undefined || formData[key as string] === null) {
+    if (
+      formData[key as string] === undefined ||
+      formData[key as string] === null
+    ) {
       return null;
     }
   }

@@ -108,7 +108,9 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
   // Calculate amounts per day type using user's distribution
   const highCarbsPerDay = (weeklyCarbs * highCarbRatio) / allocation.high;
   const mediumCarbsPerDay =
-    allocation.medium > 0 ? (weeklyCarbs * midCarbRatio) / allocation.medium : 0;
+    allocation.medium > 0
+      ? (weeklyCarbs * midCarbRatio) / allocation.medium
+      : 0;
   const lowCarbsPerDay = (weeklyCarbs * lowCarbRatio) / allocation.low;
 
   const highFatPerDay = (weeklyFat * highFatRatio) / allocation.high;
