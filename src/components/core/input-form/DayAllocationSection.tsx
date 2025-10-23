@@ -30,7 +30,7 @@ export function DayAllocationSection({
             </span>
             <Switch
               checked={watchedValues.includeMidCarb}
-              onCheckedChange={(checked) => {
+              onCheckedChange={(checked: boolean) => {
                 setValue('includeMidCarb', checked as boolean, {
                   shouldValidate: true,
                 });
