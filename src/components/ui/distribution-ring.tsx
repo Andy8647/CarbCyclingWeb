@@ -10,6 +10,8 @@ interface DistributionRingProps {
   onMidChange: (value: number, isDragging?: boolean) => void;
   onLowChange: (value: number, isDragging?: boolean) => void;
   label: string;
+  includeMid?: boolean;
+  stepPercent?: number; // optional snapping step for dragging (e.g., 5)
   colors?: {
     high: string;
     mid: string;
@@ -27,6 +29,8 @@ export function DistributionRing({
   onMidChange,
   onLowChange,
   label,
+  includeMid = true,
+  stepPercent,
   colors = {
     high: '#ef4444',
     mid: '#f59e0b',
@@ -39,7 +43,7 @@ export function DistributionRing({
   const { t } = useTranslation();
   const svgRef = useRef<SVGSVGElement>(null);
   const rafIdRef = useRef<number | null>(null);
-  const dragTypeRef = useRef<'high-mid' | 'mid-low' | null>(null);
+  const dragTypeRef = useRef<'high-mid' | 'mid-low' | 'high-low' | null>(null);
   const pointerIdRef = useRef<number | null>(null);
   const dragValuesRef = useRef({
     high: highPercent,
@@ -51,6 +55,15 @@ export function DistributionRing({
   const centerY = size / 2;
   const outerRadius = size * 0.4;
   const innerRadius = size * 0.275;
+
+  const snap = useCallback(
+    (value: number) => {
+      if (!stepPercent || stepPercent <= 0) return value;
+      const step = stepPercent;
+      return Math.round(value / step) * step;
+    },
+    [stepPercent]
+  );
 
   // Convert percentage to angle (0% at top, clockwise)
   const percentToAngle = (percent: number) => {
@@ -118,7 +131,7 @@ export function DistributionRing({
   };
 
   const handlePointerDown = (
-    type: 'high-mid' | 'mid-low',
+    type: 'high-mid' | 'mid-low' | 'high-low',
     event: ReactPointerEvent<SVGCircleElement>
   ) => {
     dragTypeRef.current = type;
@@ -170,7 +183,8 @@ export function DistributionRing({
           // 限制在合理范围内，并确保mid不会太小
           const minHigh = 5;
           const maxHigh = 100 - currentValues.low - 5; // 确保mid至少5%
-          const newHigh = Math.max(minHigh, Math.min(maxHigh, targetPercent));
+          let newHigh = Math.max(minHigh, Math.min(maxHigh, targetPercent));
+          newHigh = snap(newHigh);
           const newMid = 100 - newHigh - currentValues.low;
 
           dragValuesRef.current = {
@@ -184,10 +198,11 @@ export function DistributionRing({
           // targetPercent代表high+mid的总和
           const minTotal = currentValues.high + 5; // mid至少5%
           const maxTotal = 95; // low至少5%
-          const totalHighMid = Math.max(
+          let totalHighMid = Math.max(
             minTotal,
             Math.min(maxTotal, targetPercent)
           );
+          totalHighMid = snap(totalHighMid);
           const newMid = totalHighMid - currentValues.high;
           const newLow = 100 - totalHighMid;
 
@@ -198,10 +213,27 @@ export function DistributionRing({
           };
           onMidChange(newMid, true);
           onLowChange(newLow, true);
+        } else if (dragTypeRef.current === 'high-low') {
+          // Two-segment mode (no mid). Keep both high and low >=5%
+          const minHigh = 5;
+          const maxHigh = 95;
+          let newHigh = Math.max(minHigh, Math.min(maxHigh, targetPercent));
+          newHigh = snap(newHigh);
+          const newLow = 100 - newHigh;
+
+          dragValuesRef.current = {
+            ...currentValues,
+            high: newHigh,
+            low: newLow,
+            mid: 0,
+          };
+          onHighChange(newHigh, true);
+          onMidChange(0, true);
+          onLowChange(newLow, true);
         }
       });
     },
-    [centerX, centerY, onHighChange, onMidChange, onLowChange, size]
+    [centerX, centerY, onHighChange, onMidChange, onLowChange, size, snap]
   );
 
   const handlePointerUp = useCallback((event: PointerEvent) => {
@@ -239,6 +271,7 @@ export function DistributionRing({
 
   const highMidPos = handlePosition(highPercent);
   const midLowPos = handlePosition(highPercent + midPercent);
+  const highLowPos = handlePosition(highPercent);
 
   return (
     <div className="flex flex-col items-center gap-3">
@@ -262,42 +295,64 @@ export function DistributionRing({
           {/* High segment */}
           <path d={createDonutSegment(0, highPercent)} fill={colors.high} />
           {/* Mid segment */}
-          <path
-            d={createDonutSegment(highPercent, highPercent + midPercent)}
-            fill={colors.mid}
-          />
+          {includeMid && (
+            <path
+              d={createDonutSegment(highPercent, highPercent + midPercent)}
+              fill={colors.mid}
+            />
+          )}
           {/* Low segment */}
           <path
-            d={createDonutSegment(highPercent + midPercent, 100)}
+            d={createDonutSegment(
+              includeMid ? highPercent + midPercent : highPercent,
+              100
+            )}
             fill={colors.low}
           />
         </g>
 
-        {/* High-Mid handle */}
-        <circle
-          cx={highMidPos.x}
-          cy={highMidPos.y}
-          r="10"
-          fill="white"
-          stroke="#64748b"
-          strokeWidth="2"
-          className="cursor-grab active:cursor-grabbing hover:drop-shadow-lg"
-          onPointerDown={(event) => handlePointerDown('high-mid', event)}
-          style={{ filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))' }}
-        />
+        {includeMid ? (
+          <>
+            {/* High-Mid handle */}
+            <circle
+              cx={highMidPos.x}
+              cy={highMidPos.y}
+              r="10"
+              fill="white"
+              stroke="#64748b"
+              strokeWidth="2"
+              className="cursor-grab active:cursor-grabbing hover:drop-shadow-lg"
+              onPointerDown={(event) => handlePointerDown('high-mid', event)}
+              style={{ filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))' }}
+            />
 
-        {/* Mid-Low handle */}
-        <circle
-          cx={midLowPos.x}
-          cy={midLowPos.y}
-          r="10"
-          fill="white"
-          stroke="#64748b"
-          strokeWidth="2"
-          className="cursor-grab active:cursor-grabbing hover:drop-shadow-lg"
-          onPointerDown={(event) => handlePointerDown('mid-low', event)}
-          style={{ filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))' }}
-        />
+            {/* Mid-Low handle */}
+            <circle
+              cx={midLowPos.x}
+              cy={midLowPos.y}
+              r="10"
+              fill="white"
+              stroke="#64748b"
+              strokeWidth="2"
+              className="cursor-grab active:cursor-grabbing hover:drop-shadow-lg"
+              onPointerDown={(event) => handlePointerDown('mid-low', event)}
+              style={{ filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))' }}
+            />
+          </>
+        ) : (
+          // Single handle between high and low
+          <circle
+            cx={highLowPos.x}
+            cy={highLowPos.y}
+            r="10"
+            fill="white"
+            stroke="#64748b"
+            strokeWidth="2"
+            className="cursor-grab active:cursor-grabbing hover:drop-shadow-lg"
+            onPointerDown={(event) => handlePointerDown('high-low', event)}
+            style={{ filter: 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))' }}
+          />
+        )}
 
         {/* Center label */}
         <text
@@ -322,22 +377,26 @@ export function DistributionRing({
               {t('nutrition.distributionRing.high')}: {Math.round(highPercent)}%
             </span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <div
-              className="w-3 h-3 rounded-full"
-              style={{ backgroundColor: colors.mid }}
-            />
-            <span className="font-medium">
-              {t('nutrition.distributionRing.mid')}: {Math.round(midPercent)}%
-            </span>
-          </div>
+          {includeMid && (
+            <div className="flex items-center gap-1.5">
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: colors.mid }}
+              />
+              <span className="font-medium">
+                {t('nutrition.distributionRing.mid')}: {Math.round(midPercent)}%
+              </span>
+            </div>
+          )}
           <div className="flex items-center gap-1.5">
             <div
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: colors.low }}
             />
             <span className="font-medium">
-              {t('nutrition.distributionRing.low')}: {Math.round(lowPercent)}%
+              {t('nutrition.distributionRing.low')}: {Math.round(
+                includeMid ? lowPercent : 100 - Math.round(highPercent)
+              )}%
             </span>
           </div>
         </div>

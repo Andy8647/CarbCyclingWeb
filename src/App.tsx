@@ -101,6 +101,9 @@ function AppContent() {
 
   // Get saved form data and merge with defaults
   const savedFormData = getFormData();
+  const includeMidDefault =
+    (savedFormData.includeMidCarb as boolean | undefined) ??
+    ((savedFormData.midDays as number | undefined) ?? 3) > 0;
   const formDefaults = {
     weight: 70,
     bodyType: 'mesomorph' as const,
@@ -112,6 +115,7 @@ function AppContent() {
     highDays: 2,
     midDays: 3,
     lowDays: 2,
+    includeMidCarb: includeMidDefault,
     // Default carb/fat distribution percentages
     highCarbPercent: 50,
     midCarbPercent: 35,
@@ -121,6 +125,23 @@ function AppContent() {
     lowFatPercent: 50,
     ...savedFormData, // Override defaults with saved data
   };
+
+  // Normalize defaults when mid is disabled
+  if (!formDefaults.includeMidCarb) {
+    // Ensure midDays is 0 and reassign to low
+    const totalDays = formDefaults.cycleDays;
+    const high = Math.max(1, Math.min(totalDays - 1, formDefaults.highDays));
+    const low = Math.max(1, totalDays - high);
+    formDefaults.highDays = high;
+    formDefaults.midDays = 0;
+    formDefaults.lowDays = low;
+
+    // Set mid percentages to 0 and keep totals at 100 by adjusting low
+    formDefaults.midCarbPercent = 0;
+    formDefaults.lowCarbPercent = 100 - formDefaults.highCarbPercent;
+    formDefaults.midFatPercent = 0;
+    formDefaults.lowFatPercent = 100 - formDefaults.highFatPercent;
+  }
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),

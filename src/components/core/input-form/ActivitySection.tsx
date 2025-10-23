@@ -24,24 +24,44 @@ export function ActivitySection({ form, watchedValues }: ActivitySectionProps) {
   } = form;
 
   const handleResetDistribution = () => {
-    setValue('highCarbPercent', DEFAULT_DISTRIBUTION.high.carbs, {
-      shouldValidate: true,
-    });
-    setValue('midCarbPercent', DEFAULT_DISTRIBUTION.medium.carbs, {
-      shouldValidate: true,
-    });
-    setValue('lowCarbPercent', DEFAULT_DISTRIBUTION.low.carbs, {
-      shouldValidate: true,
-    });
-    setValue('highFatPercent', DEFAULT_DISTRIBUTION.high.fat, {
-      shouldValidate: true,
-    });
-    setValue('midFatPercent', DEFAULT_DISTRIBUTION.medium.fat, {
-      shouldValidate: true,
-    });
-    setValue('lowFatPercent', DEFAULT_DISTRIBUTION.low.fat, {
-      shouldValidate: true,
-    });
+    const includeMid = watchedValues.includeMidCarb;
+    if (includeMid) {
+      setValue('highCarbPercent', DEFAULT_DISTRIBUTION.high.carbs, {
+        shouldValidate: true,
+      });
+      setValue('midCarbPercent', DEFAULT_DISTRIBUTION.medium.carbs, {
+        shouldValidate: true,
+      });
+      setValue('lowCarbPercent', DEFAULT_DISTRIBUTION.low.carbs, {
+        shouldValidate: true,
+      });
+      setValue('highFatPercent', DEFAULT_DISTRIBUTION.high.fat, {
+        shouldValidate: true,
+      });
+      setValue('midFatPercent', DEFAULT_DISTRIBUTION.medium.fat, {
+        shouldValidate: true,
+      });
+      setValue('lowFatPercent', DEFAULT_DISTRIBUTION.low.fat, {
+        shouldValidate: true,
+      });
+    } else {
+      // No mid: set mid=0 and split totals between high/low keeping current high
+      setValue('midCarbPercent', 0, { shouldValidate: true });
+      setValue('lowCarbPercent', 100 - DEFAULT_DISTRIBUTION.high.carbs, {
+        shouldValidate: true,
+      });
+      setValue('highCarbPercent', DEFAULT_DISTRIBUTION.high.carbs, {
+        shouldValidate: true,
+      });
+
+      setValue('midFatPercent', 0, { shouldValidate: true });
+      setValue('lowFatPercent', 100 - DEFAULT_DISTRIBUTION.high.fat, {
+        shouldValidate: true,
+      });
+      setValue('highFatPercent', DEFAULT_DISTRIBUTION.high.fat, {
+        shouldValidate: true,
+      });
+    }
   };
 
   return (
@@ -66,6 +86,8 @@ export function ActivitySection({ form, watchedValues }: ActivitySectionProps) {
             highPercent={watchedValues.highCarbPercent}
             midPercent={watchedValues.midCarbPercent}
             lowPercent={watchedValues.lowCarbPercent}
+            includeMid={watchedValues.includeMidCarb}
+            stepPercent={5}
             onHighChange={(value, isDragging) =>
               setValue('highCarbPercent', value, {
                 shouldValidate: !isDragging,
@@ -84,6 +106,8 @@ export function ActivitySection({ form, watchedValues }: ActivitySectionProps) {
             highPercent={watchedValues.highFatPercent}
             midPercent={watchedValues.midFatPercent}
             lowPercent={watchedValues.lowFatPercent}
+            includeMid={watchedValues.includeMidCarb}
+            stepPercent={5}
             onHighChange={(value, isDragging) =>
               setValue('highFatPercent', value, { shouldValidate: !isDragging })
             }

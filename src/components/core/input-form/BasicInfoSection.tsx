@@ -102,8 +102,9 @@ export function BasicInfoSection({
           <DayAllocationRing
             cycleDays={watchedValues.cycleDays}
             highDays={watchedValues.highDays || 1}
-            midDays={watchedValues.midDays || 1}
+            midDays={watchedValues.midDays ?? 0}
             lowDays={watchedValues.lowDays || 1}
+            includeMid={watchedValues.includeMidCarb}
             onHighChange={(value) =>
               setValue('highDays', value, { shouldValidate: true })
             }

@@ -56,9 +56,18 @@ export function CycleDaysSection({
     const defaultAllocation =
       DAY_ALLOCATION[value as keyof typeof DAY_ALLOCATION];
     if (defaultAllocation) {
-      setValue('highDays', defaultAllocation.high, { shouldValidate: true });
-      setValue('midDays', defaultAllocation.medium, { shouldValidate: true });
-      setValue('lowDays', defaultAllocation.low, { shouldValidate: true });
+      const includeMid = watchedValues.includeMidCarb;
+      if (includeMid) {
+        setValue('highDays', defaultAllocation.high, { shouldValidate: true });
+        setValue('midDays', defaultAllocation.medium, { shouldValidate: true });
+        setValue('lowDays', defaultAllocation.low, { shouldValidate: true });
+      } else {
+        setValue('highDays', defaultAllocation.high, { shouldValidate: true });
+        setValue('midDays', 0, { shouldValidate: true });
+        setValue('lowDays', defaultAllocation.low + defaultAllocation.medium, {
+          shouldValidate: true,
+        });
+      }
     }
   };
 

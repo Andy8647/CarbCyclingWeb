@@ -6,6 +6,7 @@ interface DayAllocationRingProps {
   highDays: number;
   midDays: number;
   lowDays: number;
+  includeMid?: boolean;
   onHighChange: (value: number) => void;
   onMidChange: (value: number) => void;
   onLowChange: (value: number) => void;
@@ -23,6 +24,7 @@ export function DayAllocationRing({
   highDays,
   midDays,
   lowDays,
+  includeMid = true,
   onHighChange,
   onMidChange,
   onLowChange,
@@ -36,38 +38,48 @@ export function DayAllocationRing({
   };
 
   // Convert percentages back to days (with rounding and constraints)
-  const percentToDays = (percent: number) => {
+  const percentToDays = (percent: number, minDays: number, maxDays: number) => {
     const rawDays = Math.round((percent * cycleDays) / 100);
-
-    // Ensure at least 1 day for each type
-    const minDays = 1;
-    const clampedDays = Math.max(minDays, Math.min(cycleDays - 2, rawDays)); // -2 to leave room for other two types
-
-    return clampedDays;
+    return Math.max(minDays, Math.min(maxDays, rawDays));
   };
 
   const handleHighChange = (percent: number) => {
-    const newHigh = percentToDays(percent);
-    // Adjust mid to maintain total
-    const remaining = cycleDays - newHigh - lowDays;
-    if (remaining >= 1) {
+    if (!includeMid) {
+      const newHigh = percentToDays(percent, 1, cycleDays - 1);
+      const newLow = cycleDays - newHigh;
       onHighChange(newHigh);
-      onMidChange(remaining);
+      onMidChange(0);
+      onLowChange(newLow);
+    } else {
+      const newHigh = percentToDays(percent, 1, cycleDays - 2);
+      const remaining = cycleDays - newHigh - lowDays;
+      if (remaining >= 1) {
+        onHighChange(newHigh);
+        onMidChange(remaining);
+      }
     }
   };
 
   const handleMidChange = (percent: number) => {
-    const newMid = percentToDays(percent);
+    if (!includeMid) return;
+    const newMid = percentToDays(percent, 1, cycleDays - 2);
     onMidChange(newMid);
   };
 
   const handleLowChange = (percent: number) => {
-    const newLow = percentToDays(percent);
-    // Adjust mid to maintain total
-    const remaining = cycleDays - highDays - newLow;
-    if (remaining >= 1) {
+    if (!includeMid) {
+      const newLow = percentToDays(percent, 1, cycleDays - 1);
+      const newHigh = cycleDays - newLow;
       onLowChange(newLow);
-      onMidChange(remaining);
+      onMidChange(0);
+      onHighChange(newHigh);
+    } else {
+      const newLow = percentToDays(percent, 1, cycleDays - 2);
+      const remaining = cycleDays - highDays - newLow;
+      if (remaining >= 1) {
+        onLowChange(newLow);
+        onMidChange(remaining);
+      }
     }
   };
 
@@ -85,16 +97,18 @@ export function DayAllocationRing({
           {t('activity.days')}
         </span>
       </div>
-      <div className="flex items-center gap-1.5">
-        <div
-          className="w-3 h-3 rounded-full shrink-0"
-          style={{ backgroundColor: DAYS_RING_COLORS.mid }}
-        />
-        <span className="font-medium whitespace-nowrap">
-          {t('basicInfo.midDays')}: {midDays}
-          {t('activity.days')}
-        </span>
-      </div>
+      {includeMid && (
+        <div className="flex items-center gap-1.5">
+          <div
+            className="w-3 h-3 rounded-full shrink-0"
+            style={{ backgroundColor: DAYS_RING_COLORS.mid }}
+          />
+          <span className="font-medium whitespace-nowrap">
+            {t('basicInfo.midDays')}: {midDays}
+            {t('activity.days')}
+          </span>
+        </div>
+      )}
       <div className="flex items-center gap-1.5">
         <div
           className="w-3 h-3 rounded-full shrink-0"
@@ -114,9 +128,10 @@ export function DayAllocationRing({
     >
       <div className="shrink-0">
         <DistributionRing
+          includeMid={includeMid}
           highPercent={daysToPercent(highDays)}
-          midPercent={daysToPercent(midDays)}
-          lowPercent={daysToPercent(lowDays)}
+          midPercent={includeMid ? daysToPercent(midDays) : 0}
+          lowPercent={includeMid ? daysToPercent(lowDays) : daysToPercent(lowDays)}
           onHighChange={handleHighChange}
           onMidChange={handleMidChange}
           onLowChange={handleLowChange}

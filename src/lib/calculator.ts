@@ -75,20 +75,45 @@ export function calculateNutritionPlan(input: UserInput): NutritionPlan {
   };
 
   // Convert user percentages to decimals
-  const highCarbRatio = input.highCarbPercent / 100;
-  const midCarbRatio = input.midCarbPercent / 100;
-  const lowCarbRatio = input.lowCarbPercent / 100;
-  const highFatRatio = input.highFatPercent / 100;
-  const midFatRatio = input.midFatPercent / 100;
-  const lowFatRatio = input.lowFatPercent / 100;
+  let highCarbRatio = input.highCarbPercent / 100;
+  let midCarbRatio = input.midCarbPercent / 100;
+  let lowCarbRatio = input.lowCarbPercent / 100;
+  let highFatRatio = input.highFatPercent / 100;
+  let midFatRatio = input.midFatPercent / 100;
+  let lowFatRatio = input.lowFatPercent / 100;
+
+  // If there are no mid days, ensure mid ratios are zero and re-normalize high/low to sum 1
+  if (input.midDays === 0) {
+    midCarbRatio = 0;
+    const sumCarb = highCarbRatio + lowCarbRatio;
+    if (sumCarb > 0) {
+      highCarbRatio = highCarbRatio / sumCarb;
+      lowCarbRatio = lowCarbRatio / sumCarb;
+    } else {
+      highCarbRatio = 0.5;
+      lowCarbRatio = 0.5;
+    }
+
+    midFatRatio = 0;
+    const sumFat = highFatRatio + lowFatRatio;
+    if (sumFat > 0) {
+      highFatRatio = highFatRatio / sumFat;
+      lowFatRatio = lowFatRatio / sumFat;
+    } else {
+      highFatRatio = 0.5;
+      lowFatRatio = 0.5;
+    }
+  }
 
   // Calculate amounts per day type using user's distribution
   const highCarbsPerDay = (weeklyCarbs * highCarbRatio) / allocation.high;
-  const mediumCarbsPerDay = (weeklyCarbs * midCarbRatio) / allocation.medium;
+  const mediumCarbsPerDay =
+    allocation.medium > 0 ? (weeklyCarbs * midCarbRatio) / allocation.medium : 0;
   const lowCarbsPerDay = (weeklyCarbs * lowCarbRatio) / allocation.low;
 
   const highFatPerDay = (weeklyFat * highFatRatio) / allocation.high;
-  const mediumFatPerDay = (weeklyFat * midFatRatio) / allocation.medium;
+  const mediumFatPerDay =
+    allocation.medium > 0 ? (weeklyFat * midFatRatio) / allocation.medium : 0;
   const lowFatPerDay = (weeklyFat * lowFatRatio) / allocation.low;
 
   // Create daily plans

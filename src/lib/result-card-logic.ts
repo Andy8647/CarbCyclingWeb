@@ -40,26 +40,33 @@ export const calculateNutritionData = (
   formData: Record<string, unknown> | undefined,
   isValid: boolean
 ) => {
-  if (
-    !isValid ||
-    !formData ||
-    !formData?.weight ||
-    !formData?.bodyType ||
-    !formData?.carbCoeff ||
-    !formData?.proteinCoeff ||
-    !formData?.fatCoeff ||
-    !formData?.cycleDays ||
-    !formData?.highDays ||
-    !formData?.midDays ||
-    !formData?.lowDays ||
-    !formData?.highCarbPercent ||
-    !formData?.midCarbPercent ||
-    !formData?.lowCarbPercent ||
-    !formData?.highFatPercent ||
-    !formData?.midFatPercent ||
-    !formData?.lowFatPercent
-  ) {
-    return null;
+  // Do not gate on form isValid; compute when required fields are present
+  if (!formData) return null;
+
+  const includeMid = (formData.includeMidCarb as boolean) ?? true;
+
+  const requiredKeys: Array<keyof UserInput> = [
+    'weight',
+    'bodyType',
+    'carbCoeff',
+    'proteinCoeff',
+    'fatCoeff',
+    'cycleDays',
+    'highDays',
+    'lowDays',
+    'highCarbPercent',
+    'lowCarbPercent',
+    'highFatPercent',
+    'lowFatPercent',
+  ];
+  if (includeMid) {
+    requiredKeys.push('midDays', 'midCarbPercent', 'midFatPercent');
+  }
+
+  for (const key of requiredKeys) {
+    if (formData[key as string] === undefined || formData[key as string] === null) {
+      return null;
+    }
   }
 
   const input: UserInput = {
@@ -70,13 +77,13 @@ export const calculateNutritionData = (
     fatCoeff: formData.fatCoeff as number,
     cycleDays: formData.cycleDays as number,
     highDays: formData.highDays as number,
-    midDays: formData.midDays as number,
+    midDays: (formData.midDays as number) ?? 0,
     lowDays: formData.lowDays as number,
     highCarbPercent: formData.highCarbPercent as number,
-    midCarbPercent: formData.midCarbPercent as number,
+    midCarbPercent: (formData.midCarbPercent as number) ?? 0,
     lowCarbPercent: formData.lowCarbPercent as number,
     highFatPercent: formData.highFatPercent as number,
-    midFatPercent: formData.midFatPercent as number,
+    midFatPercent: (formData.midFatPercent as number) ?? 0,
     lowFatPercent: formData.lowFatPercent as number,
   };
 
