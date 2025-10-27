@@ -46,13 +46,13 @@ export function ResultCard() {
     {}
   );
 
-  const resultsMacroEmojis = t('results.macroEmojis', {
+  const nutritionEmojis = t('nutrition.macroEmojis', {
     returnObjects: true,
   }) as Record<string, string>;
   const macroIcons = {
-    carbs: resultsMacroEmojis?.carbs ?? 'C',
-    protein: resultsMacroEmojis?.protein ?? 'P',
-    fat: resultsMacroEmojis?.fat ?? 'F',
+    carbs: nutritionEmojis?.carbs ?? '🍚',
+    protein: nutritionEmojis?.protein ?? '🍖',
+    fat: nutritionEmojis?.fat ?? '🥜',
   };
 
   const formData = form?.watch();
@@ -212,6 +212,7 @@ export function ResultCard() {
         onExportPNG={handleExportPNG}
         onResetMealPlan={handleResetMealPlan}
         cycleDays={cycleDays}
+        tdee={nutritionPlan?.tdee}
       />
 
       <div ref={exportRef}>

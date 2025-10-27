@@ -9,6 +9,8 @@ export const basicInfoZhCN = {
   midDays: '中碳日',
   lowDays: '低碳日',
   includeMidCarb: '包含中碳日',
+  highShort: '高',
+  lowShort: '低',
 };
 
 export const basicInfoEnUS = {
@@ -22,4 +24,6 @@ export const basicInfoEnUS = {
   midDays: 'Mid',
   lowDays: 'Low',
   includeMidCarb: 'Include Mid-Carb Days',
+  highShort: 'H',
+  lowShort: 'L',
 };

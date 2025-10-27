@@ -14,8 +14,7 @@
     "format:check": "prettier --check .",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:run": "vitest run",
-    "cli": "tsx src/cli.ts"
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@radix-ui/react-switch": "^1.1.3",

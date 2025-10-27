@@ -129,12 +129,31 @@ export function DraggableCard({
         </div>
 
         {/* Calorie information */}
-        <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+        <div className="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-1.5">
           <div className="flex justify-between items-center">
             <div className="text-xs text-slate-500 whitespace-nowrap">
               🔥 {t('results.totalCalories')}
             </div>
-            <div className="font-semibold text-xs">{day.calories}kCal</div>
+            <div className="font-semibold text-xs flex items-center gap-1">
+              <span>{Math.round(day.calories)}kCal</span>
+              {typeof day.deltaPct === 'number' &&
+                (() => {
+                  const pct = Math.round(day.deltaPct || 0);
+                  const positive = pct > 0;
+                  const zero = pct === 0;
+                  const sign = zero ? '' : positive ? '+' : '−';
+                  const color = zero
+                    ? 'text-slate-500'
+                    : positive
+                      ? 'text-emerald-500'
+                      : 'text-rose-400';
+                  return (
+                    <span
+                      className={`ml-1 ${color}`}
+                    >{`${sign}${Math.abs(pct)}%`}</span>
+                  );
+                })()}
+            </div>
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { useFormContext } from '@/lib/form-context';
 import {
   WeightAndNutritionSection,
   CycleDaysSection,
-  DayAllocationSection,
+  ProfileSection,
 } from './input-form';
 
 export function InputForm() {
@@ -19,7 +19,16 @@ export function InputForm() {
       <div className="space-y-1">
         {/* Responsive layout - stacked on mobile, 3 columns on desktop */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:items-start">
-          {/* Column 1: Nutrition Coefficients */}
+          {/* Column 1: Profile (sex, age, AF) + (height, weight) */}
+          <div className="flex flex-col h-full">
+            <ProfileSection
+              form={form}
+              unitSystem={unitSystem}
+              watchedValues={watchedValues}
+            />
+          </div>
+
+          {/* Column 2: Low/High macro coefficients */}
           <div className="flex flex-col h-full">
             <WeightAndNutritionSection
               form={form}
@@ -27,18 +36,13 @@ export function InputForm() {
             />
           </div>
 
-          {/* Column 2: Cycle Settings + Weight + Popover Distribution */}
-          <div className="flex flex-col h-full">
+          {/* Column 3: Cycle days + Day allocation (combined) */}
+          <div className="flex flex-col h-full gap-2">
             <CycleDaysSection
               form={form}
               unitSystem={unitSystem}
               watchedValues={watchedValues}
             />
-          </div>
-
-          {/* Column 3: Day Allocation */}
-          <div className="flex flex-col h-full">
-            <DayAllocationSection form={form} watchedValues={watchedValues} />
           </div>
         </div>
       </div>

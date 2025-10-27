@@ -44,6 +44,10 @@ export const resultsZhCN = {
     protein: '蛋',
     fat: '脂',
   },
+  target: '目标',
+  deltaLegendTitle: 'Δ 相对 TDEE',
+  deltaSurplus: '盈余',
+  deltaDeficit: '缺口',
 };
 
 export const resultsEnUS = {
@@ -92,4 +96,8 @@ export const resultsEnUS = {
     protein: 'P',
     fat: 'F',
   },
+  target: 'Target',
+  deltaLegendTitle: 'Δ vs TDEE',
+  deltaSurplus: 'Surplus',
+  deltaDeficit: 'Deficit',
 };

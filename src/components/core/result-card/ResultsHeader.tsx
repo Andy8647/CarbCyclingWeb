@@ -13,6 +13,7 @@ interface ResultsHeaderProps {
   onExportPNG: () => void;
   onResetMealPlan: () => void;
   cycleDays: number;
+  tdee?: number;
 }
 
 export function ResultsHeader({
@@ -25,6 +26,7 @@ export function ResultsHeader({
   onExportPNG,
   onResetMealPlan,
   cycleDays,
+  tdee,
 }: ResultsHeaderProps) {
   const { t } = useTranslation();
 
@@ -38,11 +40,22 @@ export function ResultsHeader({
 
   return (
     <div className="flex items-center justify-between mb-6">
-      <div className="flex items-center gap-2">
-        <span className="text-lg">🍽️</span>
-        <h2 className="text-lg font-bold text-foreground">
-          {t('results.title')}
-        </h2>
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🍽️</span>
+          <h2 className="text-lg font-bold text-foreground">
+            {t('results.title')}
+          </h2>
+        </div>
+        <div className="flex items-center gap-3">
+          {typeof tdee === 'number' && (
+            <div className="text-xs px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
+              <span className="mr-1">🔥</span>
+              <span className="font-medium">{t('results.dailyTDEE')}:</span>
+              <span className="ml-1 font-semibold">{Math.round(tdee)}kCal</span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div
