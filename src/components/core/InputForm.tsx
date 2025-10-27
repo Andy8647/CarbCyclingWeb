@@ -38,11 +38,7 @@ export function InputForm() {
 
           {/* Column 3: Cycle days + Day allocation (combined) */}
           <div className="flex flex-col h-full gap-2">
-            <CycleDaysSection
-              form={form}
-              unitSystem={unitSystem}
-              watchedValues={watchedValues}
-            />
+            <CycleDaysSection form={form} watchedValues={watchedValues} />
           </div>
         </div>
       </div>
