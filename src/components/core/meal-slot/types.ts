@@ -3,20 +3,27 @@ import type {
   MealPortion,
   MealSlotId,
 } from '@/lib/persistence-types';
-import type { FoodFormState } from '@/components/core/food-library/types';
-
-export type QuickAddFormState = FoodFormState;
 
 export interface SlotSectionProps {
   slotId: MealSlotId;
+  dayNumber: number;
   portions: MealPortion[];
   foodLibrary: FoodItem[];
   onUpdate: (portions: MealPortion[]) => void;
-  onAddCustomFood: (
-    food: Omit<FoodItem, 'id' | 'createdAt' | 'updatedAt'>
-  ) => FoodItem;
   allowRemove: boolean;
   onRemoveSlot: () => void;
+  onCopySlot: () => void;
+  onPasteSlot: (mode: 'replace' | 'append') => void;
+  canPaste: boolean;
+  onMovePortion: (
+    sourceDayNumber: number,
+    sourceSlotId: MealSlotId,
+    targetDayNumber: number,
+    targetSlotId: MealSlotId,
+    portionId: string,
+    foodId: string,
+    servings: number
+  ) => void;
 }
 
 export interface PortionCardProps {
@@ -24,4 +31,6 @@ export interface PortionCardProps {
   food?: FoodItem;
   onRemove: () => void;
   onPortionInputChange: (value: string) => void;
+  slotId: MealSlotId;
+  dayNumber: number;
 }

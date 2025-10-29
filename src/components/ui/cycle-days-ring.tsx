@@ -62,8 +62,8 @@ export function CycleDaysRing({
       }}
       size={140}
       thickness={0.25}
-      colorActive="var(--primary)"
-      colorRest="var(--muted)"
+      colorActive="hsla(217, 91%, 60%, 0.6)"
+      colorRest="hsla(215, 20%, 65%, 0.4)"
       handleColor="#ffffff"
       label={`${value || min}${t('activity.days')}`}
       showMarkers={true}

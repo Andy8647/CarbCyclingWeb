@@ -35,6 +35,7 @@ export function ResultCard() {
     updateFood,
     removeFood,
     getMealPlan,
+    setMealPlanForDay,
     setMealPortionsForSlot,
     resetMealPlan,
   } = useFormContext();
@@ -103,6 +104,74 @@ export function ResultCard() {
       setMealPortionsForSlot(cycleDays, dayNumber, slotId, portions);
     },
     [cycleDays, setMealPortionsForSlot]
+  );
+
+  const handleMovePortion = useCallback(
+    (
+      sourceDayNumber: number,
+      sourceSlotId: MealSlotId,
+      targetDayNumber: number,
+      targetSlotId: MealSlotId,
+      portionId: string,
+      foodId: string,
+      servings: number
+    ) => {
+      if (!cycleDays) return;
+
+      // 一次性获取当前 meal plan
+      const currentMealPlan = getMealPlan(cycleDays);
+      if (!currentMealPlan) return;
+
+      const newPortion: MealPortion = {
+        id: `portion-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        foodId,
+        servings,
+      };
+
+      // 如果源和目标在同一天，需要一次性更新整个 day
+      if (sourceDayNumber === targetDayNumber) {
+        const currentDayPlan = normalizeDayMealPlan(
+          currentMealPlan.dayMeals[sourceDayNumber]
+        );
+        const sourcePortions = currentDayPlan[sourceSlotId] || [];
+        const targetPortions = currentDayPlan[targetSlotId] || [];
+
+        // 创建新的 day plan
+        const newDayPlan = {
+          ...currentDayPlan,
+          [sourceSlotId]: sourcePortions.filter((p) => p.id !== portionId),
+          [targetSlotId]: [...targetPortions, newPortion],
+        };
+
+        // 一次性更新整个 day
+        setMealPlanForDay(cycleDays, sourceDayNumber, newDayPlan);
+      } else {
+        // 跨天操作，分别更新两个 day
+        const sourceDayPlan = normalizeDayMealPlan(
+          currentMealPlan.dayMeals[sourceDayNumber]
+        );
+        const sourcePortions = sourceDayPlan[sourceSlotId] || [];
+        const newSourceDayPlan = {
+          ...sourceDayPlan,
+          [sourceSlotId]: sourcePortions.filter((p) => p.id !== portionId),
+        };
+
+        const targetDayPlan = normalizeDayMealPlan(
+          currentMealPlan.dayMeals[targetDayNumber]
+        );
+        const targetPortions = targetDayPlan[targetSlotId] || [];
+        const newTargetDayPlan = {
+          ...targetDayPlan,
+          [targetSlotId]: [...targetPortions, newPortion],
+        };
+
+        // 先更新源 day（删除）
+        setMealPlanForDay(cycleDays, sourceDayNumber, newSourceDayPlan);
+        // 再更新目标 day（添加）
+        setMealPlanForDay(cycleDays, targetDayNumber, newTargetDayPlan);
+      }
+    },
+    [cycleDays, getMealPlan, setMealPlanForDay]
   );
 
   const handleResetMealPlan = useCallback(() => {
@@ -236,15 +305,8 @@ export function ResultCard() {
             {/* Layout conditional rendering based on screen size */}
             {isLargeScreen ? (
               /* Kanban Board layout for large screens */
-              <div className="w-full">
-                <div
-                  className="flex gap-3 pb-4 mx-auto justify-around"
-                  style={{
-                    width: orderedDays.length <= 7 ? '100%' : 'max-content',
-                    maxWidth: '100%',
-                    overflowX: orderedDays.length > 7 ? 'auto' : 'visible',
-                  }}
-                >
+              <div className="w-full overflow-x-auto">
+                <div className="flex gap-3 pb-4 min-w-fit">
                   {orderedDays.map((dayData, index) => {
                     if (!dayData) return null;
 
@@ -278,7 +340,7 @@ export function ResultCard() {
                                 portions
                               )
                             }
-                            onAddCustomFood={addCustomFood}
+                            onMovePortion={handleMovePortion}
                             targetMacros={{
                               carbs: dayData.carbs,
                               protein: dayData.protein,
@@ -303,7 +365,7 @@ export function ResultCard() {
                 dayMealPlans={dayMealPlans}
                 foodLibrary={foodLibrary}
                 onMealSlotChange={handleMealSlotUpdate}
-                onAddCustomFood={addCustomFood}
+                onMovePortion={handleMovePortion}
                 showMealSlots={showMealSlots}
               />
             )}

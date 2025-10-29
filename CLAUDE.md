@@ -2,8 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-@import ".claude/prd.md"
-@import ".claude/plan.md"
+@import "docs/prd.md"
+@import "docs/plan.md"
 
 ## Development Commands
 

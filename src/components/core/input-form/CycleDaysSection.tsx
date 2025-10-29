@@ -81,8 +81,8 @@ export function CycleDaysSection({
                 }}
                 size={140}
                 thickness={0.25}
-                colorActive="var(--accent)"
-                colorRest="var(--muted)"
+                colorActive="hsla(25, 95%, 53%, 0.6)"
+                colorRest="hsla(160, 84%, 39%, 0.6)"
                 handleColor="#ffffff"
                 label={label}
                 showMarkers={true}

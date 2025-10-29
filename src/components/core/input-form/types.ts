@@ -11,8 +11,3 @@ export interface NutritionSectionProps {
   form: UseFormReturn<FormData>;
   watchedValues: FormData;
 }
-
-export interface ActivitySectionProps {
-  form: UseFormReturn<FormData>;
-  watchedValues: FormData;
-}

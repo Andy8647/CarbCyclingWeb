@@ -198,9 +198,15 @@ interface IOSGridLayoutProps {
     slotId: MealSlotId,
     portions: MealPortion[]
   ) => void;
-  onAddCustomFood: (
-    food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
-  ) => FoodItem;
+  onMovePortion: (
+    sourceDayNumber: number,
+    sourceSlotId: MealSlotId,
+    targetDayNumber: number,
+    targetSlotId: MealSlotId,
+    portionId: string,
+    foodId: string,
+    servings: number
+  ) => void;
   showMealSlots: boolean;
 }
 
@@ -212,7 +218,7 @@ export function IOSGridLayout({
   dayMealPlans,
   foodLibrary,
   onMealSlotChange,
-  onAddCustomFood,
+  onMovePortion,
   showMealSlots,
 }: IOSGridLayoutProps) {
   const gridRef = useRef<HTMLDivElement>(null);
@@ -308,7 +314,7 @@ export function IOSGridLayout({
                   onUpdateSlot={(slotId, portions) =>
                     onMealSlotChange(day.day, slotId, portions)
                   }
-                  onAddCustomFood={onAddCustomFood}
+                  onMovePortion={onMovePortion}
                   targetMacros={{
                     carbs: day.carbs,
                     protein: day.protein,

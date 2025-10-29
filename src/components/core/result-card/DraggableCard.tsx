@@ -12,19 +12,19 @@ import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import { getWorkoutTypes } from '@/lib/calculator';
 import { getDayTypeDisplay } from '@/lib/result-card-logic';
 import type { DayData } from '@/lib/result-card-logic';
+import { CompactMacroDisplay } from '@/components/ui/compact-macro-display';
 
 interface DraggableCardProps {
   day: DayData;
   dailyWorkouts: Record<number, string>;
   setDailyWorkout: (day: number, workout: string) => void;
-  macroEmojis: Record<string, string>;
+  macroEmojis?: Record<string, string>; // 保留以保持向后兼容，但不再使用
 }
 
 export function DraggableCard({
   day,
   dailyWorkouts,
   setDailyWorkout,
-  macroEmojis,
 }: DraggableCardProps) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDivElement>(null);
@@ -102,30 +102,17 @@ export function DraggableCard({
           📊 {t('results.nutritionBreakdown')}
         </div>
 
-        <div className="space-y-1.5">
-          <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
-            <div className="flex items-center gap-0.5">
-              <span className="text-xs">{macroEmojis.carbs ?? 'C'}</span>
-              <span className="text-xs">{t('results.carbs')}</span>
-            </div>
-            <div className="font-semibold text-xs">{day.carbs}g</div>
-          </div>
-
-          <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
-            <div className="flex items-center gap-0.5">
-              <span className="text-xs">{macroEmojis.fat ?? 'F'}</span>
-              <span className="text-xs">{t('results.fat')}</span>
-            </div>
-            <div className="font-semibold text-xs">{day.fat}g</div>
-          </div>
-
-          <div className="flex justify-between items-center p-1.5 rounded bg-slate-100 dark:bg-slate-800">
-            <div className="flex items-center gap-0.5">
-              <span className="text-xs">{macroEmojis.protein ?? 'P'}</span>
-              <span className="text-xs">{t('results.protein')}</span>
-            </div>
-            <div className="font-semibold text-xs">{day.protein}g</div>
-          </div>
+        {/* Compact nutrition display */}
+        <div className="flex items-center justify-center p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+          <CompactMacroDisplay
+            macros={{
+              carbs: day.carbs,
+              protein: day.protein,
+              fat: day.fat,
+            }}
+            size="md"
+            showLabels={false}
+          />
         </div>
 
         {/* Calorie information */}

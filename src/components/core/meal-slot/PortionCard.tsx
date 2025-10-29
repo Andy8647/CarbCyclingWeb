@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { NumberInput } from '@/components/ui/number-input';
@@ -9,14 +10,18 @@ import {
   getInputStep,
 } from '@/lib/meal-planner';
 import type { PortionCardProps } from './types';
+import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 
 export function PortionCard({
   portion,
   food,
   onRemove,
   onPortionInputChange,
+  slotId,
+  dayNumber,
 }: PortionCardProps) {
   const { t } = useTranslation();
+  const portionRef = useRef<HTMLDivElement>(null);
 
   const macros = food
     ? calculatePortionMacros(food, portion.servings)
@@ -65,8 +70,29 @@ export function PortionCard({
     },
   ];
 
+  // Make portion draggable
+  useEffect(() => {
+    const element = portionRef.current;
+    if (!element) return;
+
+    return draggable({
+      element,
+      getInitialData: () => ({
+        type: 'portion',
+        portionId: portion.id,
+        foodId: portion.foodId,
+        servings: portion.servings,
+        sourceSlotId: slotId,
+        sourceDayNumber: dayNumber,
+      }),
+    });
+  }, [portion.id, portion.foodId, portion.servings, slotId, dayNumber]);
+
   return (
-    <div className="px-2 py-2">
+    <div
+      ref={portionRef}
+      className="px-2 py-2 cursor-grab active:cursor-grabbing"
+    >
       <div className="flex w-full items-center gap-1.5">
         <div className="flex-1 min-w-0">
           <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate block">

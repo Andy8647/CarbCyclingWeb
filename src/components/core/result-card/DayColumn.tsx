@@ -81,17 +81,26 @@ export function DayColumn({
       ? Math.max(syncedHeight - measuredHeight, 0)
       : 0;
 
+  // 根据日型决定卡片渐变色
+  const isHighCarb = day?.type === 'high';
+  const cardGradient = isHighCarb
+    ? 'from-orange-50/50 to-amber-50/50 dark:from-orange-950/20 dark:to-amber-950/20 border-orange-200/50 dark:border-orange-800/50'
+    : 'from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-950/20 border-emerald-200/50 dark:border-emerald-800/50';
+
   return (
     <div
       ref={ref}
-      className={`flex-1 min-w-[120px] max-w-[280px] ${
+      className={`flex-1 min-w-[240px] ${
         isDraggedOver ? 'bg-blue-50/30 dark:bg-blue-900/20 rounded-lg' : ''
       } flex flex-col`}
     >
-      <div ref={contentRef} className="flex flex-col h-full">
+      <div
+        ref={contentRef}
+        className={`flex flex-col h-full rounded-2xl bg-gradient-to-br ${cardGradient} border shadow-sm p-4 transition-all duration-200 hover:shadow-md`}
+      >
         {/* Fixed column header - not draggable */}
-        <div className="mb-3 p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800">
-          <h3 className="font-semibold text-sm">
+        <div className="mb-3 p-2.5 rounded-lg bg-white/60 dark:bg-slate-900/40 backdrop-blur-sm">
+          <h3 className="font-semibold text-sm text-center">
             {t('results.dayNumber').replace(
               '{{day}}',
               (columnIndex + 1).toString()
@@ -108,11 +117,11 @@ export function DayColumn({
 
           {/* Card container area */}
           <div
-            className={`min-h-[300px] rounded-xl border-2 border-dashed p-0 ${
+            className={`min-h-[280px] rounded-xl border-2 border-dashed p-0 ${
               isDraggedOver
                 ? 'border-blue-400 bg-blue-50/50 dark:bg-blue-900/30 border-solid'
-                : 'border-slate-300/50 dark:border-slate-600/50'
-            } mt-auto overflow-hidden`}
+                : 'border-white/40 dark:border-slate-700/40'
+            } mt-auto overflow-hidden bg-white/20 dark:bg-slate-900/20 backdrop-blur-sm`}
           >
             {day && (
               <DraggableCard

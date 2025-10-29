@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useClipboard } from '@/lib/hooks/use-clipboard';
 import {
   type DayMealPlan,
   type FoodItem,
@@ -23,15 +24,22 @@ import {
 import { cn } from '@/lib/utils';
 import { Plus } from 'lucide-react';
 import { SlotSection } from '@/components/core/meal-slot';
+import { CompactMacroDeficit } from '@/components/ui/macro-progress-bar';
 
 interface MealSlotPlannerProps {
   dayNumber: number;
   dayMealPlan: DayMealPlan;
   foodLibrary: FoodItem[];
   onUpdateSlot: (slotId: MealSlotId, portions: MealPortion[]) => void;
-  onAddCustomFood: (
-    food: Omit<FoodItem, 'id' | 'isCustom' | 'createdAt' | 'updatedAt'>
-  ) => FoodItem;
+  onMovePortion: (
+    sourceDayNumber: number,
+    sourceSlotId: MealSlotId,
+    targetDayNumber: number,
+    targetSlotId: MealSlotId,
+    portionId: string,
+    foodId: string,
+    servings: number
+  ) => void;
   targetMacros: {
     carbs: number;
     protein: number;
@@ -51,32 +59,16 @@ interface MacroDiffRowProps {
   getDiffTextClass: (value: number) => string;
 }
 
-function MacroDiffRow({
-  diff,
-  macroLabels,
-  getDiffTextClass,
-}: MacroDiffRowProps) {
+function MacroDiffRow({ diff }: MacroDiffRowProps) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="inline-flex items-center gap-1">
-        <span>{macroLabels.carbs ?? 'C'}</span>
-        <span className={getDiffTextClass(diff.carbs)}>
-          {diff.carbs >= 0 ? `+${diff.carbs}` : diff.carbs}g
-        </span>
-      </span>
-      <span className="inline-flex items-center gap-1">
-        <span>{macroLabels.protein ?? 'P'}</span>
-        <span className={getDiffTextClass(diff.protein)}>
-          {diff.protein >= 0 ? `+${diff.protein}` : diff.protein}g
-        </span>
-      </span>
-      <span className="inline-flex items-center gap-1">
-        <span>{macroLabels.fat ?? 'F'}</span>
-        <span className={getDiffTextClass(diff.fat)}>
-          {diff.fat >= 0 ? `+${diff.fat}` : diff.fat}g
-        </span>
-      </span>
-    </div>
+    <CompactMacroDeficit
+      deficit={{
+        carbs: diff.carbs, // diff 是 current - target，负数表示还差多少
+        protein: diff.protein,
+        fat: diff.fat,
+      }}
+      className="w-full justify-center"
+    />
   );
 }
 
@@ -131,7 +123,7 @@ export function MealSlotPlanner({
   dayMealPlan,
   foodLibrary,
   onUpdateSlot,
-  onAddCustomFood,
+  onMovePortion,
   targetMacros,
   className,
 }: MealSlotPlannerProps) {
@@ -140,6 +132,9 @@ export function MealSlotPlanner({
   const [extraSlots, setExtraSlots] = useState<MealSlotId[]>([
     ...BASE_MEAL_SLOTS,
   ]);
+
+  // 剪贴板管理
+  const { copySlot, pasteToSlot, hasSlotData } = useClipboard();
 
   useEffect(() => {
     setExtraSlots([...BASE_MEAL_SLOTS]);
@@ -181,6 +176,27 @@ export function MealSlotPlanner({
       setExtraSlots((prev) => prev.filter((slot) => slot !== slotId));
     },
     [onUpdateSlot]
+  );
+
+  // 复制餐次处理器
+  const handleCopySlot = useCallback(
+    (slotId: MealSlotId) => {
+      const portions = dayMealPlan[slotId] || [];
+      copySlot(slotId, portions);
+    },
+    [dayMealPlan, copySlot]
+  );
+
+  // 粘贴餐次处理器
+  const handlePasteSlot = useCallback(
+    (slotId: MealSlotId, mode: 'replace' | 'append') => {
+      const currentPortions = dayMealPlan[slotId] || [];
+      const newPortions = pasteToSlot(currentPortions, mode);
+      if (newPortions) {
+        onUpdateSlot(slotId, newPortions);
+      }
+    },
+    [dayMealPlan, pasteToSlot, onUpdateSlot]
   );
 
   const dayTotals = useMemo(
@@ -245,12 +261,16 @@ export function MealSlotPlanner({
           <SlotSection
             key={`${dayNumber}-${slot.id}`}
             slotId={slot.id}
+            dayNumber={dayNumber}
             portions={dayMealPlan[slot.id]}
             foodLibrary={foodLibrary}
             onUpdate={(portions) => onUpdateSlot(slot.id, portions)}
-            onAddCustomFood={onAddCustomFood}
             allowRemove={combinedVisibleSlots.length > 1}
             onRemoveSlot={() => handleRemoveSlot(slot.id)}
+            onCopySlot={() => handleCopySlot(slot.id)}
+            onPasteSlot={(mode) => handlePasteSlot(slot.id, mode)}
+            canPaste={hasSlotData}
+            onMovePortion={onMovePortion}
           />
         ))}
       </div>
